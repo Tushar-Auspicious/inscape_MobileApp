@@ -1,0 +1,147 @@
+import { StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { CustomText } from "../../Components/CustomText";
+import PrivacyModal from "../../Components/Modals/PrivacyModal";
+import CustomCheckBox from "../../Components/Buttons/CustomCheckBox";
+import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
+import TermsOfUseModal from "../../Components/Modals/TermsOfUseModal";
+import CustomButton from "../../Components/Buttons/CustomButton";
+import COLORS from "../../Utilities/Colors";
+import styles from "./style";
+
+const TermsAndConditions = () => {
+  const [isPolicyModal, setIsPolicyModal] = useState(false);
+  const [isTermsModal, setIsTermsModal] = useState(false);
+
+  // States for checkboxes
+  const [isPrivacyChecked, setIsPrivacyChecked] = useState(false);
+  const [isHealthDataChecked, setIsHealthDataChecked] = useState(false);
+  const [isMarketingChecked, setIsMarketingChecked] = useState(false);
+
+  // States to track whether the modal has been shown
+  const [hasSeenPrivacyModal, setHasSeenPrivacyModal] = useState(false);
+  const [hasSeenTermsModal, setHasSeenTermsModal] = useState(false);
+
+  const handlePrivacyCheck = () => {
+    if (!hasSeenPrivacyModal) {
+      setIsPolicyModal(true);
+      setHasSeenPrivacyModal(true);
+    } else {
+      setIsPrivacyChecked(!isPrivacyChecked);
+    }
+  };
+
+  const handleHealthDataCheck = () => {
+    if (!hasSeenPrivacyModal) {
+      setIsPolicyModal(true);
+      setHasSeenPrivacyModal(true);
+    } else {
+      setIsHealthDataChecked(!isHealthDataChecked);
+    }
+  };
+
+  const handleMarketingCheck = () => {
+    if (!hasSeenTermsModal) {
+      setIsTermsModal(true);
+      setHasSeenTermsModal(true);
+    } else {
+      setIsMarketingChecked(!isMarketingChecked);
+    }
+  };
+
+  const togglePrivacyModal = () => {
+    setIsPolicyModal(!isPolicyModal);
+  };
+
+  const toggleTermsModal = () => {
+    setIsTermsModal(!isTermsModal);
+  };
+
+  const handleAcceptAll = () => {
+    setIsPrivacyChecked(true);
+    setIsHealthDataChecked(true);
+    setIsMarketingChecked(true);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <CustomText type="subHeading" fontFamily="SF-Pro-Display-Bold">
+        Let’s get you started!
+      </CustomText>
+
+      <View style={styles.checkBoxContainer}>
+        <View style={styles.row}>
+          <CustomCheckBox
+            isChecked={isPrivacyChecked}
+            setIsChecked={handlePrivacyCheck} // Ensure user reads Privacy Policy
+          />
+          <CustomText>
+            I agree to{" "}
+            <CustomText onPress={togglePrivacyModal} style={styles.linkText}>
+              Privacy Policy
+            </CustomText>{" "}
+            and{" "}
+            <CustomText onPress={toggleTermsModal} style={styles.linkText}>
+              Terms of Use
+            </CustomText>{" "}
+          </CustomText>
+        </View>
+
+        <View style={styles.rowStart}>
+          <CustomCheckBox
+            isChecked={isHealthDataChecked}
+            setIsChecked={handleHealthDataCheck} // Ensure user reads Privacy Policy
+          />
+          <CustomText style={styles.flexText}>
+            I agree to processing of my personal health data for providing me
+            Meditation app functions. See more in{" "}
+            <CustomText style={styles.linkText} onPress={togglePrivacyModal}>
+              Privacy Policy.
+            </CustomText>
+          </CustomText>
+        </View>
+
+        <View style={styles.rowStart}>
+          <CustomCheckBox
+            isChecked={isMarketingChecked}
+            setIsChecked={handleMarketingCheck} // Ensure user reads Terms of Use
+          />
+          <CustomText style={styles.flexText}>
+            I agree that the app may use my personal data to send me product or
+            service offerings via app or email.*
+          </CustomText>
+        </View>
+      </View>
+
+      <View>
+        <CustomButton
+          title="Accept all"
+          onPress={handleAcceptAll}
+          backgroundColor={COLORS.navyBlue}
+          disabled={
+            isPrivacyChecked && isHealthDataChecked && isMarketingChecked
+          }
+        />
+        <CustomButton
+          title="Next"
+          onPress={() => {}}
+          backgroundColor={COLORS.white}
+          textColor={COLORS.navyBlue}
+        />
+
+        <CustomText style={styles.footerText}>
+          You can withdraw your consent anytime by contacting us at{" "}
+          <CustomText style={styles.boldText}>danglobus@support.com</CustomText>
+        </CustomText>
+      </View>
+      <PrivacyModal isVisible={isPolicyModal} setIsVisible={setIsPolicyModal} />
+      <TermsOfUseModal
+        isVisible={isTermsModal}
+        setIsVisible={setIsTermsModal}
+      />
+    </SafeAreaView>
+  );
+};
+
+export default TermsAndConditions;
