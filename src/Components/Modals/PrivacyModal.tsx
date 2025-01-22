@@ -43,7 +43,7 @@ const PrivacyModal: FC<PrivacyModalProps> = ({ isVisible, setIsVisible }) => {
           style={styles.heading}
           type="subHeading"
           color={COLORS.navyBlue}
-          fontFamily="SF-Pro-Display-Bold"
+          fontFamily="bold"
         >
           Privacy Policy
         </CustomText>
@@ -54,9 +54,8 @@ const PrivacyModal: FC<PrivacyModalProps> = ({ isVisible, setIsVisible }) => {
         >
           <CustomText
             style={styles.textContent}
-            type="default"
             color={COLORS.darkGrey}
-            fontFamily="SF-Pro-Display-Bold"
+            fontFamily="bold"
           >
             Your privacy is important to us. Our meditation app collects only
             necessary data, such as your name, email, and usage patterns, to
@@ -100,8 +99,8 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   crossIcon: {
-    height: 15,
-    width: 15,
+    height: verticalScale(15),
+    width: verticalScale(15),
   },
   heading: {
     textAlign: "center",

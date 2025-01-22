@@ -31,7 +31,6 @@ const styles = StyleSheet.create({
     gap: horizontalScale(20),
   },
   linkText: {
-    fontWeight: "bold",
     textDecorationLine: "underline",
   },
   flexText: {
@@ -40,9 +39,6 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: "center",
     marginTop: verticalScale(20),
-  },
-  boldText: {
-    fontWeight: "bold",
   },
 });
 

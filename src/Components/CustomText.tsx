@@ -1,19 +1,11 @@
 import { StyleSheet, Text, type TextProps } from "react-native";
 import COLORS from "../Utilities/Colors";
 import { responsiveFontSize } from "../Utilities/Metrics";
+import { FontFamilyType, getPlatformFont } from "../Assets/fonts";
 
 export type CustomTextProps = TextProps & {
   color?: string;
-  fontFamily?:
-    | "SF-Pro-Display-Black"
-    | "SF-Pro-Display-Bold"
-    | "SF-Pro-Display-Heavy"
-    | "SF-Pro-Display-Light"
-    | "SF-Pro-Display-Medium"
-    | "SF-Pro-Display-Regular"
-    | "SF-Pro-Display-Semibold"
-    | "SF-Pro-Display-Thin"
-    | "SF-Pro-Display-SemiUltralight";
+  fontFamily?: FontFamilyType;
   type?:
     | "heading"
     | "subHeading"
@@ -26,7 +18,7 @@ export type CustomTextProps = TextProps & {
 
 export function CustomText({
   style,
-  fontFamily = "SF-Pro-Display-Regular",
+  fontFamily = "regular",
   color = COLORS.white,
   type = "default",
   ...rest
@@ -37,7 +29,7 @@ export function CustomText({
   return (
     <Text
       style={[
-        { color, fontFamily },
+        { color, fontFamily: getPlatformFont(fontFamily) },
         type === "heading"
           ? {
               ...styles.heading,

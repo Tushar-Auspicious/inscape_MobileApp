@@ -46,7 +46,7 @@ const TermsOfUseModal: FC<TermsOfUseModalProps> = ({
           style={styles.heading}
           type="subHeading"
           color={COLORS.navyBlue}
-          fontFamily="SF-Pro-Display-Bold"
+          fontFamily="bold"
         >
           Terms of Use
         </CustomText>
@@ -59,7 +59,7 @@ const TermsOfUseModal: FC<TermsOfUseModalProps> = ({
             style={styles.textContent}
             type="default"
             color={COLORS.darkGrey}
-            fontFamily="SF-Pro-Display-Bold"
+            fontFamily="bold"
           >
             Welcome to our meditation app! By accessing or using the app, you
             agree to these Terms of Use. This app is for personal,
@@ -98,8 +98,8 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   crossIcon: {
-    height: 15,
-    width: 15,
+    height: verticalScale(15),
+    width: verticalScale(15),
   },
   heading: {
     textAlign: "center",

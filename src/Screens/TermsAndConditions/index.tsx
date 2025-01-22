@@ -1,12 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
+import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CustomButton from "../../Components/Buttons/CustomButton";
+import CustomCheckBox from "../../Components/Buttons/CustomCheckBox";
 import { CustomText } from "../../Components/CustomText";
 import PrivacyModal from "../../Components/Modals/PrivacyModal";
-import CustomCheckBox from "../../Components/Buttons/CustomCheckBox";
-import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
 import TermsOfUseModal from "../../Components/Modals/TermsOfUseModal";
-import CustomButton from "../../Components/Buttons/CustomButton";
 import COLORS from "../../Utilities/Colors";
 import styles from "./style";
 
@@ -66,7 +65,7 @@ const TermsAndConditions = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <CustomText type="subHeading" fontFamily="SF-Pro-Display-Bold">
+      <CustomText type="subHeading" fontFamily="bold">
         Let’s get you started!
       </CustomText>
 
@@ -78,11 +77,19 @@ const TermsAndConditions = () => {
           />
           <CustomText>
             I agree to{" "}
-            <CustomText onPress={togglePrivacyModal} style={styles.linkText}>
+            <CustomText
+              onPress={togglePrivacyModal}
+              style={styles.linkText}
+              fontFamily="bold"
+            >
               Privacy Policy
             </CustomText>{" "}
             and{" "}
-            <CustomText onPress={toggleTermsModal} style={styles.linkText}>
+            <CustomText
+              onPress={toggleTermsModal}
+              style={styles.linkText}
+              fontFamily="bold"
+            >
               Terms of Use
             </CustomText>{" "}
           </CustomText>
@@ -96,7 +103,11 @@ const TermsAndConditions = () => {
           <CustomText style={styles.flexText}>
             I agree to processing of my personal health data for providing me
             Meditation app functions. See more in{" "}
-            <CustomText style={styles.linkText} onPress={togglePrivacyModal}>
+            <CustomText
+              style={styles.linkText}
+              fontFamily="bold"
+              onPress={togglePrivacyModal}
+            >
               Privacy Policy.
             </CustomText>
           </CustomText>
@@ -132,7 +143,7 @@ const TermsAndConditions = () => {
 
         <CustomText style={styles.footerText}>
           You can withdraw your consent anytime by contacting us at{" "}
-          <CustomText style={styles.boldText}>danglobus@support.com</CustomText>
+          <CustomText fontFamily="bold">danglobus@support.com</CustomText>
         </CustomText>
       </View>
       <PrivacyModal isVisible={isPolicyModal} setIsVisible={setIsPolicyModal} />

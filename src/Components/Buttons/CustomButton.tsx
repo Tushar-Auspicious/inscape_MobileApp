@@ -1,6 +1,8 @@
 import React, { FC } from "react";
-import { StyleSheet, Text, TouchableOpacity, ViewStyle } from "react-native";
+import { StyleSheet, TouchableOpacity, ViewStyle } from "react-native";
 import COLORS from "../../Utilities/Colors";
+import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
+import { CustomText } from "../CustomText";
 
 type CustomButtonProps = {
   title: string;
@@ -30,7 +32,9 @@ const CustomButton: FC<CustomButtonProps> = ({
       ]}
       onPress={onPress}
     >
-      <Text style={[styles.text, { color: textColor }]}>{title}</Text>
+      <CustomText type="subTitle" color={textColor} fontFamily="bold">
+        {title}
+      </CustomText>
     </TouchableOpacity>
   );
 };
@@ -39,15 +43,11 @@ export default CustomButton;
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 22,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingVertical: verticalScale(22),
+    paddingHorizontal: horizontalScale(20),
+    borderRadius: verticalScale(12),
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 10,
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: "600",
+    marginVertical: verticalScale(5),
   },
 });
