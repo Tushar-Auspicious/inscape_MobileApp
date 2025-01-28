@@ -13,14 +13,18 @@ const Discover = () => {
   const onFilterPress = () => {};
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
+    <SafeAreaView
+      edges={['top', 'left', 'right']}
+      style={styles.container}
+    >
       <View style={styles.scrollContainer}>
         <CustomInput
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder="What do you want to listen?"
-          type="search"
+          placeholder='What do you want to listen?'
+          type='search'
           onFilterPress={onFilterPress}
+          isFilterIcon
         />
 
         <FlatList

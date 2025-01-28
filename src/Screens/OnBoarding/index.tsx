@@ -4,17 +4,17 @@ import {
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Pressable,
   Text,
+  TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import CustomButton from "../../Components/Buttons/CustomButton";
-import OnBoardingSlides, { SlideType } from "../../Seeds/OnBoardingSeed";
-import COLORS from "../../Utilities/Colors";
-import { deviceWidth, horizontalScale, wp } from "../../Utilities/Metrics";
-import styles from "./style";
-import { OnBoardingProps } from "../../Typings/route";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import CustomButton from '../../Components/Buttons/CustomButton';
+import OnBoardingSlides, { SlideType } from '../../Seeds/OnBoardingSeed';
+import { OnBoardingProps } from '../../Typings/route';
+import COLORS from '../../Utilities/Colors';
+import { deviceWidth, horizontalScale, wp } from '../../Utilities/Metrics';
+import styles from './style';
 
 const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
   const flatListRef = React.useRef<FlatList>(null);
@@ -38,12 +38,12 @@ const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
         setCurrentSlideIndex(currentSlideIndex + 1);
       }
     } else {
-      navigation.navigate("termsAndConditions");
+      navigation.navigate('termsAndConditions');
     }
   };
 
   const handleSkip = () => {
-    navigation.navigate("termsAndConditions");
+    navigation.navigate('termsAndConditions');
   };
 
   const renderSlides = ({
@@ -54,8 +54,14 @@ const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
     index: number;
   }) => {
     return (
-      <View key={item.id + index} style={styles.slideContainer}>
-        <Image source={item?.image} style={styles.slideImage} />
+      <View
+        key={item.id + index}
+        style={styles.slideContainer}
+      >
+        <Image
+          source={item?.image}
+          style={styles.slideImage}
+        />
         <View style={styles.slideTextCont}>
           <Text style={styles.title}>{item?.title}</Text>
           <Text style={styles.subtitle}>{item?.subtitle}</Text>
@@ -97,13 +103,13 @@ const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
       {renderIndicators()}
       <View style={styles.buttonCont}>
         <CustomButton
-          title="Next"
+          title='Next'
           onPress={goToNextSlide}
           style={{ width: wp(90) }}
         />
-        <Pressable onPress={handleSkip}>
+        <TouchableOpacity onPress={handleSkip}>
           <Text style={styles.skipText}>Skip</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

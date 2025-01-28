@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.darkBlue,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
 
   backgroundImage: {
@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
   formContainer: {
     backgroundColor: COLORS.darkBlue,
     width: wp(100),
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     borderTopRightRadius: 70,
     paddingTop: verticalScale(20),
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     height: 78,
     width: 73,
     top: -78.1,
-    position: "absolute",
+    position: 'absolute',
     tintColor: COLORS.darkBlue,
   },
   inputContainer: {
@@ -35,17 +35,17 @@ const styles = StyleSheet.create({
     marginVertical: verticalScale(20),
   },
   row: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: horizontalScale(10),
   },
   flexInput: {
     flex: 1,
   },
   footerText: {
-    textAlign: "center",
+    textAlign: 'center',
   },
   signInLink: {
-    textDecorationLine: "underline",
+    textDecorationLine: 'underline',
   },
 });
 

@@ -13,6 +13,11 @@ import ClockBlue from "./clock-blue.svg";
 import BackArrow from "./BackArrow.svg";
 import Filter from "./Filter.svg";
 import RightArrow from "./rightIcon.svg";
+import maleIcon from './maleIcon.svg';
+import femaleIcon from './femaleIcon.svg';
+import otherIcon from './otherIcon.svg';
+import downArrowIcon from './downArrow.svg';
+import upArrowIcon from './upArrow.svg';
 
 const ICONS = {
   Home,
@@ -30,10 +35,15 @@ const ICONS = {
   BackArrow,
   Filter,
   RightArrow,
+  maleIcon,
+  femaleIcon,
+  otherIcon,
+  downArrowIcon,
+  upArrowIcon,
 
-  crossIcon: require("./crossIcon.png"),
-  tickIcon: require("./check.png"),
-  eyesOff: require("./eye-off.png"),
+  crossIcon: require('./crossIcon.png'),
+  tickIcon: require('./check.png'),
+  eyesOff: require('./eye-off.png'),
 };
 
 export default ICONS;

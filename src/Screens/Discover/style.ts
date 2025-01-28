@@ -8,13 +8,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkBlue,
   },
   scrollContainer: {
-    paddingVertical: verticalScale(10),
+    paddingVertical: verticalScale(20),
     paddingHorizontal: horizontalScale(15),
     gap: verticalScale(20),
   },
 
   listColumCont: {
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
 
   flatListCont: { paddingBottom: verticalScale(60) },

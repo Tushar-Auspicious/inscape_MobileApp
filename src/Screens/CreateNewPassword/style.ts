@@ -15,8 +15,6 @@ const styles = StyleSheet.create({
     width: wp(8),
   },
 
-  backArrow: { height: 15, width: 15 },
-
   textContainer: {
     gap: verticalScale(10),
     paddingRight: horizontalScale(20),

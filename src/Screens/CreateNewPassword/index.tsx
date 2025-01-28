@@ -1,28 +1,27 @@
 import React, { FC, useState } from "react";
-import {
-  Image,
-  KeyboardAvoidingView,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import ICONS from "../../Assets/icons";
-import CustomButton from "../../Components/Buttons/CustomButton";
-import CustomInput from "../../Components/CustomInput";
-import { CustomText } from "../../Components/CustomText";
-import { CreateNewPasswordProps } from "../../Typings/route";
-import styles from "./style";
+import { KeyboardAvoidingView, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import ICONS from '../../Assets/icons';
+import CustomButton from '../../Components/Buttons/CustomButton';
+import CustomIcon from '../../Components/CustomIcon';
+import CustomInput from '../../Components/CustomInput';
+import { CustomText } from '../../Components/CustomText';
+import { CreateNewPasswordProps } from '../../Typings/route';
+import styles from './style';
 
 const CreateNewPassword: FC<CreateNewPasswordProps> = ({ navigation }) => {
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleResetPassword = () => {
-    navigation.navigate("passwordSuccess");
+    navigation.navigate('passwordSuccess');
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior='padding'
+      style={{ flex: 1 }}
+    >
       <SafeAreaView style={styles.container}>
         {navigation.canGoBack() && (
           <TouchableOpacity
@@ -30,12 +29,19 @@ const CreateNewPassword: FC<CreateNewPasswordProps> = ({ navigation }) => {
             onPress={() => navigation.goBack()}
             style={styles.backArrowCont}
           >
-            <Image source={ICONS.backArrow} style={styles.backArrow} />
+            <CustomIcon
+              Icon={ICONS.BackArrow}
+              height={15}
+              width={15}
+            />
           </TouchableOpacity>
         )}
 
         <View style={styles.textContainer}>
-          <CustomText type="subHeading" fontFamily="bold">
+          <CustomText
+            type='subHeading'
+            fontFamily='bold'
+          >
             Create New Password
           </CustomText>
           <CustomText>
@@ -48,20 +54,20 @@ const CreateNewPassword: FC<CreateNewPasswordProps> = ({ navigation }) => {
           <CustomInput
             value={newPassword}
             onChangeText={setNewPassword}
-            placeholder="New Password"
-            type="password"
+            placeholder='New Password'
+            type='password'
           />
 
           <CustomInput
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            placeholder="Confirm New Password"
-            type="password"
+            placeholder='Confirm New Password'
+            type='password'
           />
         </View>
 
         <CustomButton
-          title="Reset Password"
+          title='Reset Password'
           onPress={handleResetPassword}
           style={styles.btn}
         />

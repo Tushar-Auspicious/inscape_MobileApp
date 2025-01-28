@@ -6,9 +6,9 @@ import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import { SettingScreenProps } from "../../Typings/route";
-import { verticalScale } from "../../Utilities/Metrics";
-import styles from "./style";
-import COLORS from "../../Utilities/Colors";
+import COLORS from '../../Utilities/Colors';
+import { verticalScale } from '../../Utilities/Metrics';
+import styles from './style';
 
 const Settings: FC<SettingScreenProps> = ({ navigation }) => {
   const renderBars = (title: string, onPress: () => void) => {
@@ -17,22 +17,32 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
         activeOpacity={1}
         onPress={onPress}
         style={{
-          width: "100%",
-          justifyContent: "space-between",
-          flexDirection: "row",
+          width: '100%',
+          justifyContent: 'space-between',
+          flexDirection: 'row',
           paddingVertical: verticalScale(10),
         }}
       >
-        <CustomText type="subTitle" fontFamily="semiBold">
+        <CustomText
+          type='subTitle'
+          fontFamily='medium'
+        >
           {title}
         </CustomText>
-        <CustomIcon Icon={ICONS.RightArrow} height={15} width={15} />
+        <CustomIcon
+          Icon={ICONS.RightArrow}
+          height={15}
+          width={15}
+        />
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.main}>
+    <SafeAreaView
+      edges={['top', 'left', 'right']}
+      style={styles.main}
+    >
       <View style={styles.scrollContainer}>
         <ImageBackground
           source={IMAGES.pinkBg}
@@ -42,14 +52,17 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
           <Image
             source={IMAGES.curvedView}
             style={styles.curvedImage}
-            resizeMode="contain"
+            resizeMode='contain'
           />
-          <CustomText fontFamily="bold" type="title">
+          <CustomText
+            fontFamily='bold'
+            type='title'
+          >
             Settings
           </CustomText>
 
           <View style={{ marginVertical: verticalScale(20) }}>
-            {renderBars("My Account", () => navigation.navigate("myAccount"))}
+            {renderBars('My Account', () => navigation.navigate('myAccount'))}
             <View
               style={{
                 backgroundColor: COLORS.mixGreyBlue,
@@ -57,27 +70,30 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
                 marginVertical: verticalScale(20),
               }}
             />
-            <CustomText fontFamily="bold" type="title">
+            <CustomText
+              fontFamily='bold'
+              type='title'
+            >
               Support
             </CustomText>
             <View
               style={{ gap: verticalScale(10), marginTop: verticalScale(15) }}
             >
-              {renderBars("FAQ", () => navigation.navigate("myAccount"))}
-              {renderBars("Privacy Policy", () =>
-                navigation.navigate("myAccount")
+              {renderBars('FAQ', () => navigation.navigate('Faq'))}
+              {renderBars('Privacy Policy', () =>
+                navigation.navigate('settingsPrivacyPolicy')
               )}
-              {renderBars("Terms & Conditions", () =>
-                navigation.navigate("myAccount")
+              {renderBars('Terms & Conditions', () =>
+                navigation.navigate('settingsTermsAndConditions')
               )}
             </View>
           </View>
 
           <TouchableOpacity>
             <CustomText
-              style={{ textDecorationLine: "underline" }}
-              fontFamily="bold"
-              type="subTitle"
+              style={{ textDecorationLine: 'underline' }}
+              fontFamily='bold'
+              type='subTitle'
             >
               Log out
             </CustomText>
