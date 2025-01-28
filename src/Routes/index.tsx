@@ -5,14 +5,18 @@ import BottomTabBar from "../Components/BottomTabBar";
 import Categories from "../Screens/Categories";
 import CreateNewPassword from "../Screens/CreateNewPassword";
 import Discover from "../Screens/Discover";
+import FAQ from "../Screens/FAQ";
 import ForgotPassword from "../Screens/ForgotPassword";
 import Home from "../Screens/Home";
 import Library from "../Screens/Library";
+import MyAccount from "../Screens/MyAccount";
 import OnBoarding from "../Screens/OnBoarding";
 import OTP from "../Screens/OTP";
 import PasswordSuccess from "../Screens/PasswordSuccess";
 import RegisterSuccess from "../Screens/RegisterSuccess";
 import Settings from "../Screens/Settings";
+import SettingsPrivacyPolicy from "../Screens/SettingsPrivacyPolicy";
+import SettingTermsCondition from "../Screens/SettingTermsCondition";
 import SignIn from "../Screens/SignIn";
 import SignUp from "../Screens/SignUp";
 import TermsAndConditions from "../Screens/TermsAndConditions";
@@ -23,10 +27,6 @@ import {
   RootStackParams,
 } from "../Typings/route";
 import { storage } from "../Utilities/Storage";
-import MyAccount from "../Screens/MyAccount";
-import FAQ from "../Screens/FAQ";
-import PrivacyPolicy from "../Screens/PrivacyPolicy";
-import SettingTermsCondition from "../Screens/SettingTermsCondition";
 
 const RootStack = createNativeStackNavigator<RootStackParams>();
 const Auth = createNativeStackNavigator<AuthStackParams>();
@@ -116,7 +116,7 @@ const Routing = () => {
         <Main.Screen name="categories" component={Categories} />
         <Main.Screen name="myAccount" component={MyAccount} />
         <Main.Screen name="Faq" component={FAQ} />
-        <Main.Screen name="privacyPolicy" component={PrivacyPolicy} />
+        <Main.Screen name="privacyPolicy" component={SettingsPrivacyPolicy} />
         <Main.Screen
           name="termsAndConditions"
           component={SettingTermsCondition}

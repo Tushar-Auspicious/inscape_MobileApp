@@ -23,8 +23,8 @@ export type MainStackParams = {
   categories: undefined;
   myAccount: undefined;
   Faq: undefined;
-  termsAndConditions: undefined;
-  privacyPolicy: undefined;
+  settingsTermsAndConditions: undefined;
+  settingsPrivacyPolicy: undefined;
   playerList: undefined;
   player: undefined;
 };
@@ -89,4 +89,24 @@ export type HomeScreenProps = NativeStackScreenProps<
 export type SettingScreenProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
   "settingsTab"
+>;
+
+export type SettingsTermsAndConditionProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "settingsTermsAndConditions"
+>;
+
+export type SettingsPrivacyPolicyProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "settingsPrivacyPolicy"
+>;
+
+export type myAccountProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "myAccount"
+>;
+
+export type FAQProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "Faq"
 >;
