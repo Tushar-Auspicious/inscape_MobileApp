@@ -16,7 +16,7 @@ type CustomButtonProps = {
 const CustomButton: FC<CustomButtonProps> = ({
   title,
   onPress,
-  backgroundColor = COLORS.navyBlue,
+  backgroundColor = COLORS.darkNavyBlue,
   textColor = COLORS.white,
   style,
   disabled = false,

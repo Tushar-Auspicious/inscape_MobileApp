@@ -21,11 +21,17 @@ import { CustomText } from "../CustomText";
 type PrivacyModalProps = {
   isVisible: boolean;
   setIsVisible: (visible: boolean) => void;
+  onAgree: () => void;
 };
 
-const PrivacyModal: FC<PrivacyModalProps> = ({ isVisible, setIsVisible }) => {
+const PrivacyModal: FC<PrivacyModalProps> = ({
+  isVisible,
+  setIsVisible,
+  onAgree,
+}) => {
   const toggleModal = () => {
     setIsVisible(!isVisible);
+    onAgree();
   };
 
   return (

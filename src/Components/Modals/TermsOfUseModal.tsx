@@ -21,14 +21,17 @@ import { CustomText } from "../CustomText";
 type TermsOfUseModalProps = {
   isVisible: boolean;
   setIsVisible: (visible: boolean) => void;
+  onAgree: () => void;
 };
 
 const TermsOfUseModal: FC<TermsOfUseModalProps> = ({
   isVisible,
   setIsVisible,
+  onAgree,
 }) => {
   const toggleModal = () => {
     setIsVisible(!isVisible);
+    onAgree();
   };
 
   return (

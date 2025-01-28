@@ -19,23 +19,74 @@ export type AuthStackParams = {
 };
 
 export type MainStackParams = {
-  home: undefined;
-  discover: undefined;
-  library: undefined;
-  settingStack: NavigatorScreenParams<SettingsStackParams>;
-  playerList: undefined;
-  player: undefined;
-};
-
-export type SettingsStackParams = {
-  settings: undefined;
+  tabs: NavigatorScreenParams<BottomTabParams>;
+  categories: undefined;
   myAccount: undefined;
   Faq: undefined;
   termsAndConditions: undefined;
   privacyPolicy: undefined;
+  playerList: undefined;
+  player: undefined;
+};
+
+export type BottomTabParams = {
+  homeTab: undefined;
+  discoverTab: undefined;
+  libraryTab: undefined;
+  settingsTab: undefined;
 };
 
 export type OnBoardingProps = NativeStackScreenProps<
   AuthStackParams,
   "onBoarding"
+>;
+
+export type TermsAndConditionProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "termsAndConditions"
+>;
+
+export type SignUpProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "signUp"
+>;
+
+export type SignInProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "signIn"
+>;
+
+export type RegisterSuccessProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "registerSuccess"
+>;
+
+export type OTPProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "otpScreen"
+>;
+
+export type ForgotPasswordProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "forgotPassword"
+>;
+
+export type CreateNewPasswordProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "createNewPassword"
+>;
+
+export type PasswordSuccessProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "passwordSuccess"
+>;
+
+export type HomeScreenProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "homeTab"
+>;
+
+export type SettingScreenProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "settingsTab"
 >;

@@ -1,15 +1,19 @@
-import React, { useState } from "react";
-import { Text, View } from "react-native";
+import React, { FC, useState } from "react";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../../Components/Buttons/CustomButton";
 import CustomCheckBox from "../../Components/Buttons/CustomCheckBox";
 import { CustomText } from "../../Components/CustomText";
 import PrivacyModal from "../../Components/Modals/PrivacyModal";
 import TermsOfUseModal from "../../Components/Modals/TermsOfUseModal";
+import { TermsAndConditionProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import styles from "./style";
 
-const TermsAndConditions = () => {
+const TermsAndConditions: FC<TermsAndConditionProps> = ({
+  navigation,
+  route,
+}) => {
   const [isPolicyModal, setIsPolicyModal] = useState(false);
   const [isTermsModal, setIsTermsModal] = useState(false);
 
@@ -23,30 +27,26 @@ const TermsAndConditions = () => {
   const [hasSeenTermsModal, setHasSeenTermsModal] = useState(false);
 
   const handlePrivacyCheck = () => {
-    if (!hasSeenPrivacyModal) {
-      setIsPolicyModal(true);
-      setHasSeenPrivacyModal(true);
+    if (!isPrivacyChecked) {
+      if (!hasSeenPrivacyModal) {
+        togglePrivacyModal();
+        return;
+      }
+      if (!hasSeenTermsModal) {
+        toggleTermsModal();
+        return;
+      }
     } else {
-      setIsPrivacyChecked(!isPrivacyChecked);
+      setIsPrivacyChecked(true);
     }
   };
 
   const handleHealthDataCheck = () => {
-    if (!hasSeenPrivacyModal) {
-      setIsPolicyModal(true);
-      setHasSeenPrivacyModal(true);
-    } else {
-      setIsHealthDataChecked(!isHealthDataChecked);
-    }
+    setIsHealthDataChecked(!isHealthDataChecked);
   };
 
   const handleMarketingCheck = () => {
-    if (!hasSeenTermsModal) {
-      setIsTermsModal(true);
-      setHasSeenTermsModal(true);
-    } else {
-      setIsMarketingChecked(!isMarketingChecked);
-    }
+    setIsMarketingChecked(!isMarketingChecked);
   };
 
   const togglePrivacyModal = () => {
@@ -58,9 +58,26 @@ const TermsAndConditions = () => {
   };
 
   const handleAcceptAll = () => {
+    if (!hasSeenPrivacyModal) {
+      togglePrivacyModal();
+      return;
+    }
+    if (!hasSeenTermsModal) {
+      toggleTermsModal();
+      return;
+    }
     setIsPrivacyChecked(true);
     setIsHealthDataChecked(true);
     setIsMarketingChecked(true);
+  };
+
+  const onAgreeTerms = () => {
+    setHasSeenTermsModal(true);
+    setIsPrivacyChecked(true);
+  };
+
+  const onAgreePolicy = () => {
+    setHasSeenPrivacyModal(true);
   };
 
   return (
@@ -136,7 +153,10 @@ const TermsAndConditions = () => {
         />
         <CustomButton
           title="Next"
-          onPress={() => {}}
+          onPress={() => navigation.replace("signUp")}
+          disabled={
+            !isPrivacyChecked || !isHealthDataChecked || !isMarketingChecked
+          }
           backgroundColor={COLORS.white}
           textColor={COLORS.navyBlue}
         />
@@ -146,10 +166,15 @@ const TermsAndConditions = () => {
           <CustomText fontFamily="bold">danglobus@support.com</CustomText>
         </CustomText>
       </View>
-      <PrivacyModal isVisible={isPolicyModal} setIsVisible={setIsPolicyModal} />
+      <PrivacyModal
+        isVisible={isPolicyModal}
+        setIsVisible={setIsPolicyModal}
+        onAgree={onAgreePolicy}
+      />
       <TermsOfUseModal
         isVisible={isTermsModal}
         setIsVisible={setIsTermsModal}
+        onAgree={onAgreeTerms}
       />
     </SafeAreaView>
   );

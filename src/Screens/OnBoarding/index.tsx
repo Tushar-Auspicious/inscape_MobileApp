@@ -28,7 +28,7 @@ const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
     setCurrentSlideIndex(currentIndex);
   };
 
-  const goToNextSlide = () => {
+  const goToNextSlide = async () => {
     const nextSlideIndex = currentSlideIndex + 1;
     if (nextSlideIndex != OnBoardingSlides.length) {
       const offset = nextSlideIndex * deviceWidth;

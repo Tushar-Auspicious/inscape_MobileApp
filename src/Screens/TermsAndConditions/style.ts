@@ -1,11 +1,6 @@
 import { StyleSheet } from "react-native";
 import COLORS from "../../Utilities/Colors";
-import {
-  horizontalScale,
-  responsiveFontSize,
-  verticalScale,
-  wp,
-} from "../../Utilities/Metrics";
+import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
 
 const styles = StyleSheet.create({
   container: {
