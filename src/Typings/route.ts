@@ -20,6 +20,7 @@ export type AuthStackParams = {
 
 export type MainStackParams = {
   tabs: NavigatorScreenParams<BottomTabParams>;
+  searchHome: undefined;
   categories: undefined;
   myAccount: undefined;
   Faq: undefined;
@@ -109,4 +110,25 @@ export type myAccountProps = NativeStackScreenProps<
 export type FAQProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
   "Faq"
+>;
+
+export type SearchHomeProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "searchHome"
+>;
+
+export type CategoryProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "categories"
+>;
+
+export type DiscoverProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "discoverTab"
+>;
+
+
+export type PlayerListProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "playerList"
 >;

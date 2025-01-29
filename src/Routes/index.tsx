@@ -27,6 +27,10 @@ import {
   RootStackParams,
 } from '../Typings/route';
 import { storage } from '../Utilities/Storage';
+import { Platform } from "react-native";
+import SearchHome from "../Screens/SearchHome";
+import PlayerList from "../Screens/PlayerList";
+import Player from "../Screens/Player";
 
 const RootStack = createNativeStackNavigator<RootStackParams>();
 const Auth = createNativeStackNavigator<AuthStackParams>();
@@ -44,51 +48,24 @@ const Routing = () => {
         initialRouteName={
           isOnboarded
             ? isTermsAccepted
-              ? 'signIn'
-              : 'termsAndConditions'
-            : 'onBoarding'
+              ? "signIn"
+              : "termsAndConditions"
+            : "onBoarding"
         }
         screenOptions={{
           headerShown: false,
-          animation: 'none',
+          animation: Platform.OS === "ios" ? "default" : "none",
         }}
       >
-        <Auth.Screen
-          name='onBoarding'
-          component={OnBoarding}
-        />
-        <Auth.Screen
-          name='termsAndConditions'
-          component={TermsAndConditions}
-        />
-        <Auth.Screen
-          name='signUp'
-          component={SignUp}
-        />
-        <Auth.Screen
-          name='signIn'
-          component={SignIn}
-        />
-        <Auth.Screen
-          name='registerSuccess'
-          component={RegisterSuccess}
-        />
-        <Auth.Screen
-          name='otpScreen'
-          component={OTP}
-        />
-        <Auth.Screen
-          name='forgotPassword'
-          component={ForgotPassword}
-        />
-        <Auth.Screen
-          name='createNewPassword'
-          component={CreateNewPassword}
-        />
-        <Auth.Screen
-          name='passwordSuccess'
-          component={PasswordSuccess}
-        />
+        <Auth.Screen name="onBoarding" component={OnBoarding} />
+        <Auth.Screen name="termsAndConditions" component={TermsAndConditions} />
+        <Auth.Screen name="signUp" component={SignUp} />
+        <Auth.Screen name="signIn" component={SignIn} />
+        <Auth.Screen name="registerSuccess" component={RegisterSuccess} />
+        <Auth.Screen name="otpScreen" component={OTP} />
+        <Auth.Screen name="forgotPassword" component={ForgotPassword} />
+        <Auth.Screen name="createNewPassword" component={CreateNewPassword} />
+        <Auth.Screen name="passwordSuccess" component={PasswordSuccess} />
       </Auth.Navigator>
     );
   }
@@ -98,36 +75,36 @@ const Routing = () => {
       <Tabs.Navigator
         screenOptions={{
           headerShown: false,
-          animation: 'none',
+          animation: "none",
         }}
         tabBar={(props) => <BottomTabBar {...props} />}
       >
         <Tabs.Screen
           options={{
-            title: 'Home',
+            title: "Home",
           }}
-          name='homeTab'
+          name="homeTab"
           component={Home}
         />
         <Tabs.Screen
           options={{
-            title: 'Discover',
+            title: "Discover",
           }}
-          name='discoverTab'
+          name="discoverTab"
           component={Discover}
         />
         <Tabs.Screen
           options={{
-            title: 'Library',
+            title: "Library",
           }}
-          name='libraryTab'
+          name="libraryTab"
           component={Library}
         />
         <Tabs.Screen
           options={{
-            title: 'Settings',
+            title: "Settings",
           }}
-          name='settingsTab'
+          name="settingsTab"
           component={Settings}
         />
       </Tabs.Navigator>
@@ -139,53 +116,38 @@ const Routing = () => {
       <Main.Navigator
         screenOptions={{
           headerShown: false,
-          animation: 'none',
+          animation: Platform.OS === "ios" ? "default" : "none",
         }}
       >
+        <Main.Screen name="tabs" component={TabStack} />
+        <Main.Screen name="searchHome" component={SearchHome} />
+        <Main.Screen name="categories" component={Categories} />
+        <Main.Screen name="myAccount" component={MyAccount} />
+        <Main.Screen name="Faq" component={FAQ} />
         <Main.Screen
-          name='tabs'
-          component={TabStack}
-        />
-        <Main.Screen
-          name='categories'
-          component={Categories}
-        />
-        <Main.Screen
-          name='myAccount'
-          component={MyAccount}
-        />
-        <Main.Screen
-          name='Faq'
-          component={FAQ}
-        />
-        <Main.Screen
-          name='settingsPrivacyPolicy'
+          name="settingsPrivacyPolicy"
           component={SettingsPrivacyPolicy}
         />
         <Main.Screen
-          name='settingsTermsAndConditions'
+          name="settingsTermsAndConditions"
           component={SettingTermsCondition}
         />
+        <Main.Screen name="playerList" component={PlayerList} />
+        <Main.Screen name="player" component={Player} />
       </Main.Navigator>
     );
   }
 
   return (
     <RootStack.Navigator
-      initialRouteName={isAuth ? 'mainStack' : 'authStack'}
+      initialRouteName={!isAuth ? "mainStack" : "authStack"}
       screenOptions={{
         headerShown: false,
-        animation: 'none',
+        animation: Platform.OS === "ios" ? "default" : "none",
       }}
     >
-      <RootStack.Screen
-        name='authStack'
-        component={AuthStack}
-      />
-      <RootStack.Screen
-        name='mainStack'
-        component={MainStack}
-      />
+      <RootStack.Screen name="authStack" component={AuthStack} />
+      <RootStack.Screen name="mainStack" component={MainStack} />
     </RootStack.Navigator>
   );
 };

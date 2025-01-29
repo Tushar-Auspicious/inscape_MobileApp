@@ -11,45 +11,31 @@ import CustomButton from '../../Components/Buttons/CustomButton';
 import CustomIcon from '../../Components/CustomIcon';
 import CustomInput from '../../Components/CustomInput';
 import { CustomText } from '../../Components/CustomText';
-import { myAccountProps } from '../../Typings/route';
-import COLORS from '../../Utilities/Colors';
-import { horizontalScale, verticalScale } from '../../Utilities/Metrics';
-import styles from './style';
+import { myAccountProps } from "../../Typings/route";
+import styles from "./style";
 
 const MyAccount: FC<myAccountProps> = ({ navigation }) => {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [companyName, setCompanyName] = useState('');
-  const [birthDate, setBirthDate] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [selectedGender, setSelectedGender] = useState<
-    'Male' | 'Female' | 'Other'
-  >('Male'); // Gender state
+    "Male" | "Female" | "Other"
+  >("Male"); // Gender state
 
-  const genderTypes: ('Male' | 'Female' | 'Other')[] = [
-    'Male',
-    'Female',
-    'Other',
+  const genderTypes: ("Male" | "Female" | "Other")[] = [
+    "Male",
+    "Female",
+    "Other",
   ];
 
   const handleSaveProfile = () => {};
 
   return (
-    <KeyboardAvoidingView
-      behavior='padding'
-      style={{ flex: 1 }}
-    >
+    <KeyboardAvoidingView behavior="padding" style={styles.keyboardView}>
       <SafeAreaView style={styles.container}>
-        <View
-          style={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-          }}
-        >
-          <CustomText
-            type='title'
-            fontFamily='bold'
-          >
+        <View style={styles.header}>
+          <CustomText type="title" fontFamily="bold">
             My Account
           </CustomText>
           {navigation.canGoBack() && (
@@ -58,11 +44,7 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
               onPress={() => navigation.goBack()}
               style={styles.backArrowCont}
             >
-              <CustomIcon
-                Icon={ICONS.BackArrow}
-                height={15}
-                width={15}
-              />
+              <CustomIcon Icon={ICONS.BackArrow} height={15} width={15} />
             </TouchableOpacity>
           )}
         </View>
@@ -71,46 +53,44 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
           <CustomInput
             value={fullName}
             onChangeText={setFullName}
-            placeholder='Full Name'
-            label='Full Name'
+            placeholder="Full Name"
+            label="Full Name"
+            heigth={44}
           />
 
           <CustomInput
             value={email}
             onChangeText={setEmail}
-            placeholder='Email'
-            label='Email'
+            placeholder="Email"
+            label="Email"
+            heigth={44}
           />
 
           <CustomInput
             value={companyName}
             onChangeText={setCompanyName}
-            placeholder='Company Name'
-            label='Company Name'
+            placeholder="Company Name"
+            label="Company Name"
+            heigth={44}
           />
 
           <CustomInput
             value={birthDate}
             onChangeText={setBirthDate}
-            placeholder='Birthday'
-            label='Birthday'
+            placeholder="Birthday"
+            label="Birthday"
+            heigth={44}
           />
 
-          <View style={{ gap: verticalScale(5) }}>
-            <CustomText fontFamily='medium'>Gender</CustomText>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              {genderTypes.map((gender, index) => {
+          <View style={styles.genderCont}>
+            <CustomText fontFamily="medium">Gender</CustomText>
+            <View style={styles.genderRow}>
+              {genderTypes.map((gender) => {
                 const renderGenderIcon = () => {
-                  if (gender === 'Male') {
+                  if (gender === "Male") {
                     return ICONS.maleIcon;
                   }
-                  if (gender === 'Female') {
+                  if (gender === "Female") {
                     return ICONS.femaleIcon;
                   } else {
                     return ICONS.otherIcon;
@@ -121,21 +101,10 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
 
                 return (
                   <Pressable
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: horizontalScale(10),
-                      width: '30%',
-                      backgroundColor: isSelected
-                        ? COLORS.darkNavyBlue
-                        : COLORS.lightNavyBlue,
-                      borderWidth: isSelected ? 1 : 0,
-                      borderColor: COLORS.white,
-                      justifyContent: 'flex-start',
-                      paddingVertical: verticalScale(18),
-                      paddingHorizontal: horizontalScale(15),
-                      borderRadius: 10,
-                    }}
+                    style={[
+                      styles.genderOption,
+                      isSelected && styles.selectedGenderOption,
+                    ]}
                     onPress={() => setSelectedGender(gender)}
                   >
                     <CustomIcon
@@ -152,7 +121,7 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
         </View>
 
         <CustomButton
-          title='Reset Password'
+          title="Save"
           onPress={handleSaveProfile}
           style={styles.btn}
         />

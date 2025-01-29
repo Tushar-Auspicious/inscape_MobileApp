@@ -8,6 +8,7 @@ const COLORS = {
   mixGreyBlue: "#64748B",
   white: "white",
   black: "black",
+  darkPink: "#907081",
 };
 
 export default COLORS;

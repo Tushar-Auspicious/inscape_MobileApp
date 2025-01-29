@@ -1,34 +1,53 @@
-import { View, Text, ScrollView, Alert, FlatList } from "react-native";
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
+import { FlatList, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import styles from "./style";
-import CustomInput from "../../Components/CustomInput";
-import meditationTypes from "../../Seeds/DiscoverSeeds";
+import ICONS from "../../Assets/icons";
 import ExploreCard from "../../Components/Cards/ExploreCard";
-import { verticalScale, wp } from "../../Utilities/Metrics";
+import CustomIcon from "../../Components/CustomIcon";
+import CustomInput from "../../Components/CustomInput";
+import EmptyDataView from "../../Components/EmptyDataView";
+import meditationTypes from "../../Seeds/DiscoverSeeds";
+import { DiscoverProps } from "../../Typings/route";
+import { wp } from "../../Utilities/Metrics";
+import styles from "./style";
 
-const Discover = () => {
+// Back arrow only show if no seaerch results found to show intital data
+
+const Discover: FC<DiscoverProps> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [searchedData, setSearchedData] = useState(meditationTypes);
   const onFilterPress = () => {};
 
   return (
-    <SafeAreaView
-      edges={['top', 'left', 'right']}
-      style={styles.container}
-    >
+    <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
       <View style={styles.scrollContainer}>
-        <CustomInput
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder='What do you want to listen?'
-          type='search'
-          onFilterPress={onFilterPress}
-          isFilterIcon
-        />
+        <View style={styles.mainHeader}>
+          {searchedData.length === 0 && (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <CustomIcon
+                onPress={() => navigation.goBack()}
+                Icon={ICONS.BackArrow}
+                width={15}
+                height={15}
+              />
+            </TouchableOpacity>
+          )}
+          <CustomInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            isFilterIcon
+            type="search"
+            placeholder="Search..."
+            style={{
+              flex: 1,
+            }}
+            onFilterPress={onFilterPress}
+            heigth={44}
+          />
+        </View>
 
         <FlatList
-          data={meditationTypes}
+          data={searchedData}
           numColumns={2}
           columnWrapperStyle={styles.listColumCont}
           contentContainerStyle={styles.flatListCont}
@@ -42,6 +61,7 @@ const Discover = () => {
               width={wp(43)}
             />
           )}
+          ListEmptyComponent={<EmptyDataView searchData={[]} />}
         />
       </View>
     </SafeAreaView>

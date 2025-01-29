@@ -1,6 +1,6 @@
-import { StyleSheet } from 'react-native';
-import COLORS from '../../Utilities/Colors';
-import { horizontalScale, verticalScale, wp } from '../../Utilities/Metrics';
+import { StyleSheet } from "react-native";
+import COLORS from "../../Utilities/Colors";
+import { horizontalScale, verticalScale, wp } from "../../Utilities/Metrics";
 
 const styles = StyleSheet.create({
   container: {
@@ -9,20 +9,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(20),
     paddingVertical: verticalScale(20),
   },
-
+  keyboardView: {
+    flex: 1,
+  },
+  header: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
   backArrowCont: {
     paddingRight: horizontalScale(10),
     width: wp(8),
-    position: 'absolute',
+    position: "absolute",
     left: 0,
   },
-
   inputCont: {
-    gap: verticalScale(30),
+    gap: verticalScale(20),
     paddingVertical: verticalScale(30),
     flex: 1,
   },
-
+  genderCont: {
+    gap: verticalScale(5),
+  },
+  genderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  genderOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: horizontalScale(10),
+    width: "30%",
+    backgroundColor: COLORS.lightNavyBlue,
+    justifyContent: "flex-start",
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: horizontalScale(15),
+    borderRadius: 10,
+  },
+  selectedGenderOption: {
+    backgroundColor: COLORS.darkNavyBlue,
+    borderWidth: 1,
+    borderColor: COLORS.white,
+  },
   btn: {
     marginVertical: verticalScale(20),
   },

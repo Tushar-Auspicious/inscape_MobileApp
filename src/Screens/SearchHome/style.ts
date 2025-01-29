@@ -6,24 +6,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.darkBlue,
+    paddingVertical: verticalScale(10),
   },
-  scrollContainer: {
-    paddingVertical: verticalScale(20),
-    paddingHorizontal: horizontalScale(15),
-    gap: verticalScale(20),
-  },
-
   mainHeader: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: verticalScale(15),
     gap: horizontalScale(10),
+    paddingHorizontal: horizontalScale(20),
   },
-
-  listColumCont: {
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
+    marginTop: verticalScale(15),
+    paddingHorizontal: horizontalScale(20),
   },
-
-  flatListCont: { paddingBottom: verticalScale(60) },
+  list: {
+    paddingHorizontal: horizontalScale(20),
+  },
 });
 
 export default styles;

@@ -18,6 +18,13 @@ import femaleIcon from './femaleIcon.svg';
 import otherIcon from './otherIcon.svg';
 import downArrowIcon from './downArrow.svg';
 import upArrowIcon from './upArrow.svg';
+import emptyDataImage from "./emptyDataImage.svg";
+import playIcon from "./play.svg";
+import pauseIcon from "./pause.svg";
+import playNextIcon from "./playNext.svg";
+import playPreviousIcon from "./playPrevious.svg";
+import downloadIcon from "./download.svg";
+import shuffleIcon from "./shuffle.svg";
 
 const ICONS = {
   Home,
@@ -40,10 +47,17 @@ const ICONS = {
   otherIcon,
   downArrowIcon,
   upArrowIcon,
+  emptyDataImage,
+  playIcon,
+  pauseIcon,
+  playNextIcon,
+  playPreviousIcon,
+  downloadIcon,
+  shuffleIcon,
 
-  crossIcon: require('./crossIcon.png'),
-  tickIcon: require('./check.png'),
-  eyesOff: require('./eye-off.png'),
+  crossIcon: require("./crossIcon.png"),
+  tickIcon: require("./check.png"),
+  eyesOff: require("./eye-off.png"),
 };
 
 export default ICONS;
