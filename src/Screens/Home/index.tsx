@@ -62,7 +62,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
               rating={item.rating}
               title={item.title}
               type={item.type}
-              onPress={() => {}}
+              onPress={() => navigation.navigate("playerList")}
             />
           )}
         />
@@ -90,7 +90,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
               title={item.title}
               type={item.type}
               isSmall
-              onPress={() => {}}
+              onPress={() => navigation.navigate("playerList")}
             />
           )}
         />
@@ -112,7 +112,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
               imageUrl={item.imageUrl}
               title="Focus"
               subTitle="54 items"
-              onPress={() => {}}
+              onPress={() => navigation.navigate("playerList")}
             />
           )}
         />
@@ -134,7 +134,13 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
               title={item.title}
               duration={item.duration}
               level={item.level}
-              onPress={() => {}}
+              onPress={() =>
+                navigation.navigate("player", {
+                  artist: item.level,
+                  img: item.imageUrl,
+                  title: item.title,
+                })
+              }
             />
           )}
         />

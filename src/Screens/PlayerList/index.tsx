@@ -19,12 +19,17 @@ import { PlayerListProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import { hp } from "../../Utilities/Metrics";
 import styles from "./style";
+import { getGreeting } from "../../Utilities/Helpers";
 
 const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
 
   const handleGoToPLayer = () => {
-    navigation.navigate("player");
+    navigation.navigate("player", {
+      img: "https://s3-alpha-sig.figma.com/img/a4a0/2628/cabd302ddee9cc5565d23c4c13f71025?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=Au~eVSsLWRALf3h90BUuA-omOYOwLSip-CIgk8WmzeXMJGkQcUPjtA-6EH4z4iPrKyeZVNJ9VWtGky4Bacsf4i-7~a3WzaPIzgBedgUmbD7jCxU2dJG4LytdSDiqaqlLSGSW1sxHfygsTLlq3czuW4XJKYbFpswyS6MSOSBMrKkeuW6gYSm5MgGGR4plMNPo8kyWITaUk9d3x-mYyGifcN2UtpnKtXoqk947dmXFctLh3P53ChTnkDa4ubSXsAdH~AxHebS317skrOvCmDXD1YSKhAQaj3VP-LkViHp8w505tPUldbJ~-zbtIA9nOUMV2xyKbYvSdvUrUG~P5yL~9g__",
+      artist: "juice world",
+      title: "Lucid Dreams",
+    });
   };
 
   return (
@@ -63,7 +68,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
           </TouchableOpacity>
 
           <View style={styles.headerTextCont}>
-            <CustomText type="subHeading">Good Morning</CustomText>
+            <CustomText type="subHeading">{getGreeting()}</CustomText>
 
             <CustomText>
               We want to acquaint you with the most effective mantras and you

@@ -11,6 +11,14 @@ type CustomButtonProps = {
   textColor?: string;
   style?: ViewStyle;
   disabled?: boolean;
+  textSize?:
+    | "heading"
+    | "subHeading"
+    | "title"
+    | "subTitle"
+    | "default"
+    | "small"
+    | "extraSmall";
 };
 
 const CustomButton: FC<CustomButtonProps> = ({
@@ -19,6 +27,7 @@ const CustomButton: FC<CustomButtonProps> = ({
   backgroundColor = COLORS.darkNavyBlue,
   textColor = COLORS.white,
   style,
+  textSize = "subTitle",
   disabled = false,
 }) => {
   return (
@@ -32,7 +41,7 @@ const CustomButton: FC<CustomButtonProps> = ({
       ]}
       onPress={onPress}
     >
-      <CustomText type="subTitle" color={textColor} fontFamily="bold">
+      <CustomText type={textSize} color={textColor} fontFamily="bold">
         {title}
       </CustomText>
     </TouchableOpacity>

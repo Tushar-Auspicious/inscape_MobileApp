@@ -2216,6 +2216,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-community/slider@npm:^4.5.5":
+  version: 4.5.5
+  resolution: "@react-native-community/slider@npm:4.5.5"
+  checksum: 8d818e7f505694269bf8009c8c5db89efc3e9bb56054a1835613b6d7431356370bef9ce23d269519163097fe506e3f5420b34ba2c553bf380d1f144277a11942
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.76.6":
   version: 0.76.6
   resolution: "@react-native/assets-registry@npm:0.76.6"
@@ -5880,6 +5887,7 @@ __metadata:
     "@react-native-community/cli": 15.0.1
     "@react-native-community/cli-platform-android": 15.0.1
     "@react-native-community/cli-platform-ios": 15.0.1
+    "@react-native-community/slider": ^4.5.5
     "@react-native/babel-preset": 0.76.6
     "@react-native/eslint-config": 0.76.6
     "@react-native/metro-config": 0.76.6
@@ -5899,11 +5907,12 @@ __metadata:
     react-native: 0.76.6
     react-native-mmkv: 2.12.2
     react-native-modal: ^13.0.1
+    react-native-raw-bottom-sheet: ^3.0.0
     react-native-safe-area-context: ^5.1.0
     react-native-screens: ^4.5.0
     react-native-svg: ^15.11.1
     react-native-svg-transformer: ^1.5.0
-    react-native-track-player: ^4.1.1
+    react-native-track-player: 4.1.1
     react-redux: ^9.2.0
     react-test-renderer: 18.3.1
     typescript: 5.0.4
@@ -8528,6 +8537,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-raw-bottom-sheet@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "react-native-raw-bottom-sheet@npm:3.0.0"
+  checksum: bd8cb9fff9240d1d09279910498efb26df80631f697fd7d93352f1247f30880d6ec6d1c978822f59d1cd375b03c9dad48d6f520935fde13b7ae35ec8305a2694
+  languageName: node
+  linkType: hard
+
 "react-native-safe-area-context@npm:^5.1.0":
   version: 5.1.0
   resolution: "react-native-safe-area-context@npm:5.1.0"
@@ -8580,7 +8596,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-track-player@npm:^4.1.1":
+"react-native-track-player@npm:4.1.1":
   version: 4.1.1
   resolution: "react-native-track-player@npm:4.1.1"
   peerDependencies:
@@ -9150,12 +9166,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.1.3, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.5.2, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0":
+"semver@npm:^7.1.3, semver@npm:^7.3.7, semver@npm:^7.5.2, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0":
   version: 7.6.3
   resolution: "semver@npm:7.6.3"
   bin:
     semver: bin/semver.js
   checksum: 4110ec5d015c9438f322257b1c51fe30276e5f766a3f64c09edd1d7ea7118ecbc3f379f3b69032bacf13116dc7abc4ad8ce0d7e2bd642e26b0d271b56b61a7d8
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.3.5":
+  version: 7.7.0
+  resolution: "semver@npm:7.7.0"
+  bin:
+    semver: bin/semver.js
+  checksum: a4eefdada9c40df120935b73b0b86080d22f375ed9b950403a4b6a90cc036e552d903ff3c7c3e865823c434ee6c6473908b13d64c84aa307423d3a998e654652
   languageName: node
   linkType: hard
 

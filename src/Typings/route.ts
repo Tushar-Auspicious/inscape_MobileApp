@@ -27,7 +27,7 @@ export type MainStackParams = {
   settingsTermsAndConditions: undefined;
   settingsPrivacyPolicy: undefined;
   playerList: undefined;
-  player: undefined;
+  player: { title: string; artist: string; img: string };
 };
 
 export type BottomTabParams = {
@@ -127,8 +127,18 @@ export type DiscoverProps = NativeStackScreenProps<
   "discoverTab"
 >;
 
+export type LibraryProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "libraryTab"
+>;
+
 
 export type PlayerListProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
   "playerList"
+>;
+
+export type PlayerProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams,
+  "player"
 >;

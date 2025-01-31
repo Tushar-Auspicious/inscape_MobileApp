@@ -140,7 +140,7 @@ const Routing = () => {
 
   return (
     <RootStack.Navigator
-      initialRouteName={!isAuth ? "mainStack" : "authStack"}
+      initialRouteName={isAuth ? "mainStack" : "authStack"}
       screenOptions={{
         headerShown: false,
         animation: Platform.OS === "ios" ? "default" : "none",

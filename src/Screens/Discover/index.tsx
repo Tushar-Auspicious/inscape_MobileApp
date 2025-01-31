@@ -57,7 +57,7 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
               imageUrl={item.imageUrl}
               title={item.title}
               subTitle={`${item.sessions} sessions`}
-              onPress={() => {}}
+              onPress={() => navigation.navigate("playerList")}
               width={wp(43)}
             />
           )}

@@ -1,30 +1,29 @@
 import { BlurView } from '@react-native-community/blur';
 import React, { FC } from 'react';
 import {
-  Image,
   ImageBackground,
   Platform,
   StyleSheet,
-  Text,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-} from 'react-native';
-import ICONS from '../../Assets/icons';
+} from "react-native";
+import ICONS from "../../Assets/icons";
 import {
   horizontalScale,
   hp,
   verticalScale,
   wp,
-} from '../../Utilities/Metrics';
-import { CustomText } from '../CustomText';
-import CustomIcon from '../CustomIcon';
+} from "../../Utilities/Metrics";
+import CustomIcon from "../CustomIcon";
+import { CustomText } from "../CustomText";
 
 type ContentCardProps = {
   imageUrl: string;
   title: string;
   duration: string;
   rating: string;
-  type?: 'default' | 'potrait';
+  type?: "default" | "potrait";
   width?: number;
   height?: number;
   isSmall?: boolean;
@@ -38,26 +37,26 @@ const ContentCard: FC<ContentCardProps> = ({
   title,
   imageUrl,
   duration,
-  type = 'default',
+  type = "default",
   isSmall = false,
   width = wp(88),
-  height = hp(Platform.OS === 'ios' ? 23 : 25),
+  height = hp(Platform.OS === "ios" ? 23 : 25),
   onPress,
 }) => {
   // Adjust width and height for portrait cards based on size
-  if (type === 'potrait') {
+  if (type === "potrait") {
     if (isSmall) {
       width = wp(37); // Custom width for portrait
-      height = hp(Platform.OS === 'ios' ? 20 : 22); // Custom height for portrait
+      height = hp(Platform.OS === "ios" ? 20 : 22); // Custom height for portrait
     } else {
       width = wp(51); // Custom width for portrait
-      height = hp(Platform.OS === 'ios' ? 28 : 30); // Custom height for portrait
+      height = hp(Platform.OS === "ios" ? 28 : 30); // Custom height for portrait
     }
   }
 
   // Adjust the title length based on card type and size
   title =
-    type === 'default'
+    type === "default"
       ? title.length > 30
         ? `${title.slice(0, 30)}...`
         : title
@@ -70,7 +69,7 @@ const ContentCard: FC<ContentCardProps> = ({
       : title;
 
   // Define the height of the blur view based on the card type
-  const blurViewHeight = type === 'default' ? '36%' : '32%';
+  const blurViewHeight = type === "default" ? "36%" : "32%";
 
   return (
     <TouchableWithoutFeedback onPress={onPress}>
@@ -78,19 +77,19 @@ const ContentCard: FC<ContentCardProps> = ({
         source={{ uri: imageUrl }}
         style={[
           styles.cardContainer,
-          { width, height, justifyContent: 'flex-end' },
+          { width, height, justifyContent: "flex-end" },
         ]}
         imageStyle={styles.backgroundImage}
       >
         {/* Blur Overlay */}
 
-        {Platform.OS === 'ios' ? (
+        {Platform.OS === "ios" ? (
           <>
             <BlurView
               style={[styles.blurView, { height: blurViewHeight }]}
-              blurType='light'
+              blurType="light"
               blurAmount={10}
-              reducedTransparencyFallbackColor='white'
+              reducedTransparencyFallbackColor="white"
             />
 
             {/* Content */}
@@ -104,8 +103,8 @@ const ContentCard: FC<ContentCardProps> = ({
             >
               <View style={styles.textContainer}>
                 <CustomText
-                  type={isSmall ? 'default' : 'subTitle'}
-                  fontFamily='bold'
+                  type={isSmall ? "default" : "subTitle"}
+                  fontFamily="bold"
                 >
                   {title.slice(0, 20)}
                 </CustomText>
@@ -115,25 +114,19 @@ const ContentCard: FC<ContentCardProps> = ({
                     width={ICON_SIZE}
                     height={ICON_SIZE}
                   />
-                  <CustomText
-                    type='small'
-                    fontFamily='bold'
-                  >
+                  <CustomText type="small" fontFamily="bold">
                     {duration}
                   </CustomText>
                 </View>
               </View>
-              {type === 'default' && (
+              {type === "default" && (
                 <View style={styles.ratingContainer}>
                   <CustomIcon
                     Icon={ICONS.Star}
                     width={ICON_SIZE}
                     height={ICON_SIZE}
                   />
-                  <CustomText
-                    type='small'
-                    fontFamily='bold'
-                  >
+                  <CustomText type="small" fontFamily="bold">
                     {rating}
                   </CustomText>
                 </View>
@@ -141,56 +134,48 @@ const ContentCard: FC<ContentCardProps> = ({
             </View>
           </>
         ) : (
-          <>
-            <BlurView
-              style={{
-                height: blurViewHeight,
-              }}
-              blurType='light'
-              blurAmount={10}
-              reducedTransparencyFallbackColor='white'
-              overlayColor='transparent'
-            >
-              <View style={styles.content}>
-                <View style={styles.textContainer}>
-                  <CustomText
-                    type={isSmall ? 'default' : 'subTitle'}
-                    fontFamily='bold'
-                  >
-                    {title.slice(0, 20)}
+          <BlurView
+            style={{
+              height: blurViewHeight,
+            }}
+            blurType="light"
+            blurAmount={10}
+            reducedTransparencyFallbackColor="white"
+            overlayColor="transparent"
+          >
+            <TouchableOpacity onPress={onPress} style={styles.content}>
+              <View style={styles.textContainer}>
+                <CustomText
+                  type={isSmall ? "default" : "subTitle"}
+                  fontFamily="bold"
+                >
+                  {title.slice(0, 20)}
+                </CustomText>
+                <View style={styles.infoRow}>
+                  <CustomIcon
+                    Icon={ICONS.Clock}
+                    width={ICON_SIZE}
+                    height={ICON_SIZE}
+                  />
+                  <CustomText type="small" fontFamily="bold">
+                    {duration}
                   </CustomText>
-                  <View style={styles.infoRow}>
-                    <CustomIcon
-                      Icon={ICONS.Clock}
-                      width={ICON_SIZE}
-                      height={ICON_SIZE}
-                    />
-                    <CustomText
-                      type='small'
-                      fontFamily='bold'
-                    >
-                      {duration}
-                    </CustomText>
-                  </View>
                 </View>
-                {type === 'default' && (
-                  <View style={styles.ratingContainer}>
-                    <CustomIcon
-                      Icon={ICONS.Star}
-                      width={ICON_SIZE}
-                      height={ICON_SIZE}
-                    />
-                    <CustomText
-                      type='small'
-                      fontFamily='bold'
-                    >
-                      {rating}
-                    </CustomText>
-                  </View>
-                )}
               </View>
-            </BlurView>
-          </>
+              {type === "default" && (
+                <View style={styles.ratingContainer}>
+                  <CustomIcon
+                    Icon={ICONS.Star}
+                    width={ICON_SIZE}
+                    height={ICON_SIZE}
+                  />
+                  <CustomText type="small" fontFamily="bold">
+                    {rating}
+                  </CustomText>
+                </View>
+              )}
+            </TouchableOpacity>
+          </BlurView>
         )}
       </ImageBackground>
     </TouchableWithoutFeedback>

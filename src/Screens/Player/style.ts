@@ -12,7 +12,24 @@ const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
     marginBottom: verticalScale(60),
+    position: "relative",
   },
+
+  imageStyle: {
+    borderTopRightRadius: 30,
+    borderTopLeftRadius: 30,
+  },
+
+  backButton: {
+    position: "absolute",
+    zIndex: 100,
+    left: wp(5),
+    paddingVertical: verticalScale(8),
+    paddingHorizontal: horizontalScale(8),
+    backgroundColor: "rgba( 255, 255, 255, 0.35 )",
+    borderRadius: 5,
+  },
+
   playerCont: {
     backgroundColor: COLORS.darkBlue,
     width: wp(100),

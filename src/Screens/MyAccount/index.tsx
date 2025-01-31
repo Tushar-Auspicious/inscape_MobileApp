@@ -74,15 +74,15 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
             heigth={44}
           />
 
-          <CustomInput
+          {/* <CustomInput
             value={birthDate}
             onChangeText={setBirthDate}
             placeholder="Birthday"
             label="Birthday"
             heigth={44}
-          />
+          /> */}
 
-          <View style={styles.genderCont}>
+          {/* <View style={styles.genderCont}>
             <CustomText fontFamily="medium">Gender</CustomText>
             <View style={styles.genderRow}>
               {genderTypes.map((gender) => {
@@ -117,7 +117,7 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
                 );
               })}
             </View>
-          </View>
+          </View> */}
         </View>
 
         <CustomButton

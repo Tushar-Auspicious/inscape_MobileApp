@@ -20,7 +20,7 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
   // States for checkboxes
   const [isPrivacyChecked, setIsPrivacyChecked] = useState(false);
   const [isHealthDataChecked, setIsHealthDataChecked] = useState(false);
-  const [isMarketingChecked, setIsMarketingChecked] = useState(false);
+  const [isTermsChecked, setIsTermsCheked] = useState(false);
 
   // States to track whether the modal has been shown
   const [hasSeenPrivacyModal, setHasSeenPrivacyModal] = useState(false);
@@ -41,12 +41,19 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
     }
   };
 
-  const handleHealthDataCheck = () => {
-    setIsHealthDataChecked(!isHealthDataChecked);
+  const handleTermsCheck = () => {
+    if (!isTermsChecked) {
+      if (!hasSeenTermsModal) {
+        toggleTermsModal();
+        return;
+      }
+    } else {
+      setIsTermsCheked(true);
+    }
   };
 
-  const handleMarketingCheck = () => {
-    setIsMarketingChecked(!isMarketingChecked);
+  const handleHealthDataCheck = () => {
+    setIsHealthDataChecked(!isHealthDataChecked);
   };
 
   const togglePrivacyModal = () => {
@@ -64,20 +71,26 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
     }
     if (!hasSeenTermsModal) {
       toggleTermsModal();
+      setIsHealthDataChecked(true);
       return;
     }
-    setIsPrivacyChecked(true);
     setIsHealthDataChecked(true);
-    setIsMarketingChecked(true);
   };
 
   const onAgreeTerms = () => {
     setHasSeenTermsModal(true);
-    setIsPrivacyChecked(true);
+    setIsTermsCheked(true);
+    if (hasSeenPrivacyModal) {
+      setIsHealthDataChecked(true);
+    }
   };
 
   const onAgreePolicy = () => {
+    setIsPrivacyChecked(true);
     setHasSeenPrivacyModal(true);
+    if (!hasSeenTermsModal) {
+      toggleTermsModal();
+    }
   };
 
   return (
@@ -87,35 +100,10 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
       </CustomText>
 
       <View style={styles.checkBoxContainer}>
-        <View style={styles.row}>
+        <View style={styles.rowStart}>
           <CustomCheckBox
             isChecked={isPrivacyChecked}
             setIsChecked={handlePrivacyCheck} // Ensure user reads Privacy Policy
-          />
-          <CustomText>
-            I agree to{" "}
-            <CustomText
-              onPress={togglePrivacyModal}
-              style={styles.linkText}
-              fontFamily="bold"
-            >
-              Privacy Policy
-            </CustomText>{" "}
-            and{" "}
-            <CustomText
-              onPress={toggleTermsModal}
-              style={styles.linkText}
-              fontFamily="bold"
-            >
-              Terms of Use
-            </CustomText>{" "}
-          </CustomText>
-        </View>
-
-        <View style={styles.rowStart}>
-          <CustomCheckBox
-            isChecked={isHealthDataChecked}
-            setIsChecked={handleHealthDataCheck} // Ensure user reads Privacy Policy
           />
           <CustomText style={styles.flexText}>
             I agree to processing of my personal health data for providing me
@@ -130,10 +118,27 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
           </CustomText>
         </View>
 
+        <View style={styles.row}>
+          <CustomCheckBox
+            isChecked={isTermsChecked}
+            setIsChecked={handleTermsCheck} // Ensure user reads Privacy Policy
+          />
+          <CustomText>
+            I agree to{" "}
+            <CustomText
+              onPress={toggleTermsModal}
+              style={styles.linkText}
+              fontFamily="bold"
+            >
+              Terms of Use
+            </CustomText>{" "}
+          </CustomText>
+        </View>
+
         <View style={styles.rowStart}>
           <CustomCheckBox
-            isChecked={isMarketingChecked}
-            setIsChecked={handleMarketingCheck} // Ensure user reads Terms of Use
+            isChecked={isHealthDataChecked}
+            setIsChecked={handleHealthDataCheck} // Ensure user reads Terms of Use
           />
           <CustomText style={styles.flexText}>
             I agree that the app may use my personal data to send me product or
@@ -147,15 +152,13 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
           title="Accept all"
           onPress={handleAcceptAll}
           backgroundColor={COLORS.navyBlue}
-          disabled={
-            isPrivacyChecked && isHealthDataChecked && isMarketingChecked
-          }
+          disabled={isPrivacyChecked && isHealthDataChecked && isTermsChecked}
         />
         <CustomButton
           title="Next"
           onPress={() => navigation.replace("signUp")}
           disabled={
-            !isPrivacyChecked || !isHealthDataChecked || !isMarketingChecked
+            !isPrivacyChecked || !isHealthDataChecked || !isTermsChecked
           }
           backgroundColor={COLORS.white}
           textColor={COLORS.navyBlue}

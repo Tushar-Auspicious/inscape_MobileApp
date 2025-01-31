@@ -25,6 +25,7 @@ import playNextIcon from "./playNext.svg";
 import playPreviousIcon from "./playPrevious.svg";
 import downloadIcon from "./download.svg";
 import shuffleIcon from "./shuffle.svg";
+import crossIcon from "./crossIcon.svg";
 
 const ICONS = {
   Home,
@@ -54,8 +55,9 @@ const ICONS = {
   playPreviousIcon,
   downloadIcon,
   shuffleIcon,
+  crossIcon,
 
-  crossIcon: require("./crossIcon.png"),
+  // crossIcon: require("./crossIcon.png"),
   tickIcon: require("./check.png"),
   eyesOff: require("./eye-off.png"),
 };

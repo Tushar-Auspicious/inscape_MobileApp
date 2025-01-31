@@ -19,8 +19,8 @@ const BottomTabBar: FC<BottomTabBarProps> = ({
   const renderIcon = (routeName: string, isFocused: boolean) => {
     const icons: Record<string, any> = {
       homeTab: isFocused ? ICONS.HomeSolid : ICONS.Home,
-      discoverTab: isFocused ? ICONS.DiscoverSolid : ICONS.Discover,
-      libraryTab: isFocused ? ICONS.SearchSolid : ICONS.Search,
+      libraryTab: isFocused ? ICONS.DiscoverSolid : ICONS.Discover,
+      discoverTab: isFocused ? ICONS.SearchSolid : ICONS.Search,
       settingsTab: isFocused ? ICONS.SettingsSolid : ICONS.Settings,
     };
 

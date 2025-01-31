@@ -19,6 +19,10 @@ import styles from "./style";
 const Categories: FC<CategoryProps> = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  const handleCardPress = () => {
+    navigation.navigate("playerList");
+  };
+
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
       <ImageBackground
@@ -87,7 +91,7 @@ const Categories: FC<CategoryProps> = ({ navigation }) => {
               title={item.title}
               type={item.type}
               isSmall
-              onPress={() => {}}
+              onPress={handleCardPress}
             />
           )}
         />
@@ -114,7 +118,7 @@ const Categories: FC<CategoryProps> = ({ navigation }) => {
               title={item.title}
               type={item.type}
               isSmall
-              onPress={() => {}}
+              onPress={handleCardPress}
             />
           )}
         />
@@ -141,7 +145,7 @@ const Categories: FC<CategoryProps> = ({ navigation }) => {
               title={item.title}
               type={item.type}
               isSmall
-              onPress={() => {}}
+              onPress={handleCardPress}
             />
           )}
         />

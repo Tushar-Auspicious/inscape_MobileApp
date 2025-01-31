@@ -5,6 +5,8 @@ import Routing from './src/Routes';
 import Splash from './src/Screens/Splash';
 import { Appearance, LogBox } from 'react-native';
 
+LogBox.ignoreAllLogs();
+
 const App = () => {
   const [isReady, setIsReady] = useState(false);
 

@@ -4,6 +4,7 @@ import {
   ImageBackground,
   Platform,
   StyleSheet,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -72,12 +73,12 @@ const ExploreCard: FC<ExploreCardProps> = ({
             overlayColor="transparent"
           >
             {/* Content */}
-            <View style={styles.content}>
+            <TouchableOpacity onPress={onPress} style={styles.content}>
               <CustomText fontFamily="bold">{title}</CustomText>
               <CustomText type="extraSmall" fontFamily="bold">
                 {subTitle}
               </CustomText>
-            </View>
+            </TouchableOpacity>
           </BlurView>
         )}
 

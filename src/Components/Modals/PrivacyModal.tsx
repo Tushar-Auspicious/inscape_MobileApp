@@ -17,6 +17,7 @@ import {
 } from "../../Utilities/Metrics";
 import CustomButton from "../Buttons/CustomButton";
 import { CustomText } from "../CustomText";
+import CustomIcon from "../CustomIcon";
 
 type PrivacyModalProps = {
   isVisible: boolean;
@@ -42,7 +43,11 @@ const PrivacyModal: FC<PrivacyModalProps> = ({
           onPress={toggleModal}
           style={styles.closeButton}
         >
-          <Image source={ICONS.crossIcon} style={styles.crossIcon} />
+          <CustomIcon
+            Icon={ICONS.crossIcon}
+            height={verticalScale(30)}
+            width={verticalScale(30)}
+          />
         </TouchableOpacity>
 
         <CustomText
