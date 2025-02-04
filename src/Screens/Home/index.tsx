@@ -36,7 +36,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
           title="Wondering mind"
           rating="4.8"
           duration="12 min"
-          imageUrl="https://s3-alpha-sig.figma.com/img/2a38/ad1a/d9ffcda8b4ac57580fa368032f146aa7?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=HsqfkWkkSozO~qIV1gKFna7IOuJbVOr2Oa1iLAEeHCwXefU3dvcaemA1jio8wIyxfqFu04s4K1aV6s6mP2JZ1wjqrx0jQ2jJu2CRSgL1QYzDhIvQFLRuqBmoXPZFGu9WxmsyVHinVy3H83CNFae~Xdv~YBJPgFCO2V55Ja9p0xpxMIW3enmA1Ktl07Pr6U~IfxXLJENRQPcfvzXQyG6K1Pe~Ndpp4H1ZR5~00fJzV~rvbU21pZYrxyvJ3F6j265rhwgqfwjLnVuujTsMCQedAQ1S1yHAg17R24zs0-k6TPDqi9TOgDXDvEcWzFU8DlI4u~RfJyfXovTSchjxsB6edg__"
+          imageUrl="https://plus.unsplash.com/premium_photo-1682125853703-896a05629709?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bXVzaWN8ZW58MHx8MHx8fDA%3D"
           onPress={() => navigation.navigate("playerList")}
         />
 
@@ -128,21 +128,30 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
           data={breathingSessions}
           contentContainerStyle={styles.verticalList}
           keyExtractor={(item, index) => item.title + index.toString()}
-          renderItem={({ item }) => (
-            <SessionCard
-              imageUrl={item.imageUrl}
-              title={item.title}
-              duration={item.duration}
-              level={item.level}
-              onPress={() =>
-                navigation.navigate("player", {
-                  artist: item.level,
-                  img: item.imageUrl,
-                  title: item.title,
-                })
-              }
-            />
-          )}
+          renderItem={({ item }) => {
+            const trackIndex = breathingSessions.findIndex(
+              (t) => t.id === item.id
+            );
+            return (
+              <SessionCard
+                imageUrl={item.imageUrl}
+                title={item.title}
+                duration={item.duration}
+                level={item.level}
+                onPress={() =>
+                  navigation.navigate("player", {
+                    trackList: breathingSessions.map((item) => ({
+                      artist: item.title,
+                      artwork: item.imageUrl,
+                      title: item.title,
+                      url: item.url,
+                    })),
+                    currentTrackIndex: trackIndex,
+                  })
+                }
+              />
+            );
+          }}
         />
       </ScrollView>
     </SafeAreaView>

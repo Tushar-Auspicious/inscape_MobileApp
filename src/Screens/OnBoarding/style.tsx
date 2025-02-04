@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native";
 import COLORS from "../../Utilities/Colors";
 import {
   horizontalScale,
+  hp,
   responsiveFontSize,
   verticalScale,
   wp,
@@ -15,15 +16,15 @@ const styles = StyleSheet.create({
   },
 
   slideContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: verticalScale(10),
     width: wp(100),
     paddingHorizontal: wp(10),
   },
 
   slideImage: {
-    height: 458,
-    resizeMode: 'cover',
+    height: hp(52),
+    resizeMode: "cover",
     width: wp(90),
     borderRadius: verticalScale(10),
   },
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
   subtitle: {
     color: COLORS.white,
     fontSize: responsiveFontSize(14),
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: responsiveFontSize(19.6),
     maxWidth: wp(60),
   },
@@ -43,33 +44,33 @@ const styles = StyleSheet.create({
   title: {
     color: COLORS.white,
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
 
   buttonCont: {
     paddingVertical: verticalScale(10),
     width: wp(100),
-    alignItems: 'center',
+    alignItems: "center",
     gap: verticalScale(10),
   },
 
   skipText: {
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
     color: COLORS.white,
-    fontWeight: '800',
+    fontWeight: "800",
   },
 
   image: {
-    height: '100%',
-    width: '100%',
-    resizeMode: 'contain',
+    height: "100%",
+    width: "100%",
+    resizeMode: "contain",
   },
 
   indicatorCont: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     paddingVertical: verticalScale(10),
   },
 

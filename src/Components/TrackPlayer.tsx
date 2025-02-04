@@ -1,100 +1,103 @@
 import Slider from "@react-native-community/slider";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  AppState,
   Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import Player, {
   Event,
+  State,
   useActiveTrack,
   useIsPlaying,
-  usePlaybackState,
   useProgress,
+  useTrackPlayerEvents,
 } from "react-native-track-player";
 import ICONS from "../Assets/icons";
-import { QueueInitialTracksService } from "../PlayerServices/QueueInitialTrackService";
-import { SetupService } from "../PlayerServices/SetupService";
 import COLORS from "../Utilities/Colors";
+import { downloadFile } from "../Utilities/Helpers";
 import { verticalScale } from "../Utilities/Metrics";
 import CustomIcon from "./CustomIcon";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-type TrackPLayerProps = {
-  currentTrackName: string;
-  currentTrackPath: string;
-  nextTrackName?: string;
-  nextTrackPath?: string;
-  previousTrackName?: string;
-  previousTrackPath?: string;
+export const useStopPlaybackOnBackground = () => {
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState !== "active") Player.stop();
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => subscription.remove();
+  }, []);
 };
 
-export function useSetupPlayer() {
-  const [playerReady, setPlayerReady] = useState<boolean>(false);
+const TrackPlayer: FC<{
+  handlePreviousTrack: () => void;
+  handleNextTrack: () => void;
+}> = ({ handleNextTrack, handlePreviousTrack }) => {
+  const { playing } = useIsPlaying();
+  const track = useActiveTrack();
+  const { position, duration, buffered } = useProgress();
 
-  useEffect(() => {
-    let unmounted = false;
-    (async () => {
-      await SetupService();
-      if (unmounted) return;
-      setPlayerReady(true);
-      const queue = await Player.getQueue();
-      if (unmounted) return;
-      if (queue.length <= 0) {
-        await QueueInitialTracksService();
-      }
-    })();
-    return () => {
-      unmounted = true;
-    };
+  const [downloading, setDownloading] = useState(false);
+
+  const formatPlayerSeconds = useCallback((time: number) => {
+    return new Date(time * 1000).toISOString().slice(14, 19);
   }, []);
-  return playerReady;
-}
 
-const TrackPlayer: FC<TrackPLayerProps> = ({
-  previousTrackName,
-  previousTrackPath,
-  currentTrackName,
-  currentTrackPath,
-  nextTrackName,
-  nextTrackPath,
-}) => {
-  const { playing, bufferingDuringPlay } = useIsPlaying();
+  const handleDownload = async () => {
+    setDownloading(true);
+    const fileUrl = track?.url; // Replace with actual URL
+    const fileName = `${track?.title}.mp3`; // File name to save
 
-  const [currentTrack, setCurrentTrack] = useState(currentTrackName);
-  const { position, duration } = useProgress();
-
-  const handleNextTrack = async () => {
-    await Player.reset();
-    await Player.add([
-      {
-        id: "nextTrack",
-        url: nextTrackPath!,
-        title: nextTrackName,
-        artist: "Unknown",
-      },
-    ]);
-    await Player.play();
+    if (fileUrl) {
+      const filePath = await downloadFile(fileUrl, fileName);
+      if (filePath) {
+        Toast.show({
+          type: "success",
+          text1: "Download Successfull",
+        });
+        console.log("Downloaded file path:", filePath);
+        setDownloading(false);
+      }
+    }
   };
 
-  const handlePreviousTrack = async () => {
-    await Player.reset(); // Clear current track
-    await Player.add([
-      {
-        id: "previousTrack",
-        url: previousTrackPath!,
-        title: previousTrackName,
-        artist: "Unknown",
-      },
-    ]);
-    await Player.play();
-  };
+  useTrackPlayerEvents([Event.PlaybackState], async (event) => {
+    if (event.state === State.Ended) {
+      Player.seekTo(0);
+      Player.pause();
+    }
+  });
 
-  const formatSeconds = (time: number) =>
-    new Date(time * 1000).toISOString().slice(14, 19);
+  // Listen for track completion or end of queue
+  useTrackPlayerEvents(
+    [Event.PlaybackActiveTrackChanged, Event.PlaybackQueueEnded],
+    async (event) => {
+      const queue = await Player.getQueue();
+      const currentTrackIndex = await Player.getActiveTrackIndex();
+
+      if (
+        event.type === Event.PlaybackQueueEnded ||
+        (event.type === Event.PlaybackActiveTrackChanged &&
+          currentTrackIndex === queue.length - 1)
+      ) {
+        // Stop player and seek to the beginning of the current track
+        await Player.stop();
+        if (currentTrackIndex !== null && queue[currentTrackIndex!]) {
+          await Player.seekTo(0);
+        }
+      }
+    }
+  );
 
   return (
     <View style={{ width: "100%" }}>
@@ -102,16 +105,16 @@ const TrackPlayer: FC<TrackPLayerProps> = ({
         style={styles.container}
         value={position}
         minimumValue={0}
-        maximumValue={duration}
+        maximumValue={Platform.OS === "android" ? duration : buffered}
         thumbTintColor={COLORS.darkNavyBlue}
         minimumTrackTintColor={COLORS.darkNavyBlue}
         maximumTrackTintColor={COLORS.lightNavyBlue}
         onSlidingComplete={Player.seekTo}
       />
       <View style={styles.labelContainer}>
-        <Text style={styles.labelText}>{formatSeconds(position)}</Text>
+        <Text style={styles.labelText}>{formatPlayerSeconds(position)}</Text>
         <Text style={styles.labelText}>
-          {formatSeconds(Math.max(0, duration - position))}
+          {formatPlayerSeconds(Platform.OS === "android" ? duration : buffered)}
         </Text>
       </View>
 
@@ -149,7 +152,16 @@ const TrackPlayer: FC<TrackPLayerProps> = ({
           height={24}
           width={24}
         />
-        <CustomIcon Icon={ICONS.downloadIcon} height={24} width={24} />
+        {downloading ? (
+          <ActivityIndicator size={"small"} color={COLORS.white} />
+        ) : (
+          <CustomIcon
+            onPress={handleDownload}
+            Icon={ICONS.downloadIcon}
+            height={24}
+            width={24}
+          />
+        )}
       </View>
     </View>
   );

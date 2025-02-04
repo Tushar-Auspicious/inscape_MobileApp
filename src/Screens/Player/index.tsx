@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -11,23 +11,93 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { useActiveTrack } from "react-native-track-player";
+
+import playerInstance from "react-native-track-player";
 import ICONS from "../../Assets/icons";
 import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
-import TrackPlayer, { useSetupPlayer } from "../../Components/TrackPlayer";
+import TrackPlayer, {
+  useStopPlaybackOnBackground,
+} from "../../Components/TrackPlayer";
+import { SetupService } from "../../PlayerServices/SetupService";
 import { PlayerProps } from "../../Typings/route";
 import { verticalScale } from "../../Utilities/Metrics";
 import styles from "./style";
+import Toast from "react-native-toast-message";
+
+export function useSetupPlayer() {
+  const [playerReady, setPlayerReady] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    (async () => {
+      await SetupService();
+      if (!isMounted) return;
+      setPlayerReady(true);
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  return playerReady;
+}
 
 const Player: FC<PlayerProps> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
-  const track = useActiveTrack();
   const isPlayerReady = useSetupPlayer();
+  const track = useActiveTrack();
 
-  const { artist, img, title } = route.params;
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(
+    route.params?.currentTrackIndex || 0
+  );
+  const trackList = route.params?.trackList || [];
 
-  if (!isPlayerReady) {
+  const playTrack = async (index: number) => {
+    if (index < 0 || index >= trackList.length) return; // Prevent out-of-bounds errors
+
+    setCurrentTrackIndex(index); // Update index
+    const newTrack = trackList[index];
+
+    await playerInstance.reset(); // Reset queue before adding new track
+    await playerInstance.add([newTrack]); // Add the new track
+    await playerInstance.play(); // Start playing
+  };
+
+  const handleNextTrack = () => {
+    if (currentTrackIndex < trackList.length - 1) {
+      playTrack(currentTrackIndex + 1);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Sorry",
+        text2: "No next track available",
+      });
+    }
+  };
+
+  const handlePreviousTrack = () => {
+    if (currentTrackIndex > 0) {
+      playTrack(currentTrackIndex - 1);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Sorry",
+        text2: "No previous track available",
+      });
+    }
+  };
+
+  useEffect(() => {
+    playTrack(currentTrackIndex);
+  }, [currentTrackIndex]);
+
+  useStopPlaybackOnBackground();
+
+  if (!isPlayerReady && !track) {
     return (
       <SafeAreaView
         style={{
@@ -46,7 +116,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
   return (
     <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom }]}>
       <ImageBackground
-        source={{ uri: img }}
+        source={{ uri: track?.artwork }}
         imageStyle={styles.imageStyle}
         style={styles.backgroundImage}
       />
@@ -68,14 +138,14 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
           resizeMode="contain"
         />
         <View style={{ gap: verticalScale(4) }}>
-          <CustomText fontFamily="light">{title}</CustomText>
+          <CustomText fontFamily="light">{track?.title}</CustomText>
         </View>
         <CustomText fontFamily="semiBold" type="title">
-          {artist}
+          {track?.artist}
         </CustomText>
         <TrackPlayer
-          currentTrackName={title}
-          currentTrackPath="https://samplelib.com/lib/preview/mp3/sample-15s.mp3"
+          handleNextTrack={handleNextTrack}
+          handlePreviousTrack={handlePreviousTrack}
         />
       </View>
     </SafeAreaView>

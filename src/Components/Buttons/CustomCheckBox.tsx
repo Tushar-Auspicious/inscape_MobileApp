@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import COLORS from "../../Utilities/Colors";
 import { verticalScale } from "../../Utilities/Metrics";
 import ICONS from "../../Assets/icons";
+import CustomIcon from "../CustomIcon";
 
 type CustomCheckBoxProps = {
   isChecked: boolean;
@@ -37,9 +38,7 @@ const CustomCheckBox: FC<CustomCheckBoxProps> = ({
         },
       ]}
     >
-      {isChecked && (
-        <Image source={ICONS.tickIcon} style={{ height: 15, width: 15 }} />
-      )}
+      {isChecked && <CustomIcon Icon={ICONS.tickIcon} height={15} width={15} />}
     </TouchableOpacity>
   );
 };

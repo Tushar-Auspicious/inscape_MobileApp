@@ -1,5 +1,6 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   ImageBackground,
@@ -11,26 +12,98 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import {
+  default as Player,
+  default as TrackPlayer,
+  useActiveTrack,
+  useIsPlaying,
+  useProgress,
+} from "react-native-track-player";
 import ICONS from "../../Assets/icons";
 import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
+import { TrackList } from "../../Seeds/PlayerTracks";
 import { PlayerListProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
-import { hp } from "../../Utilities/Metrics";
-import styles from "./style";
 import { getGreeting } from "../../Utilities/Helpers";
+import { hp } from "../../Utilities/Metrics";
+import { useSetupPlayer } from "../Player";
+import styles from "./style";
+import { useStopPlaybackOnBackground } from "../../Components/TrackPlayer";
 
 const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { position, duration, buffered } = useProgress();
+  const { playing } = useIsPlaying();
+  const isPlayerReady = useSetupPlayer();
+  const track = useActiveTrack();
 
-  const handleGoToPLayer = () => {
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+
+  const playTrack = async (index: number) => {
+    if (index < 0 || index >= TrackList.length) return; // Prevent out-of-bounds errors
+
+    setCurrentTrackIndex(index); // Update index
+    const newTrack = TrackList[index];
+
+    await TrackPlayer.reset(); // Reset queue before adding new track
+    await TrackPlayer.add([newTrack]); // Add the new track
+    await TrackPlayer.play(); // Start playing
+  };
+
+  const handleNextTrack = () => {
+    if (currentTrackIndex < TrackList.length - 1) {
+      playTrack(currentTrackIndex + 1);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Oops",
+        text2: "No next track available",
+      });
+    }
+  };
+
+  const handlePreviousTrack = () => {
+    if (currentTrackIndex > 0) {
+      playTrack(currentTrackIndex - 1);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Oops",
+        text2: "No previous track available",
+      });
+    }
+  };
+
+  const handleGoToPLayer = async (track: any) => {
+    const trackIndex = TrackList.findIndex((t) => t.id === track.id); // Find index of selected track
+    setCurrentTrackIndex(trackIndex); // this is for this page mini player
+
     navigation.navigate("player", {
-      img: "https://s3-alpha-sig.figma.com/img/a4a0/2628/cabd302ddee9cc5565d23c4c13f71025?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=Au~eVSsLWRALf3h90BUuA-omOYOwLSip-CIgk8WmzeXMJGkQcUPjtA-6EH4z4iPrKyeZVNJ9VWtGky4Bacsf4i-7~a3WzaPIzgBedgUmbD7jCxU2dJG4LytdSDiqaqlLSGSW1sxHfygsTLlq3czuW4XJKYbFpswyS6MSOSBMrKkeuW6gYSm5MgGGR4plMNPo8kyWITaUk9d3x-mYyGifcN2UtpnKtXoqk947dmXFctLh3P53ChTnkDa4ubSXsAdH~AxHebS317skrOvCmDXD1YSKhAQaj3VP-LkViHp8w505tPUldbJ~-zbtIA9nOUMV2xyKbYvSdvUrUG~P5yL~9g__",
-      artist: "juice world",
-      title: "Lucid Dreams",
+      trackList: TrackList, // Pass full TrackList
+      currentTrackIndex: trackIndex, // Pass current index
     });
   };
+
+  useStopPlaybackOnBackground();
+
+  if (!isPlayerReady) {
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: COLORS.darkBlue,
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100%",
+        }}
+      >
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -79,11 +152,11 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
 
         <View>
           <FlatList
-            data={Array.from({ length: 10 })}
+            data={TrackList}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => {
+            renderItem={({ item, index }) => {
               return (
                 <View
                   style={[
@@ -94,7 +167,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
                   ]}
                 >
                   <ImageBackground
-                    source={IMAGES.pinkBg}
+                    source={{ uri: item.artwork }}
                     style={styles.cardImage}
                     imageStyle={styles.cardImageStyle}
                   >
@@ -106,14 +179,14 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
                       />
                       <View style={styles.cardTextCont}>
                         <CustomText type="subTitle" color={COLORS.darkPink}>
-                          Universal Mantras
+                          {item.title}
                         </CustomText>
                         <CustomText type="small" color={COLORS.darkPink}>
                           7 mantras for your for happy life balance
                         </CustomText>
                       </View>
                       <TouchableOpacity
-                        onPress={handleGoToPLayer}
+                        onPress={() => handleGoToPLayer(item)}
                         style={styles.cardPlayButton}
                       >
                         <CustomIcon
@@ -130,35 +203,57 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
           />
         </View>
 
-        <View style={styles.footerCont}>
-          <View style={styles.footerContent}>
-            <View style={styles.footerLeftCont}>
-              <Image source={IMAGES.pinkBg} style={styles.footerLeftImage} />
-              <CustomText>Cracking Fire</CustomText>
+        {track ? (
+          <View style={styles.footerCont}>
+            <View style={styles.footerContent}>
+              <View style={styles.footerLeftCont}>
+                <Image
+                  source={{ uri: track?.artwork }}
+                  style={styles.footerLeftImage}
+                />
+                <CustomText>{track?.title}</CustomText>
+              </View>
+
+              <View style={styles.footerRight}>
+                <CustomIcon
+                  onPress={handlePreviousTrack}
+                  Icon={ICONS.playPreviousIcon}
+                  height={15}
+                  width={15}
+                />
+                <CustomIcon
+                  onPress={playing ? Player.pause : Player.play}
+                  Icon={playing ? ICONS.pauseIcon : ICONS.playIcon}
+                  height={14}
+                  width={14}
+                />
+                <CustomIcon
+                  onPress={handleNextTrack}
+                  Icon={ICONS.playNextIcon}
+                  height={15}
+                  width={15}
+                />
+              </View>
             </View>
 
-            <View style={styles.footerRight}>
-              <CustomIcon
-                Icon={ICONS.playPreviousIcon}
-                height={15}
-                width={15}
+            <View style={styles.footerProgressBar}>
+              <View
+                style={[
+                  styles.footerProgressComplete,
+                  {
+                    width: `${
+                      (position /
+                        (Platform.OS === "android" ? duration : buffered)) *
+                      100
+                    }%`,
+                  },
+                ]}
               />
-              <CustomIcon Icon={ICONS.playIcon} height={20} width={20} />
-              <CustomIcon Icon={ICONS.playNextIcon} height={15} width={15} />
             </View>
           </View>
-
-          <View style={styles.footerProgressBar}>
-            <View
-              style={[
-                styles.footerProgressComplete,
-                {
-                  width: "60%",
-                },
-              ]}
-            />
-          </View>
-        </View>
+        ) : (
+          <View style={styles.footerCont}></View>
+        )}
       </View>
     </SafeAreaView>
   );

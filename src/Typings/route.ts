@@ -1,5 +1,6 @@
 import { NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { TrackData } from "../PlayerServices/QueueInitialTrackService";
 
 export type RootStackParams = {
   authStack: NavigatorScreenParams<AuthStackParams>;
@@ -27,7 +28,10 @@ export type MainStackParams = {
   settingsTermsAndConditions: undefined;
   settingsPrivacyPolicy: undefined;
   playerList: undefined;
-  player: { title: string; artist: string; img: string };
+  player: {
+    trackList: TrackData[]; // Pass full TrackList
+    currentTrackIndex: number;
+  };
 };
 
 export type BottomTabParams = {

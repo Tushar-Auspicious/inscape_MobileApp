@@ -88,7 +88,7 @@ const CustomInput: FC<CustomInputProps> = ({
             style={styles.iconContainer} // Style for the icon container
             onPress={togglePasswordVisibility} // Toggle visibility on icon press
           >
-            <Image source={ICONS.eyesOff} style={{ height: 20, width: 20 }} />
+            <CustomIcon Icon={ICONS.eyeoffIcon} height={20} width={20} />
           </TouchableOpacity>
         )}
 

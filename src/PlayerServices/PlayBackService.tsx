@@ -48,20 +48,12 @@ export async function PlaybackService() {
     console.log("Event.PlaybackActiveTrackChanged", event);
   });
 
-  TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, (event) => {
-    console.log("Event.PlaybackProgressUpdated", event);
-  });
-
   TrackPlayer.addEventListener(Event.PlaybackPlayWhenReadyChanged, (event) => {
     console.log("Event.PlaybackPlayWhenReadyChanged", event);
   });
 
   TrackPlayer.addEventListener(Event.PlaybackState, (event) => {
     console.log("Event.PlaybackState", event);
-  });
-
-  TrackPlayer.addEventListener(Event.PlaybackMetadataReceived, (event) => {
-    console.log("[Deprecated] Event.PlaybackMetadataReceived", event);
   });
 
   TrackPlayer.addEventListener(Event.MetadataChapterReceived, (event) => {

@@ -1,31 +1,33 @@
-import Home from "./Home.svg";
-import HomeSolid from "./Home-solid.svg";
-import Discover from "./Discover.svg";
-import DiscoverSolid from "./Discover-solid.svg";
-import Search from "./Search.svg";
-import SearchSolid from "./Search-solid.svg";
-import Settings from "./Settings.svg";
-import SettingsSolid from "./Settings-solid.svg";
-import SearchWhite from "./search-white.svg";
-import Clock from "./clock.svg";
-import Star from "./star.svg";
-import ClockBlue from "./clock-blue.svg";
 import BackArrow from "./BackArrow.svg";
+import DiscoverSolid from "./Discover-solid.svg";
+import Discover from "./Discover.svg";
 import Filter from "./Filter.svg";
-import RightArrow from "./rightIcon.svg";
-import maleIcon from './maleIcon.svg';
-import femaleIcon from './femaleIcon.svg';
-import otherIcon from './otherIcon.svg';
-import downArrowIcon from './downArrow.svg';
-import upArrowIcon from './upArrow.svg';
+import HomeSolid from "./Home-solid.svg";
+import Home from "./Home.svg";
+import SearchSolid from "./Search-solid.svg";
+import Search from "./Search.svg";
+import SettingsSolid from "./Settings-solid.svg";
+import Settings from "./Settings.svg";
+import tickIcon from "./check.svg";
+import ClockBlue from "./clock-blue.svg";
+import Clock from "./clock.svg";
+import crossIcon from "./crossIcon.svg";
+import downArrowIcon from "./downArrow.svg";
+import downloadIcon from "./download.svg";
 import emptyDataImage from "./emptyDataImage.svg";
-import playIcon from "./play.svg";
+import eyeoffIcon from "./eye-off.svg";
+import femaleIcon from "./femaleIcon.svg";
+import maleIcon from "./maleIcon.svg";
+import otherIcon from "./otherIcon.svg";
 import pauseIcon from "./pause.svg";
+import playIcon from "./play.svg";
 import playNextIcon from "./playNext.svg";
 import playPreviousIcon from "./playPrevious.svg";
-import downloadIcon from "./download.svg";
+import RightArrow from "./rightIcon.svg";
+import SearchWhite from "./search-white.svg";
 import shuffleIcon from "./shuffle.svg";
-import crossIcon from "./crossIcon.svg";
+import Star from "./star.svg";
+import upArrowIcon from "./upArrow.svg";
 
 const ICONS = {
   Home,
@@ -56,10 +58,8 @@ const ICONS = {
   downloadIcon,
   shuffleIcon,
   crossIcon,
-
-  // crossIcon: require("./crossIcon.png"),
-  tickIcon: require("./check.png"),
-  eyesOff: require("./eye-off.png"),
+  tickIcon,
+  eyeoffIcon,
 };
 
 export default ICONS;

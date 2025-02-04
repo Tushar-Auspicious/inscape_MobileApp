@@ -18,21 +18,30 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
           data={songsDownloaded}
           contentContainerStyle={styles.flatListCont}
           keyExtractor={(item, index) => item.title + index.toString()}
-          renderItem={({ item }) => (
-            <SessionCard
-              imageUrl={item.imageUrl}
-              title={item.title}
-              duration={item.duration}
-              level={item.level}
-              onPress={() =>
-                navigation.navigate("player", {
-                  artist: item.level,
-                  img: item.imageUrl,
-                  title: item.title,
-                })
-              }
-            />
-          )}
+          renderItem={({ item }) => {
+            const trackIndex = songsDownloaded.findIndex(
+              (t) => t.id === item.id
+            );
+            return (
+              <SessionCard
+                imageUrl={item.imageUrl}
+                title={item.title}
+                duration={item.duration}
+                level={item.level}
+                onPress={() =>
+                  navigation.navigate("player", {
+                    trackList: songsDownloaded.map((item) => ({
+                      artist: item.title,
+                      artwork: item.imageUrl,
+                      title: item.title,
+                      url: item.url,
+                    })),
+                    currentTrackIndex: trackIndex,
+                  })
+                }
+              />
+            );
+          }}
         />
       </View>
     </SafeAreaView>

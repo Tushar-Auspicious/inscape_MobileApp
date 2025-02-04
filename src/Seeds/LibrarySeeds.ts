@@ -4,72 +4,81 @@ const songsDownloaded = [
     title: "Lion's breath",
     duration: "02:27 min",
     level: "Beginner",
+    url: "https://samplelib.com/lib/preview/mp3/sample-15s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/5075/aee1/4a4a32584307fd3265238217290ea6d0?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=GrL8u8ZFdzsGKnIFGrlo2Ysb76HxVe4cLT6tdEDXRC8SS5Mj4uHxS8R8eODjAxM6rz7U4ToyvqSsPL4Rs2yITcT4Vpw9SZ5taFTFYkLZBhyitXKvdoAlZHeVziG2S8tfIhnTOfaM21bKJr40zhe91bRdD1OPJp4oHYQgKff9Zdq9veYfeIKW2xpZojU25S-5er~ibkNBjKhiz~voGbtpJb4VXGWBWpdlCF2m-ZUy75c3ShJvRzSk4qhbY9VrrI~kX7aUJ-lQwIdk6xjQdmz472OpCmUGkWe8sXyuzMhxm~UGDx~iNlNVmlKIOFeJEtp~CUovb~nrMaoTlrfKf4bMQw__", // Replace with actual image URL
+      "https://plus.unsplash.com/premium_photo-1682125765650-8a7baa2d4bf4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDV8fG11c2ljfGVufDB8fDB8fHww",
   },
   {
     id: "2",
     title: "Sitali breath",
     duration: "11 min",
     level: "Beginner",
+    url: "https://samplelib.com/lib/preview/mp3/sample-12s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/400d/861a/100901d40d386ebc86e1ba1808f025c8?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=lJT7PWdE5qGpw1TXV1I5AS0QMXutBnkLQAh250FgzhDUWoPh5369OJGzYlXC2~rI5AbkzHadDIY9CXYO1arIhUFGbJZeRSL533knfz8kUQWNTTYhiG6ReZh1NUhpRE2TuipeJbrsGbwarvTSIIGCGVtFTkfwKZ1W0O4HbuwtCsSrcHtEXALm9t~elbjMfqR7kQUegQVOoTGnIqPgJOfgxLNDedtcB99rnb8LgIl~HB-h-ZMNHvv5axLw7NiJyVgHhJWVyCMdOiuvR1Gih-L67Slrt5UDG6PsoGu3kwyuLJbyRXFpqEb4RvtJyqULbHvaYJn~MpD6atCpyN6H34QnMQ__", // Replace with actual image URL
+      "https://images.unsplash.com/photo-1445375011782-2384686778a0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDB8fG11c2ljfGVufDB8fDB8fHww",
   },
   {
     id: "3",
     title: "Diaphragmatic breathing",
     duration: "02:00 min",
     level: "Intermediate",
+    url: "https://samplelib.com/lib/preview/mp3/sample-9s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/7ad5/d22d/1577c913655d7edcf2a349274cc7c991?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=QDZHwbSvTKGMakFz6WV9SDKn03guEYXOuBnAe1n4fkKbtfxaVPA1m9HvSGS6frh2ehZo3i2Z-xpjnEv01avqxNvkEM8wfITzQ3RNdOkR9rSdx0vOpL-Y3F3vSf6~hAQwJBe7Jn1ktXfEdToL75VB8jF5SH0RxZy9x5Uk4rx1x8buQq3V-ilFg3lGpMuLZ5K-AqS-vRrCFGrjCoASKKnHSIERnCqFscYHqPWJhVGxiJjZtzz7TKheM~95y2q7Vo7IzG0veaOFfuFBQ9EaZrAZlR1bEWjC7ElyOXREbTel9O~fYzW1CExxifOsXgA2uMu-ONHp-WvVulpQgvAufp3QbA__", // Replace with actual image URL
+      "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDN8fG11c2ljfGVufDB8fDB8fHww",
   },
   {
     id: "4",
     title: "Sitali breath",
     duration: "11 min",
     level: "Beginner",
+    url: "https://samplelib.com/lib/preview/mp3/sample-3s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/5075/aee1/4a4a32584307fd3265238217290ea6d0?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=GrL8u8ZFdzsGKnIFGrlo2Ysb76HxVe4cLT6tdEDXRC8SS5Mj4uHxS8R8eODjAxM6rz7U4ToyvqSsPL4Rs2yITcT4Vpw9SZ5taFTFYkLZBhyitXKvdoAlZHeVziG2S8tfIhnTOfaM21bKJr40zhe91bRdD1OPJp4oHYQgKff9Zdq9veYfeIKW2xpZojU25S-5er~ibkNBjKhiz~voGbtpJb4VXGWBWpdlCF2m-ZUy75c3ShJvRzSk4qhbY9VrrI~kX7aUJ-lQwIdk6xjQdmz472OpCmUGkWe8sXyuzMhxm~UGDx~iNlNVmlKIOFeJEtp~CUovb~nrMaoTlrfKf4bMQw__", // Replace with actual image URL
+      "https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDR8fG11c2ljfGVufDB8fDB8fHww",
   },
   {
     id: "5",
     title: "Diaphragmatic breathing",
     duration: "02:00 min",
     level: "Intermediate",
+    url: "https://samplelib.com/lib/preview/mp3/sample-6s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/400d/861a/100901d40d386ebc86e1ba1808f025c8?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=lJT7PWdE5qGpw1TXV1I5AS0QMXutBnkLQAh250FgzhDUWoPh5369OJGzYlXC2~rI5AbkzHadDIY9CXYO1arIhUFGbJZeRSL533knfz8kUQWNTTYhiG6ReZh1NUhpRE2TuipeJbrsGbwarvTSIIGCGVtFTkfwKZ1W0O4HbuwtCsSrcHtEXALm9t~elbjMfqR7kQUegQVOoTGnIqPgJOfgxLNDedtcB99rnb8LgIl~HB-h-ZMNHvv5axLw7NiJyVgHhJWVyCMdOiuvR1Gih-L67Slrt5UDG6PsoGu3kwyuLJbyRXFpqEb4RvtJyqULbHvaYJn~MpD6atCpyN6H34QnMQ__", // Replace with actual image URL
+      "https://images.unsplash.com/photo-1495305379050-64540d6ee95d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDd8fG11c2ljfGVufDB8fDB8fHww",
   },
   {
     id: "6",
     title: "Lion's breath",
     duration: "02:27 min",
     level: "Beginner",
+    url: "https://samplelib.com/lib/preview/mp3/sample-9s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/5075/aee1/4a4a32584307fd3265238217290ea6d0?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=GrL8u8ZFdzsGKnIFGrlo2Ysb76HxVe4cLT6tdEDXRC8SS5Mj4uHxS8R8eODjAxM6rz7U4ToyvqSsPL4Rs2yITcT4Vpw9SZ5taFTFYkLZBhyitXKvdoAlZHeVziG2S8tfIhnTOfaM21bKJr40zhe91bRdD1OPJp4oHYQgKff9Zdq9veYfeIKW2xpZojU25S-5er~ibkNBjKhiz~voGbtpJb4VXGWBWpdlCF2m-ZUy75c3ShJvRzSk4qhbY9VrrI~kX7aUJ-lQwIdk6xjQdmz472OpCmUGkWe8sXyuzMhxm~UGDx~iNlNVmlKIOFeJEtp~CUovb~nrMaoTlrfKf4bMQw__", // Replace with actual image URL
+      "https://images.unsplash.com/photo-1476136236990-838240be4859?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTR8fG11c2ljfGVufDB8fDB8fHww",
   },
   {
     id: "7",
     title: "Diaphragmatic breathing",
     duration: "02:00 min",
     level: "Intermediate",
+    url: "https://samplelib.com/lib/preview/mp3/sample-12s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/7ad5/d22d/1577c913655d7edcf2a349274cc7c991?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=QDZHwbSvTKGMakFz6WV9SDKn03guEYXOuBnAe1n4fkKbtfxaVPA1m9HvSGS6frh2ehZo3i2Z-xpjnEv01avqxNvkEM8wfITzQ3RNdOkR9rSdx0vOpL-Y3F3vSf6~hAQwJBe7Jn1ktXfEdToL75VB8jF5SH0RxZy9x5Uk4rx1x8buQq3V-ilFg3lGpMuLZ5K-AqS-vRrCFGrjCoASKKnHSIERnCqFscYHqPWJhVGxiJjZtzz7TKheM~95y2q7Vo7IzG0veaOFfuFBQ9EaZrAZlR1bEWjC7ElyOXREbTel9O~fYzW1CExxifOsXgA2uMu-ONHp-WvVulpQgvAufp3QbA__", // Replace with actual image URL
+      "https://images.unsplash.com/photo-1535992165812-68d1861aa71e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjB8fG11c2ljfGVufDB8fDB8fHww",
   },
   {
     id: "8",
     title: "Sitali breath",
     duration: "11 min",
     level: "Beginner",
+    url: "https://samplelib.com/lib/preview/mp3/sample-15s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/5075/aee1/4a4a32584307fd3265238217290ea6d0?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=GrL8u8ZFdzsGKnIFGrlo2Ysb76HxVe4cLT6tdEDXRC8SS5Mj4uHxS8R8eODjAxM6rz7U4ToyvqSsPL4Rs2yITcT4Vpw9SZ5taFTFYkLZBhyitXKvdoAlZHeVziG2S8tfIhnTOfaM21bKJr40zhe91bRdD1OPJp4oHYQgKff9Zdq9veYfeIKW2xpZojU25S-5er~ibkNBjKhiz~voGbtpJb4VXGWBWpdlCF2m-ZUy75c3ShJvRzSk4qhbY9VrrI~kX7aUJ-lQwIdk6xjQdmz472OpCmUGkWe8sXyuzMhxm~UGDx~iNlNVmlKIOFeJEtp~CUovb~nrMaoTlrfKf4bMQw__", // Replace with actual image URL
+      "https://images.unsplash.com/photo-1504898770365-14faca6a7320?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDN8fG11c2ljfGVufDB8fDB8fHww",
   },
   {
     id: "9",
     title: "Diaphragmatic breathing",
     duration: "02:00 min",
     level: "Intermediate",
+    url: "https://samplelib.com/lib/preview/mp3/sample-19s.mp3",
     imageUrl:
-      "https://s3-alpha-sig.figma.com/img/400d/861a/100901d40d386ebc86e1ba1808f025c8?Expires=1738540800&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=lJT7PWdE5qGpw1TXV1I5AS0QMXutBnkLQAh250FgzhDUWoPh5369OJGzYlXC2~rI5AbkzHadDIY9CXYO1arIhUFGbJZeRSL533knfz8kUQWNTTYhiG6ReZh1NUhpRE2TuipeJbrsGbwarvTSIIGCGVtFTkfwKZ1W0O4HbuwtCsSrcHtEXALm9t~elbjMfqR7kQUegQVOoTGnIqPgJOfgxLNDedtcB99rnb8LgIl~HB-h-ZMNHvv5axLw7NiJyVgHhJWVyCMdOiuvR1Gih-L67Slrt5UDG6PsoGu3kwyuLJbyRXFpqEb4RvtJyqULbHvaYJn~MpD6atCpyN6H34QnMQ__", // Replace with actual image URL
+      "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTJ8fG11c2ljfGVufDB8fDB8fHww",
   },
 ];
 
