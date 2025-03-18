@@ -1,12 +1,13 @@
-import React, { FC } from 'react';
-import { TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import ICONS from '../../Assets/icons';
-import CustomIcon from '../../Components/CustomIcon';
-import { CustomText } from '../../Components/CustomText';
-import { SettingsPrivacyPolicyProps } from '../../Typings/route';
-import styles from './style';
+import React, { FC } from "react";
+import { ScrollView, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import ICONS from "../../Assets/icons";
+import CustomIcon from "../../Components/CustomIcon";
+import { CustomText } from "../../Components/CustomText";
+import { SettingsPrivacyPolicyProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
+import { verticalScale } from "../../Utilities/Metrics";
+import styles from "./style";
 
 const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
   navigation,
@@ -27,25 +28,21 @@ const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
           </TouchableOpacity>
         )}
       </View>
-      <View>
-        <CustomText
-          fontFamily="regular"
-          type="title"
-          color={COLORS.white}
-          style={{ marginTop: 30 }}
-        >
-          1. Acceptance of Terms
+      <ScrollView contentContainerStyle={{ paddingBottom: verticalScale(10) }}>
+        <CustomText fontFamily="regular" type="title" color={COLORS.white}>
+          1. Introduction
         </CustomText>
         <CustomText
           fontFamily="regular"
           type="small"
           color={COLORS.white}
-          style={{ textAlign: "justify", marginTop: 15, lineHeight: 16.5 }}
+          style={{ marginTop: 15, lineHeight: 16.5 }}
         >
-          By downloading, installing, accessing, or using [Your Mobile App
-          Name], you agree to comply with and be bound by these terms and
-          conditions, along with our Privacy Policy. If you do not agree with
-          any part of these terms, you may not use our app.
+          This Privacy Policy outlines how Inscape ("the Company") collects,
+          uses, discloses, and protects the personal information of users of the
+          Sawtiyat application ("the App"). By using the App, you consent to the
+          collection and use of your personal information as described in this
+          Privacy Policy.
         </CustomText>
         <CustomText
           fontFamily="regular"
@@ -53,18 +50,20 @@ const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
           color={COLORS.white}
           style={{ marginTop: 25 }}
         >
-          2. License
+          2. Information We Collect
         </CustomText>
         <CustomText
           fontFamily="regular"
           type="small"
           color={COLORS.white}
-          style={{ textAlign: "justify", marginTop: 15, lineHeight: 16.5 }}
+          style={{ marginTop: 15, lineHeight: 16.5 }}
         >
-          We grant you a non-exclusive, non-transferable, limited license to use
-          [Your Mobile App Name] solely for your personal, non-commercial
-          purposes, subject to these terms and the applicable app store's terms
-          of service.
+          Email address: We collect your email address to create and manage your
+          account, send you important notifications about your account, and
+          communicate with you regarding the App.
+          {"\n\n"}
+          Password: We collect your chosen password to secure your account and
+          authenticate your identity when you log in to the App.
         </CustomText>
         <CustomText
           fontFamily="regular"
@@ -72,20 +71,29 @@ const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
           color={COLORS.white}
           style={{ marginTop: 25 }}
         >
-          3. User Account
+          3. How We Use Your Information
         </CustomText>
         <CustomText
           fontFamily="regular"
           type="small"
           color={COLORS.white}
-          style={{ textAlign: "justify", marginTop: 15, lineHeight: 16.5 }}
+          style={{ marginTop: 15, lineHeight: 16.5, textAlign: "justify" }}
         >
-          Some features of [Your Mobile App Name] may require you to create an
-          account. You are responsible for maintaining the confidentiality of
-          your account information and for all activities that occur under your
-          account. You agree to provide accurate, current, and complete
-          information during the registration process and to update such
-          information to keep it accurate, current, and complete.
+          To create and manage your account.
+          {"\n"}
+          To provide you with access to the features and functionalities of the
+          App.
+          {"\n"}
+          To communicate with you about your account, updates to the App, and
+          promotional offers.
+          {"\n"}
+          To personalize your experience with the App and provide tailored
+          content and recommendations.
+          {"\n"}
+          To improve the quality and usability of the App and develop new
+          features and functionalities.
+          {"\n"}
+          To comply with legal obligations and enforce our Terms and Conditions.
         </CustomText>
         <CustomText
           fontFamily="regular"
@@ -93,19 +101,49 @@ const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
           color={COLORS.white}
           style={{ marginTop: 25 }}
         >
-          4. Use of the App
+          4. Information Sharing and Disclosure
         </CustomText>
         <CustomText
           fontFamily="regular"
           type="small"
           color={COLORS.white}
-          style={{ textAlign: "justify", marginTop: 15, lineHeight: 16.5 }}
+          style={{ marginTop: 15, lineHeight: 16.5 }}
         >
-          You agree to use [Your Mobile App Name] only for lawful purposes and
-          in a manner consistent with all applicable local, national, and
-          international laws and regulations.
+          With service providers: We may share your information with third-party
+          service providers who assist us in operating the App, processing
+          payments, and delivering services to you.
+          {"\n\n"}
+          With affiliates: We may share your information with our affiliated
+          companies for marketing and promotional purposes, but we will not
+          share your information with third-party advertisers without your
+          consent.
+          {"\n\n"}
+          With legal authorities: We may disclose your information to comply
+          with legal obligations, respond to lawful requests from law
+          enforcement agencies, or protect the rights, property, or safety of
+          our users or others.
         </CustomText>
-      </View>
+        <CustomText
+          fontFamily="regular"
+          type="title"
+          color={COLORS.white}
+          style={{ marginTop: 25 }}
+        >
+          5. Data Security
+        </CustomText>
+        <CustomText
+          fontFamily="regular"
+          type="small"
+          color={COLORS.white}
+          style={{ marginTop: 15, lineHeight: 16.5 }}
+        >
+          We implement appropriate technical and organizational measures to
+          protect your personal information against unauthorized access,
+          disclosure, alteration, or destruction. However, no method of
+          transmission over the internet or electronic storage is 100% secure,
+          and we cannot guarantee the absolute security of your information.
+        </CustomText>
+      </ScrollView>
     </SafeAreaView>
   );
 };

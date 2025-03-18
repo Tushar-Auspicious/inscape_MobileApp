@@ -47,65 +47,55 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.main}>
-      <View style={styles.scrollContainer}>
-        <ImageBackground
-          source={IMAGES.pinkBg}
-          style={styles.backgroundImage}
-        />
-        <View style={styles.container}>
-          <Image
-            source={IMAGES.curvedView}
-            style={styles.curvedImage}
-            resizeMode="contain"
+      <View style={styles.container}>
+        <CustomText fontFamily="bold" type="title">
+          Settings
+        </CustomText>
+
+        <View style={{ marginVertical: verticalScale(20) }}>
+          {renderBars("My Account", () => navigation.navigate("myAccount"))}
+          <View
+            style={{
+              backgroundColor: COLORS.mixGreyBlue,
+              height: 1,
+              marginVertical: verticalScale(30),
+            }}
           />
           <CustomText fontFamily="bold" type="title">
-            Settings
+            Support
           </CustomText>
-
-          <View style={{ marginVertical: verticalScale(20) }}>
-            {renderBars("My Account", () => navigation.navigate("myAccount"))}
-            <View
-              style={{
-                backgroundColor: COLORS.mixGreyBlue,
-                height: 1,
-                marginVertical: verticalScale(20),
-              }}
-            />
-            <CustomText fontFamily="bold" type="title">
-              Support
-            </CustomText>
-            <View
-              style={{ gap: verticalScale(10), marginTop: verticalScale(15) }}
-            >
-              {renderBars("FAQ", () => navigation.navigate("Faq"))}
-              {renderBars("Privacy Policy", () =>
-                navigation.navigate("settingsPrivacyPolicy")
-              )}
-              {renderBars("Terms & Conditions", () =>
-                navigation.navigate("settingsTermsAndConditions")
-              )}
-            </View>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => sheetRef.current.open()}
-            activeOpacity={0.8}
+          <View
+            style={{ gap: verticalScale(10), marginTop: verticalScale(15) }}
           >
-            <CustomText
-              style={{ textDecorationLine: "underline" }}
-              fontFamily="bold"
-              type="subTitle"
+            {renderBars("FAQ", () => navigation.navigate("Faq"))}
+            {renderBars("Privacy Policy", () =>
+              navigation.navigate("settingsPrivacyPolicy")
+            )}
+            {renderBars("Terms & Conditions", () =>
+              navigation.navigate("settingsTermsAndConditions")
+            )}
+            <TouchableOpacity
+              style={{
+                paddingVertical: verticalScale(10),
+              }}
+              onPress={() => sheetRef.current.open()}
+              activeOpacity={0.8}
             >
-              Log out
-            </CustomText>
-          </TouchableOpacity>
+              <CustomText
+                style={{ textDecorationLine: "underline" }}
+                fontFamily="bold"
+              >
+                Log out
+              </CustomText>
+            </TouchableOpacity>
+          </View>
         </View>
-        <LogOutModal
-          sheetRef={sheetRef}
-          onLogout={handleLogout}
-          onCancel={handleCancel}
-        />
       </View>
+      <LogOutModal
+        sheetRef={sheetRef}
+        onLogout={handleLogout}
+        onCancel={handleCancel}
+      />
     </SafeAreaView>
   );
 };

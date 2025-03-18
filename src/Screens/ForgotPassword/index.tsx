@@ -1,35 +1,31 @@
-import React, { FC, useState } from "react";
-import {
-  Image,
-  KeyboardAvoidingView,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import ICONS from "../../Assets/icons";
-import CustomButton from "../../Components/Buttons/CustomButton";
-import CustomInput from "../../Components/CustomInput";
-import { CustomText } from "../../Components/CustomText";
-import { ForgotPasswordProps } from "../../Typings/route";
-import styles from "./style";
-import CustomIcon from "../../Components/CustomIcon";
+import React, {FC, useState} from 'react';
+import {TouchableOpacity, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import ICONS from '../../Assets/icons';
+import CustomButton from '../../Components/Buttons/CustomButton';
+import CustomIcon from '../../Components/CustomIcon';
+import CustomInput from '../../Components/CustomInput';
+import {CustomText} from '../../Components/CustomText';
+import {KeyboardAvoidingContainer} from '../../Components/KeyboardAvoidingComponent';
+import {ForgotPasswordProps} from '../../Typings/route';
+import styles from './style';
+import COLORS from '../../Utilities/Colors';
 
-const ForgotPassword: FC<ForgotPasswordProps> = ({ navigation }) => {
-  const [email, setEmail] = useState("");
+const ForgotPassword: FC<ForgotPasswordProps> = ({navigation}) => {
+  const [email, setEmail] = useState('');
 
   const handleContinue = () => {
-    navigation.navigate("createNewPassword");
+    navigation.navigate('createNewPassword');
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+    <KeyboardAvoidingContainer backgroundColor={COLORS.darkBlue}>
       <SafeAreaView style={styles.container}>
         {navigation.canGoBack() && (
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => navigation.goBack()}
-            style={styles.backArrowCont}
-          >
+            style={styles.backArrowCont}>
             <CustomIcon Icon={ICONS.BackArrow} width={15} height={15} />
           </TouchableOpacity>
         )}
@@ -56,7 +52,7 @@ const ForgotPassword: FC<ForgotPasswordProps> = ({ navigation }) => {
           style={styles.btn}
         />
       </SafeAreaView>
-    </KeyboardAvoidingView>
+    </KeyboardAvoidingContainer>
   );
 };
 

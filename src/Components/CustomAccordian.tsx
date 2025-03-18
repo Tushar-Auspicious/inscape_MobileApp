@@ -1,17 +1,24 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
-import COLORS from '../Utilities/Colors';
-import { CustomText } from './CustomText';
-import CustomIcon from './CustomIcon';
-import ICONS from '../Assets/icons';
-import { horizontalScale, verticalScale } from '../Utilities/Metrics';
+import React, { useCallback, useState } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  useSharedValue,
+  interpolate,
+  Extrapolate,
+} from "react-native-reanimated";
+import COLORS from "../Utilities/Colors";
+import { CustomText } from "./CustomText";
+import CustomIcon from "./CustomIcon";
+import ICONS from "../Assets/icons";
+import { horizontalScale, verticalScale } from "../Utilities/Metrics";
+
+const SPRING_CONFIG = {
+  damping: 15,
+  mass: 1,
+  stiffness: 150,
+};
 
 const CustomAccordion = ({
   title,
@@ -20,88 +27,122 @@ const CustomAccordion = ({
   title: string;
   content: string;
 }) => {
-  const [isOpen, setIsOpen] = useState(false); // State to track if the accordion is open
-  const [height, setHeight] = useState(new Animated.Value(0)); // Animated height
+  const [isOpen, setIsOpen] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
+  const animation = useSharedValue(0);
 
-  const toggleAccordion = () => {
+  const toggleAccordion = useCallback(() => {
     if (isOpen) {
-      // Collapse animation
-      Animated.timing(height, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start(() => setIsOpen(false));
+      animation.value = withSpring(0, SPRING_CONFIG);
     } else {
-      setIsOpen(true);
-      // Expand animation
-      Animated.timing(height, {
-        toValue: 100, // Adjust based on content size
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      animation.value = withSpring(1, SPRING_CONFIG);
     }
-  };
+    setIsOpen(!isOpen);
+  }, [isOpen, animation]);
+
+  const contentAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      height: interpolate(
+        animation.value,
+        [0, 1],
+        [0, contentHeight],
+        Extrapolate.CLAMP
+      ),
+      opacity: interpolate(
+        animation.value,
+        [0, 0.5, 1],
+        [0, 0.3, 1],
+        Extrapolate.CLAMP
+      ),
+    };
+  });
+
+  const iconAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          rotate: `${interpolate(
+            animation.value,
+            [0, 1],
+            [0, 180],
+            Extrapolate.CLAMP
+          )}deg`,
+        },
+      ],
+    };
+  });
+
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: withTiming(
+        isOpen ? COLORS.darkNavyBlue : "transparent",
+        { duration: 200 }
+      ),
+    };
+  });
 
   return (
     <View style={styles.container}>
-      {/* Accordion Header */}
-      <TouchableOpacity
-        onPress={toggleAccordion}
-        activeOpacity={0.8}
-        style={[
-          styles.header,
-          {
-            backgroundColor: isOpen ? COLORS.darkNavyBlue : 'transparent',
-          },
-        ]}
-      >
-        <CustomText fontFamily='medium'>{title}</CustomText>
+      <Animated.View style={[styles.header, headerAnimatedStyle]}>
+        <TouchableOpacity
+          onPress={toggleAccordion}
+          activeOpacity={0.8}
+          style={styles.headerContent}
+        >
+          <CustomText fontFamily="medium">{title}</CustomText>
+          <Animated.View style={iconAnimatedStyle}>
+            <CustomIcon Icon={ICONS.downArrowIcon} width={15} height={15} />
+          </Animated.View>
+        </TouchableOpacity>
+      </Animated.View>
 
-        <CustomIcon
-          Icon={isOpen ? ICONS.upArrowIcon : ICONS.downArrowIcon}
-          width={15}
-          height={15}
-        />
-      </TouchableOpacity>
-
-      {/* Accordion Content */}
-      {isOpen && (
-        <Animated.View style={[styles.content, { height }]}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <CustomText
-              fontFamily='light'
-              style={{ lineHeight: 19 }}
-            >
-              {content}
-            </CustomText>
-          </ScrollView>
-        </Animated.View>
-      )}
+      <Animated.View style={[styles.content, contentAnimatedStyle]}>
+        <View
+          style={styles.measureContainer}
+          onLayout={(event) => {
+            setContentHeight(event.nativeEvent.layout.height);
+          }}
+        >
+          <CustomText fontFamily="light" style={styles.contentText}>
+            {content}
+          </CustomText>
+        </View>
+      </Animated.View>
     </View>
   );
 };
 
-// Styles for the accordion
 const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
     borderWidth: 1,
     borderRadius: 10,
     borderColor: COLORS.white,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    borderTopLeftRadius: 9,
+    borderTopRightRadius: 9,
+  },
+  headerContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: verticalScale(16),
     paddingHorizontal: horizontalScale(16),
   },
   content: {
-    overflow: 'hidden',
+    overflow: "hidden",
+    backgroundColor: COLORS.darkNavyBlue,
+  },
+  measureContainer: {
+    position: "absolute",
+    width: "100%",
     paddingVertical: verticalScale(16),
     paddingHorizontal: horizontalScale(16),
-    backgroundColor: COLORS.darkNavyBlue,
+  },
+  contentText: {
+    lineHeight: 19,
   },
 });
 

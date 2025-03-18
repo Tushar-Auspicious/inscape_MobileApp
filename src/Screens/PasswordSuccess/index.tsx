@@ -14,11 +14,7 @@ const PasswordSuccess: FC<PasswordSuccessProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image
-        source={IMAGES.passwordSuccessImg}
-        style={styles.image}
-        resizeMode="contain"
-      />
+      <Image source={IMAGES.signInbackground} style={styles.image} />
       <View style={styles.textContainer}>
         <CustomText type="subHeading" fontFamily="bold">
           Success!

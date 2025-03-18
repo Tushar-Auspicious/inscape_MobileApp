@@ -1,15 +1,17 @@
-import React, { FC, useState } from "react";
-import { KeyboardAvoidingView, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {FC, useState} from 'react';
+import {TouchableOpacity, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import ICONS from '../../Assets/icons';
 import CustomButton from '../../Components/Buttons/CustomButton';
 import CustomIcon from '../../Components/CustomIcon';
 import CustomInput from '../../Components/CustomInput';
-import { CustomText } from '../../Components/CustomText';
-import { CreateNewPasswordProps } from '../../Typings/route';
+import {CustomText} from '../../Components/CustomText';
+import {KeyboardAvoidingContainer} from '../../Components/KeyboardAvoidingComponent';
+import {CreateNewPasswordProps} from '../../Typings/route';
 import styles from './style';
+import COLORS from '../../Utilities/Colors';
 
-const CreateNewPassword: FC<CreateNewPasswordProps> = ({ navigation }) => {
+const CreateNewPassword: FC<CreateNewPasswordProps> = ({navigation}) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -18,30 +20,19 @@ const CreateNewPassword: FC<CreateNewPasswordProps> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior='padding'
-      style={{ flex: 1 }}
-    >
+    <KeyboardAvoidingContainer backgroundColor={COLORS.darkBlue}>
       <SafeAreaView style={styles.container}>
         {navigation.canGoBack() && (
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => navigation.goBack()}
-            style={styles.backArrowCont}
-          >
-            <CustomIcon
-              Icon={ICONS.BackArrow}
-              height={15}
-              width={15}
-            />
+            style={styles.backArrowCont}>
+            <CustomIcon Icon={ICONS.BackArrow} height={15} width={15} />
           </TouchableOpacity>
         )}
 
         <View style={styles.textContainer}>
-          <CustomText
-            type='subHeading'
-            fontFamily='bold'
-          >
+          <CustomText type="subHeading" fontFamily="bold">
             Create New Password
           </CustomText>
           <CustomText>
@@ -54,25 +45,25 @@ const CreateNewPassword: FC<CreateNewPasswordProps> = ({ navigation }) => {
           <CustomInput
             value={newPassword}
             onChangeText={setNewPassword}
-            placeholder='New Password'
-            type='password'
+            placeholder="New Password"
+            type="password"
           />
 
           <CustomInput
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            placeholder='Confirm New Password'
-            type='password'
+            placeholder="Confirm New Password"
+            type="password"
           />
         </View>
 
         <CustomButton
-          title='Reset Password'
+          title="Reset Password"
           onPress={handleResetPassword}
           style={styles.btn}
         />
       </SafeAreaView>
-    </KeyboardAvoidingView>
+    </KeyboardAvoidingContainer>
   );
 };
 

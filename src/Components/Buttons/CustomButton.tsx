@@ -1,8 +1,8 @@
-import React, { FC } from "react";
-import { StyleSheet, TouchableOpacity, ViewStyle } from "react-native";
-import COLORS from "../../Utilities/Colors";
-import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
-import { CustomText } from "../CustomText";
+import React, {FC} from 'react';
+import {StyleSheet, TouchableOpacity, ViewStyle} from 'react-native';
+import COLORS from '../../Utilities/Colors';
+import {horizontalScale, verticalScale} from '../../Utilities/Metrics';
+import {CustomText} from '../CustomText';
 
 type CustomButtonProps = {
   title: string;
@@ -12,13 +12,13 @@ type CustomButtonProps = {
   style?: ViewStyle;
   disabled?: boolean;
   textSize?:
-    | "heading"
-    | "subHeading"
-    | "title"
-    | "subTitle"
-    | "default"
-    | "small"
-    | "extraSmall";
+    | 'heading'
+    | 'subHeading'
+    | 'title'
+    | 'subTitle'
+    | 'default'
+    | 'small'
+    | 'extraSmall';
 };
 
 const CustomButton: FC<CustomButtonProps> = ({
@@ -27,7 +27,7 @@ const CustomButton: FC<CustomButtonProps> = ({
   backgroundColor = COLORS.darkNavyBlue,
   textColor = COLORS.white,
   style,
-  textSize = "subTitle",
+  textSize = 'subTitle',
   disabled = false,
 }) => {
   return (
@@ -36,11 +36,10 @@ const CustomButton: FC<CustomButtonProps> = ({
       activeOpacity={0.7}
       style={[
         styles.button,
-        { backgroundColor: backgroundColor, opacity: disabled ? 0.5 : 1 },
+        {backgroundColor: backgroundColor, opacity: disabled ? 0.5 : 1},
         style,
       ]}
-      onPress={onPress}
-    >
+      onPress={onPress}>
       <CustomText type={textSize} color={textColor} fontFamily="bold">
         {title}
       </CustomText>
@@ -55,8 +54,7 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(22),
     paddingHorizontal: horizontalScale(20),
     borderRadius: verticalScale(12),
-    alignItems: "center",
-    justifyContent: "center",
-    marginVertical: verticalScale(5),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

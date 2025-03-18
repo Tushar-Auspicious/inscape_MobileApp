@@ -1,21 +1,21 @@
-import React, { FC, useRef, useState } from "react";
-import { FlatList, ScrollView, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import ICONS from "../../Assets/icons";
-import ContentCard from "../../Components/Cards/ContentCard";
-import CustomIcon from "../../Components/CustomIcon";
-import CustomInput from "../../Components/CustomInput";
-import FilterModalSheet from "../../Components/Modals/FilterModal";
-import { TrendingData } from "../../Seeds/HomeSeeds";
-import { SearchHomeProps } from "../../Typings/route";
-import styles from "./style";
+import React, {FC, useRef, useState} from 'react';
+import {FlatList, ScrollView, TouchableOpacity, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import ICONS from '../../Assets/icons';
+import ContentCard from '../../Components/Cards/ContentCard';
+import CustomIcon from '../../Components/CustomIcon';
+import CustomInput from '../../Components/CustomInput';
+import FilterModalSheet from '../../Components/Modals/FilterModal';
+import {TrendingData} from '../../Seeds/HomeSeeds';
+import {SearchHomeProps} from '../../Typings/route';
+import styles from './style';
 
-const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
+const SearchHome: FC<SearchHomeProps> = ({navigation}) => {
   const filterSheetRef = useRef<any>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchClick = () => {
-    navigation.navigate("searchHome");
+    navigation.navigate('searchHome');
   };
 
   const handleFilterPress = () => {
@@ -30,12 +30,12 @@ const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
     }
   };
 
-  const handleCardPress = () => {
-    navigation.navigate("categories");
+  const handleCardPress = (item: any) => {
+    navigation.navigate('categories', {data: item});
   };
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       <View style={styles.mainHeader}>
         <TouchableOpacity onPress={handleSearchClick}>
           <CustomIcon
@@ -51,7 +51,7 @@ const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
           isFilterIcon
           type="search"
           placeholder="Search..."
-          style={{ flex: 1 }}
+          style={{flex: 1}}
           onFilterPress={handleFilterPress}
           heigth={44}
         />
@@ -59,19 +59,20 @@ const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        nestedScrollEnabled={true}
-      >
+        nestedScrollEnabled={true}>
         <FlatList
           data={TrendingData}
           contentContainerStyle={styles.list}
           keyExtractor={(item, index) => item.title + index.toString()}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <ContentCard
               title={item.title}
               rating={item.rating}
               duration={item.duration}
               imageUrl={item.imageUrl}
-              onPress={handleCardPress}
+              onPress={() => {
+                handleCardPress(item);
+              }}
             />
           )}
         />
@@ -79,8 +80,12 @@ const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
       <FilterModalSheet
         sheetRef={filterSheetRef}
         onClose={onCloseFilterSheet}
-        clearFilter={() => {}}
-        onPressApply={() => {}}
+        clearFilter={() => {
+          onCloseFilterSheet();
+        }}
+        onPressApply={() => {
+          onCloseFilterSheet();
+        }}
       />
     </SafeAreaView>
   );

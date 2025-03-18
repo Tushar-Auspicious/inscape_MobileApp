@@ -24,12 +24,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.darkBlue,
     width: wp(100),
-    position: "absolute",
-    bottom: 0,
     borderTopRightRadius: 70,
-    paddingTop: verticalScale(50),
-    paddingBottom: verticalScale(50),
+    paddingTop: verticalScale(80),
     paddingHorizontal: horizontalScale(20),
+    gap: verticalScale(30),
   },
 
   curvedImage: {

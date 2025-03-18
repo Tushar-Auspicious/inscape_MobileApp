@@ -1,17 +1,23 @@
 import { StyleSheet } from "react-native";
 import COLORS from "../../Utilities/Colors";
-import { horizontalScale, verticalScale, wp } from "../../Utilities/Metrics";
+import {
+  horizontalScale,
+  hp,
+  verticalScale,
+  wp,
+} from "../../Utilities/Metrics";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.darkBlue,
-    justifyContent: "center",
   },
 
   backgroundImage: {
-    flex: 1,
+    height: hp(65),
+    width: wp(100),
     marginBottom: verticalScale(60),
+    backgroundColor: COLORS.darkBlue,
   },
 
   formContainer: {
@@ -21,7 +27,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderTopRightRadius: 70,
     paddingTop: verticalScale(20),
-    paddingBottom: verticalScale(30),
+    paddingBottom: verticalScale(20),
     paddingHorizontal: horizontalScale(20),
   },
 
@@ -50,7 +56,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  footerTextCont: { gap: verticalScale(20), alignItems: "center" },
+  footerTextCont: { gap: verticalScale(15), alignItems: "center" },
 
   footerText: {
     textAlign: "center",

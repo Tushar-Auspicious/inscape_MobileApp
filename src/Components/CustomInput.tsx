@@ -1,24 +1,27 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState } from "react";
 import {
+  Alert,
   Image,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
-import ICONS from '../Assets/icons';
-import COLORS from '../Utilities/Colors';
+} from "react-native";
+import ICONS from "../Assets/icons";
+import COLORS from "../Utilities/Colors";
 import {
   horizontalScale,
   responsiveFontSize,
   verticalScale,
-} from '../Utilities/Metrics';
-import CustomIcon from './CustomIcon';
-import { CustomText } from './CustomText';
+} from "../Utilities/Metrics";
+import CustomIcon from "./CustomIcon";
+import { CustomText } from "./CustomText";
+import DatePicker from "react-native-date-picker";
+import dayjs from "dayjs";
 
 type CustomInputProps = {
   placeholder: string;
-  type?: "text" | "password" | "search";
+  type?: "text" | "password" | "search" | "date";
   onChangeText: (text: string) => void;
   value: string;
   style?: object;
@@ -41,6 +44,23 @@ const CustomInput: FC<CustomInputProps> = ({
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false); // State to toggle password visibility
 
+  // Date Picker
+  const [isPickerVisible, setPickerVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  // Handle date selection
+  const handleConfirm = (date: Date) => {
+    setPickerVisible(false);
+    setSelectedDate(date);
+    if (type === "date") {
+      const formattedDate = dayjs(date).format("D[th] MMM YYYY");
+      onChangeText(formattedDate);
+    }
+  };
+  const handleCancel = () => {
+    setPickerVisible(false);
+  };
+
   // Toggle password visibility
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
@@ -56,6 +76,7 @@ const CustomInput: FC<CustomInputProps> = ({
       ]}
     >
       {label && <CustomText fontFamily="medium">{label}</CustomText>}
+
       <View
         style={[
           styles.container, // Base container style
@@ -66,21 +87,42 @@ const CustomInput: FC<CustomInputProps> = ({
         {type === "search" && (
           <CustomIcon Icon={ICONS.SearchWhite} height={20} width={20} />
         )}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={[{ flex: 1, height: heigth }]}
+          disabled={type !== "date"}
+          onPress={() => {
+            type === "date" && setPickerVisible(!isPickerVisible);
+          }}
+        >
+          <View
+            pointerEvents={type === "date" ? "none" : "auto"}
+            style={{ flex: 1 }}
+          >
+            <TextInput
+              style={[styles.input]} // Input field style
+              placeholder={placeholder} // Placeholder text
+              placeholderTextColor={COLORS.white} // Placeholder text color
+              secureTextEntry={type === "password" && !isPasswordVisible} // Hide input text for password type if visibility is off
+              onChangeText={onChangeText} // Handle text change
+              value={value} // Display current value
+              editable={type !== "date"}
+            />
+          </View>
+        </TouchableOpacity>
 
-        {/* Main input field */}
-        <TextInput
-          style={[
-            styles.input,
-            {
-              height: heigth,
-            },
-          ]} // Input field style
-          placeholder={placeholder} // Placeholder text
-          placeholderTextColor={COLORS.white} // Placeholder text color
-          secureTextEntry={type === "password" && !isPasswordVisible} // Hide input text for password type if visibility is off
-          onChangeText={onChangeText} // Handle text change
-          value={value} // Display current value
-        />
+        {type === "date" && (
+          <>
+            <DatePicker
+              modal
+              open={isPickerVisible}
+              date={selectedDate || new Date()}
+              mode={type}
+              onConfirm={handleConfirm}
+              onCancel={handleCancel}
+            />
+          </>
+        )}
 
         {/* Toggle password visibility for password type */}
         {type === "password" && (

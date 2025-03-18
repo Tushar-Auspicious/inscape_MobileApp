@@ -162,15 +162,13 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
                   style={[
                     styles.listCard,
                     {
-                      height: hp(Platform.OS === "ios" ? 50 : 60),
+                      height: hp(Platform.OS === 'ios' ? 60 : 60),
                     },
-                  ]}
-                >
+                  ]}>
                   <ImageBackground
-                    source={{ uri: item.artwork }}
+                    source={{uri: item.artwork}}
                     style={styles.cardImage}
-                    imageStyle={styles.cardImageStyle}
-                  >
+                    imageStyle={styles.cardImageStyle}>
                     <View style={styles.cardContent}>
                       <Image
                         source={IMAGES.curvedView}
@@ -187,8 +185,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
                       </View>
                       <TouchableOpacity
                         onPress={() => handleGoToPLayer(item)}
-                        style={styles.cardPlayButton}
-                      >
+                        style={styles.cardPlayButton}>
                         <CustomIcon
                           Icon={ICONS.playIcon}
                           height={14}

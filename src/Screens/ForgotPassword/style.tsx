@@ -9,6 +9,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(20),
     paddingVertical: verticalScale(20),
   },
+  keyboardView: {
+    flex: 1,
+    justifyContent: "center",
+  },
 
   backArrowCont: {
     paddingRight: horizontalScale(10),

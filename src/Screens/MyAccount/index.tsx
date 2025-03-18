@@ -1,38 +1,36 @@
-import React, { FC, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Pressable,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {FC, useState} from 'react';
+import {Pressable, TouchableOpacity, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import ICONS from '../../Assets/icons';
 import CustomButton from '../../Components/Buttons/CustomButton';
 import CustomIcon from '../../Components/CustomIcon';
 import CustomInput from '../../Components/CustomInput';
-import { CustomText } from '../../Components/CustomText';
-import { myAccountProps } from "../../Typings/route";
-import styles from "./style";
+import {CustomText} from '../../Components/CustomText';
+import {KeyboardAvoidingContainer} from '../../Components/KeyboardAvoidingComponent';
+import {myAccountProps} from '../../Typings/route';
+import COLORS from '../../Utilities/Colors';
+import styles from './style';
 
-const MyAccount: FC<myAccountProps> = ({ navigation }) => {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+const MyAccount: FC<myAccountProps> = ({navigation}) => {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [selectedGender, setSelectedGender] = useState<
-    "Male" | "Female" | "Other"
-  >("Male"); // Gender state
+    'Male' | 'Female' | 'Other'
+  >('Male'); // Gender state
 
-  const genderTypes: ("Male" | "Female" | "Other")[] = [
-    "Male",
-    "Female",
-    "Other",
+  const genderTypes: ('Male' | 'Female' | 'Other')[] = [
+    'Male',
+    'Female',
+    'Other',
   ];
 
   const handleSaveProfile = () => {};
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={styles.keyboardView}>
+    // <KeyboardAvoidingView behavior="padding" style={styles.keyboardView}>
+    <KeyboardAvoidingContainer backgroundColor={COLORS.darkBlue}>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <CustomText type="title" fontFamily="bold">
@@ -42,8 +40,7 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => navigation.goBack()}
-              style={styles.backArrowCont}
-            >
+              style={styles.backArrowCont}>
               <CustomIcon Icon={ICONS.BackArrow} height={15} width={15} />
             </TouchableOpacity>
           )}
@@ -55,7 +52,6 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
             onChangeText={setFullName}
             placeholder="Full Name"
             label="Full Name"
-            heigth={44}
           />
 
           <CustomInput
@@ -63,7 +59,6 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
             onChangeText={setEmail}
             placeholder="Email"
             label="Email"
-            heigth={44}
           />
 
           <CustomInput
@@ -71,26 +66,25 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
             onChangeText={setCompanyName}
             placeholder="Company Name"
             label="Company Name"
-            heigth={44}
           />
 
-          {/* <CustomInput
+          <CustomInput
             value={birthDate}
             onChangeText={setBirthDate}
             placeholder="Birthday"
             label="Birthday"
-            heigth={44}
-          /> */}
+            type="date"
+          />
 
-          {/* <View style={styles.genderCont}>
+          <View style={styles.genderCont}>
             <CustomText fontFamily="medium">Gender</CustomText>
             <View style={styles.genderRow}>
-              {genderTypes.map((gender) => {
+              {genderTypes.map(gender => {
                 const renderGenderIcon = () => {
-                  if (gender === "Male") {
+                  if (gender === 'Male') {
                     return ICONS.maleIcon;
                   }
-                  if (gender === "Female") {
+                  if (gender === 'Female') {
                     return ICONS.femaleIcon;
                   } else {
                     return ICONS.otherIcon;
@@ -105,8 +99,7 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
                       styles.genderOption,
                       isSelected && styles.selectedGenderOption,
                     ]}
-                    onPress={() => setSelectedGender(gender)}
-                  >
+                    onPress={() => setSelectedGender(gender)}>
                     <CustomIcon
                       Icon={renderGenderIcon()}
                       width={20}
@@ -117,7 +110,7 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
                 );
               })}
             </View>
-          </View> */}
+          </View>
         </View>
 
         <CustomButton
@@ -126,7 +119,7 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
           style={styles.btn}
         />
       </SafeAreaView>
-    </KeyboardAvoidingView>
+    </KeyboardAvoidingContainer>
   );
 };
 

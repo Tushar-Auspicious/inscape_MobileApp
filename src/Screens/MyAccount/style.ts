@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
   },
   genderCont: {
     gap: verticalScale(5),
+    paddingBottom: verticalScale(10),
   },
   genderRow: {
     flexDirection: "row",
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
     width: "30%",
     backgroundColor: COLORS.lightNavyBlue,
     justifyContent: "flex-start",
-    paddingVertical: verticalScale(10),
+    paddingVertical: verticalScale(15),
     paddingHorizontal: horizontalScale(15),
     borderRadius: 10,
   },

@@ -9,19 +9,17 @@ import { LibraryProps } from "../../Typings/route";
 
 const Library: FC<LibraryProps> = ({ navigation }) => {
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       <View style={styles.scrollContainer}>
         <CustomText type="title" fontFamily="bold">
-          Songs Downloaded
+          Meditations Downloaded
         </CustomText>
         <FlatList
           data={songsDownloaded}
           contentContainerStyle={styles.flatListCont}
           keyExtractor={(item, index) => item.title + index.toString()}
-          renderItem={({ item }) => {
-            const trackIndex = songsDownloaded.findIndex(
-              (t) => t.id === item.id
-            );
+          renderItem={({item}) => {
+            const trackIndex = songsDownloaded.findIndex(t => t.id === item.id);
             return (
               <SessionCard
                 imageUrl={item.imageUrl}
@@ -29,8 +27,8 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
                 duration={item.duration}
                 level={item.level}
                 onPress={() =>
-                  navigation.navigate("player", {
-                    trackList: songsDownloaded.map((item) => ({
+                  navigation.navigate('player', {
+                    trackList: songsDownloaded.map(item => ({
                       artist: item.title,
                       artwork: item.imageUrl,
                       title: item.title,

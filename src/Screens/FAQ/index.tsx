@@ -1,26 +1,23 @@
-import React, { FC, useState } from 'react';
-import { FlatList, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import ICONS from '../../Assets/icons';
-import CustomIcon from '../../Components/CustomIcon';
-import { CustomText } from '../../Components/CustomText';
-import { FAQProps } from '../../Typings/route';
-import styles from './style';
-import CustomInput from '../../Components/CustomInput';
-import { verticalScale } from '../../Utilities/Metrics';
-import CustomAccordion from '../../Components/CustomAccordian';
-import { accordionData } from '../../Seeds/SettingsSeeds';
+import React, { FC, useState } from "react";
+import { FlatList, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import ICONS from "../../Assets/icons";
+import CustomIcon from "../../Components/CustomIcon";
+import { CustomText } from "../../Components/CustomText";
+import { FAQProps } from "../../Typings/route";
+import styles from "./style";
+import CustomInput from "../../Components/CustomInput";
+import { verticalScale } from "../../Utilities/Metrics";
+import CustomAccordion from "../../Components/CustomAccordian";
+import { accordionData } from "../../Seeds/SettingsSeeds";
 
 const FAQ: FC<FAQProps> = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <CustomText
-          type='title'
-          fontFamily='bold'
-        >
+        <CustomText type="title" fontFamily="bold">
           FAQ
         </CustomText>
         {navigation.canGoBack() && (
@@ -29,22 +26,10 @@ const FAQ: FC<FAQProps> = ({ navigation }) => {
             onPress={() => navigation.goBack()}
             style={styles.backArrowCont}
           >
-            <CustomIcon
-              Icon={ICONS.BackArrow}
-              height={15}
-              width={15}
-            />
+            <CustomIcon Icon={ICONS.BackArrow} height={15} width={15} />
           </TouchableOpacity>
         )}
       </View>
-      <CustomInput
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        placeholder='Search...'
-        type='search'
-      />
-
-      <View style={styles.accordianCont}></View>
 
       <FlatList
         data={accordionData}

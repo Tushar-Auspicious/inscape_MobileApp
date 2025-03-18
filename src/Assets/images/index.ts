@@ -5,6 +5,7 @@ const IMAGES = {
   slide3: require("./slide3.png"),
   slide4: require("./slide4.png"),
   pinkBg: require("./bgPink.png"),
+  signInbackground: require("./signInBackground.png"),
   curvedView: require("./curvedView.png"),
   registerSuccessImg: require("./registerSuccessImage.png"),
   passwordSuccessImg: require("./passwordSucccesImg.png"),

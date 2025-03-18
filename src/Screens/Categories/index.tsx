@@ -1,48 +1,50 @@
-import React, { FC, useState } from "react";
+import React, {FC, useState} from 'react';
 import {
   FlatList,
   ImageBackground,
   ScrollView,
   TouchableOpacity,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import ICONS from "../../Assets/icons";
-import ContentCard from "../../Components/Cards/ContentCard";
-import CustomIcon from "../../Components/CustomIcon";
-import CustomInput from "../../Components/CustomInput";
-import { CustomText } from "../../Components/CustomText";
-import { TrendingData } from "../../Seeds/HomeSeeds";
-import { CategoryProps } from "../../Typings/route";
-import styles from "./style";
+} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import ICONS from '../../Assets/icons';
+import ContentCard from '../../Components/Cards/ContentCard';
+import CustomIcon from '../../Components/CustomIcon';
+import CustomInput from '../../Components/CustomInput';
+import {CustomText} from '../../Components/CustomText';
+import {TrendingData} from '../../Seeds/HomeSeeds';
+import {CategoryProps} from '../../Typings/route';
+import styles from './style';
 
-const Categories: FC<CategoryProps> = ({ navigation }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+const Categories: FC<CategoryProps> = ({navigation, route}) => {
+  const {data} = route.params;
+
+  console.log(data);
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleCardPress = () => {
-    navigation.navigate("playerList");
+    navigation.navigate('playerList');
   };
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       <ImageBackground
         source={{
-          uri: "https://s3-alpha-sig.figma.com/img/4ee4/101f/0aefe60e15d8315db07fb95c1fbc17c9?Expires=1739145600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=Ehsz0y7h8PZhA1RJ1lPiqFFyEPQ8Qe2s1An2xn829OwM9hHU4AUEGgqO3a1ZjEyLFUHYLtHv0S9h7Z2vXmQPl9pKLqKO3DjTjpXEpQ72PKJLCr6SBOfSjt2PmXwE5jucDHfsQebZmN9H5YCJLJeEQUUjdOBEiPRWt3QOGMBTHxD69qbGhN7p46Rt4BtY0Z93yeh6sereZ9IwM-3TLwdtbSslYgG6Cc91yugq8pca6wChvwY44s9kn5XKV8cv9f0uWbFHTcWoYQkEwjO3dYbTc0T3bADriq~mX0cMdZX~ZvFzqQomqHdAqys50N-23YKpmayvQ1DMxd-l9qBdlZtRHQ__",
+          uri: data.imageUrl,
         }}
         style={styles.imageBackground}
-        resizeMode="cover"
-      >
+        resizeMode="cover">
         <View style={styles.imageContent}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
+            style={styles.backButton}>
             <CustomIcon Icon={ICONS.BackArrow} height={12} width={12} />
           </TouchableOpacity>
 
           <View style={styles.imageTextContent}>
             <CustomText type="heading" fontFamily="bold">
-              Sounds of Nature
+              {data.title}
             </CustomText>
 
             <CustomText>34 practices</CustomText>
@@ -67,8 +69,7 @@ const Categories: FC<CategoryProps> = ({ navigation }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        nestedScrollEnabled={true}
-      >
+        nestedScrollEnabled={true}>
         <View style={styles.sectionHeader}>
           <CustomText type="title" fontFamily="bold">
             Rain and Storm Sounds
@@ -83,7 +84,7 @@ const Categories: FC<CategoryProps> = ({ navigation }) => {
           contentContainerStyle={styles.horizontalList}
           keyExtractor={(item, index) => item.title + index.toString()}
           horizontal
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <ContentCard
               duration={item.duration}
               imageUrl={item.imageUrl}
@@ -110,7 +111,7 @@ const Categories: FC<CategoryProps> = ({ navigation }) => {
           contentContainerStyle={styles.horizontalList}
           keyExtractor={(item, index) => item.title + index.toString()}
           horizontal
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <ContentCard
               duration={item.duration}
               imageUrl={item.imageUrl}
@@ -137,7 +138,7 @@ const Categories: FC<CategoryProps> = ({ navigation }) => {
           contentContainerStyle={styles.horizontalList}
           keyExtractor={(item, index) => item.title + index.toString()}
           horizontal
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <ContentCard
               duration={item.duration}
               imageUrl={item.imageUrl}
