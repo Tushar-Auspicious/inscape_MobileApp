@@ -8,6 +8,7 @@ import PrivacyModal from "../../Components/Modals/PrivacyModal";
 import { TermsAndConditionProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import styles from "./style";
+import { verticalScale } from "../../Utilities/Metrics";
 
 const TermsAndConditions: FC<TermsAndConditionProps> = ({
   navigation,
@@ -110,7 +111,11 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
         </View>
       </View>
 
-      <View>
+      <View
+        style={{
+          gap: verticalScale(10),
+        }}
+      >
         <CustomButton
           title="Accept all"
           onPress={handleAcceptAll}

@@ -24,14 +24,14 @@ const styles = StyleSheet.create({
   topCurvedImage: {
     height: 78,
     width: 73,
-    top: -78.1,
+    top: -78,
     position: "absolute",
     tintColor: COLORS.darkNavyBlue,
   },
   bottomCurvedImage: {
     height: 78,
     width: 73,
-    bottom: -78.1,
+    bottom: -78,
     right: 0,
     position: "absolute",
     tintColor: COLORS.darkNavyBlue,

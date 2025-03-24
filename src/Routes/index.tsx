@@ -37,9 +37,9 @@ const Main = createNativeStackNavigator<MainStackParams>();
 const Tabs = createBottomTabNavigator<BottomTabParams>();
 
 const Routing = () => {
-  const isOnboarded = true;
+  const isOnboarded = false;
   const isAuth = false;
-  const isTermsAccepted = true;
+  const isTermsAccepted = false;
 
   function AuthStack() {
     return (
@@ -56,10 +56,10 @@ const Routing = () => {
           animation: Platform.OS === "ios" ? "default" : "none",
         }}
       >
-        <Auth.Screen name="signIn" component={SignIn} />
         <Auth.Screen name="onBoarding" component={OnBoarding} />
         <Auth.Screen name="termsAndConditions" component={TermsAndConditions} />
         <Auth.Screen name="signUp" component={SignUp} />
+        <Auth.Screen name="signIn" component={SignIn} />
         <Auth.Screen name="registerSuccess" component={RegisterSuccess} />
         <Auth.Screen name="otpScreen" component={OTP} />
         <Auth.Screen name="forgotPassword" component={ForgotPassword} />

@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   curvedImage: {
     height: 78,
     width: 73,
-    top: -78.1,
+    top: -78,
     position: "absolute",
     tintColor: COLORS.darkBlue,
   },
