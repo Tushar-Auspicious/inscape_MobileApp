@@ -1,8 +1,9 @@
-import {NavigatorScreenParams} from '@react-navigation/native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {TrackData} from '../PlayerServices/QueueInitialTrackService';
+import { NavigatorScreenParams } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { TrackData } from "../PlayerServices/QueueInitialTrackService";
 
 export type RootStackParams = {
+  splash: undefined;
   authStack: NavigatorScreenParams<AuthStackParams>;
   mainStack: NavigatorScreenParams<MainStackParams>;
 };
@@ -12,17 +13,17 @@ export type AuthStackParams = {
   termsAndConditions: undefined;
   signUp: undefined;
   registerSuccess: undefined;
-  otpScreen: undefined;
+  otpScreen: { isFromForgotPassword?: boolean; email: string };
   signIn: undefined;
   forgotPassword: undefined;
-  createNewPassword: undefined;
+  createNewPassword: { otp: string };
   passwordSuccess: undefined;
 };
 
 export type MainStackParams = {
   tabs: NavigatorScreenParams<BottomTabParams>;
   searchHome: undefined;
-  categories: {data: any};
+  categories: { data: any };
   myAccount: undefined;
   Faq: undefined;
   settingsTermsAndConditions: undefined;
@@ -41,104 +42,112 @@ export type BottomTabParams = {
   settingsTab: undefined;
 };
 
-export type OnBoardingProps = NativeStackScreenProps<AuthStackParams, 'onBoarding'>;
+export type SplashProps = NativeStackScreenProps<
+  RootStackParams & AuthStackParams & MainStackParams,
+  "splash"
+>;
+
+export type OnBoardingProps = NativeStackScreenProps<
+  AuthStackParams,
+  "onBoarding"
+>;
 
 export type TermsAndConditionProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
-  'termsAndConditions'
+  "termsAndConditions"
 >;
 
 export type SignUpProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
-  'signUp'
+  "signUp"
 >;
 
 export type SignInProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
-  'signIn'
+  "signIn"
 >;
 
 export type RegisterSuccessProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
-  'registerSuccess'
+  "registerSuccess"
 >;
 
 export type OTPProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
-  'otpScreen'
+  "otpScreen"
 >;
 
 export type ForgotPasswordProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
-  'forgotPassword'
+  "forgotPassword"
 >;
 
 export type CreateNewPasswordProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
-  'createNewPassword'
+  "createNewPassword"
 >;
 
 export type PasswordSuccessProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
-  'passwordSuccess'
+  "passwordSuccess"
 >;
 
 export type HomeScreenProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'homeTab'
+  "homeTab"
 >;
 
 export type SettingScreenProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'settingsTab'
+  "settingsTab"
 >;
 
 export type SettingsTermsAndConditionProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'settingsTermsAndConditions'
+  "settingsTermsAndConditions"
 >;
 
 export type SettingsPrivacyPolicyProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'settingsPrivacyPolicy'
+  "settingsPrivacyPolicy"
 >;
 
 export type myAccountProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'myAccount'
+  "myAccount"
 >;
 
 export type FAQProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'Faq'
+  "Faq"
 >;
 
 export type SearchHomeProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'searchHome'
+  "searchHome"
 >;
 
 export type CategoryProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'categories'
+  "categories"
 >;
 
 export type DiscoverProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'discoverTab'
+  "discoverTab"
 >;
 
 export type LibraryProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'libraryTab'
+  "libraryTab"
 >;
 
 export type PlayerListProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'playerList'
+  "playerList"
 >;
 
 export type PlayerProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
-  'player'
+  "player"
 >;

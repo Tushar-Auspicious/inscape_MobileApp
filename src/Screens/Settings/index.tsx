@@ -1,26 +1,30 @@
-import React, { FC, useRef, useState } from "react";
-import { Image, ImageBackground, TouchableOpacity, View } from "react-native";
+import React, { FC, useRef } from "react";
+import { TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ICONS from "../../Assets/icons";
-import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import LogOutModal from "../../Components/Modals/LogOutModal";
 import { SettingScreenProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
+import STORAGE_KEYS from "../../Utilities/Constants";
 import { verticalScale } from "../../Utilities/Metrics";
+import { deleteLocalStorageData } from "../../Utilities/Storage";
 import styles from "./style";
 
 const Settings: FC<SettingScreenProps> = ({ navigation }) => {
-  const sheetRef = useRef<any>();
-  const [isLoggedOut, setIsLoggedOut] = useState(false);
+  const sheetRef = useRef<any>(null);
 
   const handleCancel = () => {
     sheetRef.current.close();
   };
 
-  const handleLogout = () => {
-    setIsLoggedOut(true);
+  const handleLogout = async () => {
+    await deleteLocalStorageData(STORAGE_KEYS.isAuth);
+    await deleteLocalStorageData(STORAGE_KEYS.token);
+    await deleteLocalStorageData(STORAGE_KEYS.isRegistered);
+
+    navigation.replace("authStack", { screen: "signIn" });
     sheetRef.current.close();
     console.log("User logged out");
   };

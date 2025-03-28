@@ -1,7 +1,11 @@
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat"; // Import the plugin
 import { Alert, PermissionsAndroid, Platform } from "react-native";
 import RNFS from "react-native-fs";
 export const getKeyboardBehaviour =
   Platform.OS === "ios" ? "padding" : "height";
+
+dayjs.extend(customParseFormat);
 
 export const getGreeting = () => {
   const currentHour = new Date().getHours();
@@ -79,4 +83,22 @@ export const downloadFile = async (
     console.error(error);
     return null;
   }
+};
+
+export const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+export const convertDate = (inputDate: string): string => {
+  // Parse the input date "26th Mar 2000" with the correct format
+  const parsedDate = dayjs(inputDate, "Do MMM YYYY");
+
+  // Check if parsing was successful
+  if (!parsedDate.isValid()) {
+    throw new Error("Invalid date format");
+  }
+
+  // Format to "MM-DD-YYYY"
+  return parsedDate.format("MM-DD-YYYY");
 };

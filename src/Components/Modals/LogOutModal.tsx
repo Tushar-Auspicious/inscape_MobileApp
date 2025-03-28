@@ -20,7 +20,7 @@ const LogOutModal: FC<LogoutModalProps> = ({
   return (
     <RBSheet
       ref={sheetRef}
-      closeOnDragDown={true}
+      closeOnPressMask
       closeOnPressBack={true}
       height={hp(26)}
       customStyles={{

@@ -7,8 +7,10 @@ import { CustomText } from "../../Components/CustomText";
 import PrivacyModal from "../../Components/Modals/PrivacyModal";
 import { TermsAndConditionProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
-import styles from "./style";
+import STORAGE_KEYS from "../../Utilities/Constants";
 import { verticalScale } from "../../Utilities/Metrics";
+import { storeLocalStorageData } from "../../Utilities/Storage";
+import styles from "./style";
 
 const TermsAndConditions: FC<TermsAndConditionProps> = ({
   navigation,
@@ -124,7 +126,10 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
         />
         <CustomButton
           title="Next"
-          onPress={() => navigation.replace("signUp")}
+          onPress={async () => {
+            await storeLocalStorageData(STORAGE_KEYS.isTermsAccepted, true);
+            navigation.replace("signUp");
+          }}
           disabled={
             !isPrivacyChecked || !isHealthDataChecked || !isTermsChecked
           }

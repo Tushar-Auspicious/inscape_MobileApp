@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
+import { Platform } from "react-native";
 import BottomTabBar from "../Components/BottomTabBar";
 import Categories from "../Screens/Categories";
 import CreateNewPassword from "../Screens/CreateNewPassword";
@@ -13,12 +14,16 @@ import MyAccount from "../Screens/MyAccount";
 import OnBoarding from "../Screens/OnBoarding";
 import OTP from "../Screens/OTP";
 import PasswordSuccess from "../Screens/PasswordSuccess";
+import Player from "../Screens/Player";
+import PlayerList from "../Screens/PlayerList";
 import RegisterSuccess from "../Screens/RegisterSuccess";
+import SearchHome from "../Screens/SearchHome";
 import Settings from "../Screens/Settings";
 import SettingsPrivacyPolicy from "../Screens/SettingsPrivacyPolicy";
 import SettingTermsCondition from "../Screens/SettingTermsCondition";
 import SignIn from "../Screens/SignIn";
 import SignUp from "../Screens/SignUp";
+import Splash from "../Screens/Splash";
 import TermsAndConditions from "../Screens/TermsAndConditions";
 import {
   AuthStackParams,
@@ -26,10 +31,6 @@ import {
   MainStackParams,
   RootStackParams,
 } from "../Typings/route";
-import { Platform } from "react-native";
-import SearchHome from "../Screens/SearchHome";
-import PlayerList from "../Screens/PlayerList";
-import Player from "../Screens/Player";
 
 const RootStack = createNativeStackNavigator<RootStackParams>();
 const Auth = createNativeStackNavigator<AuthStackParams>();
@@ -37,20 +38,9 @@ const Main = createNativeStackNavigator<MainStackParams>();
 const Tabs = createBottomTabNavigator<BottomTabParams>();
 
 const Routing = () => {
-  const isOnboarded = false;
-  const isAuth = false;
-  const isTermsAccepted = false;
-
   function AuthStack() {
     return (
       <Auth.Navigator
-        initialRouteName={
-          isOnboarded
-            ? isTermsAccepted
-              ? "signIn"
-              : "termsAndConditions"
-            : "onBoarding"
-        }
         screenOptions={{
           headerShown: false,
           animation: Platform.OS === "ios" ? "default" : "none",
@@ -139,12 +129,12 @@ const Routing = () => {
 
   return (
     <RootStack.Navigator
-      initialRouteName={isAuth ? "mainStack" : "authStack"}
       screenOptions={{
         headerShown: false,
         animation: Platform.OS === "ios" ? "default" : "none",
       }}
     >
+      <RootStack.Screen name="splash" component={Splash} />
       <RootStack.Screen name="authStack" component={AuthStack} />
       <RootStack.Screen name="mainStack" component={MainStack} />
     </RootStack.Navigator>

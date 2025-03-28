@@ -9,7 +9,7 @@ import styles from "./style";
 
 const RegisterSuccess: FC<RegisterSuccessProps> = ({ navigation }) => {
   const handleOk = () => {
-    navigation.replace("otpScreen");
+    navigation.replace("otpScreen", { isFromForgotPassword: false });
   };
 
   return (

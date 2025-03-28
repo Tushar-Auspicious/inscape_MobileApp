@@ -1986,6 +1986,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-async-storage/async-storage@npm:^2.1.2":
+  version: 2.1.2
+  resolution: "@react-native-async-storage/async-storage@npm:2.1.2"
+  dependencies:
+    merge-options: ^3.0.4
+  peerDependencies:
+    react-native: ^0.0.0-0 || >=0.65 <1.0
+  checksum: a5c4d486e7e64067ab523b980b76cc2de5bf4b86ed410de09f2a95c3410e0c5b5be46c638a74cf5b7ed6dce10031ebac54350b498a2cb17f1a1c59347e671a73
+  languageName: node
+  linkType: hard
+
 "@react-native-community/blur@npm:^4.4.1":
   version: 4.4.1
   resolution: "@react-native-community/blur@npm:4.4.1"
@@ -3104,6 +3115,7 @@ __metadata:
     "@babel/core": ^7.25.2
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0
+    "@react-native-async-storage/async-storage": ^2.1.2
     "@react-native-community/blur": ^4.4.1
     "@react-native-community/cli": 15.0.1
     "@react-native-community/cli-platform-android": 15.0.1
@@ -3128,6 +3140,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.78.0
     react-native-date-picker: ^5.0.10
+    react-native-dotenv: ^3.4.11
     react-native-fs: ^2.20.0
     react-native-gesture-handler: ^2.24.0
     react-native-modal: ^14.0.0-rc.1
@@ -4525,6 +4538,13 @@ __metadata:
     no-case: ^3.0.4
     tslib: ^2.0.3
   checksum: a65e3519414856df0228b9f645332f974f2bf5433370f544a681122eab59e66038fc3349b4be1cdc47152779dac71a5864f1ccda2f745e767c46e9c6543b1169
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.4.5":
+  version: 16.4.7
+  resolution: "dotenv@npm:16.4.7"
+  checksum: c27419b5875a44addcc56cc69b7dc5b0e6587826ca85d5b355da9303c6fc317fc9989f1f18366a16378c9fdd9532d14117a1abe6029cc719cdbbef6eaef2cea4
   languageName: node
   linkType: hard
 
@@ -6086,6 +6106,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-plain-obj@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "is-plain-obj@npm:2.1.0"
+  checksum: cec9100678b0a9fe0248a81743041ed990c2d4c99f893d935545cfbc42876cbe86d207f3b895700c690ad2fa520e568c44afc1605044b535a7820c1d40e38daa
+  languageName: node
+  linkType: hard
+
 "is-plain-object@npm:^2.0.4":
   version: 2.0.4
   resolution: "is-plain-object@npm:2.0.4"
@@ -7202,6 +7229,15 @@ __metadata:
   version: 5.2.1
   resolution: "memoize-one@npm:5.2.1"
   checksum: a3cba7b824ebcf24cdfcd234aa7f86f3ad6394b8d9be4c96ff756dafb8b51c7f71320785fbc2304f1af48a0467cbbd2a409efc9333025700ed523f254cb52e3d
+  languageName: node
+  linkType: hard
+
+"merge-options@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "merge-options@npm:3.0.4"
+  dependencies:
+    is-plain-obj: ^2.1.0
+  checksum: d86ddb3dd6e85d558dbf25dc944f3527b6bacb944db3fdda6e84a3f59c4e4b85231095f58b835758b9a57708342dee0f8de0dffa352974a48221487fe9f4584f
   languageName: node
   linkType: hard
 
@@ -8385,6 +8421,17 @@ __metadata:
     react: ">= 17.0.1"
     react-native: ">= 0.64.3"
   checksum: 347266d8c13fb9c45b9b6300628dcf305baec64b9640f96a8678a9cb9cd62e186ccfb69b249c16599c6e601598b96c396c9074616101df3da7b6ef37296133ad
+  languageName: node
+  linkType: hard
+
+"react-native-dotenv@npm:^3.4.11":
+  version: 3.4.11
+  resolution: "react-native-dotenv@npm:3.4.11"
+  dependencies:
+    dotenv: ^16.4.5
+  peerDependencies:
+    "@babel/runtime": ^7.20.6
+  checksum: 3ebac2c2ed79dd7e4920fd3fc2da9187413b7190231618e4858b46c47833677838b96d531afe7bd5c4b0a60454dba40cb8708722210df5d522e30aefbf41da05
   languageName: node
   linkType: hard
 
