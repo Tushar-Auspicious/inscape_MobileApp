@@ -1,7 +1,9 @@
+import notifee from "@notifee/react-native"; // Import Notifee
 import Slider from "@react-native-community/slider";
 import React, { FC, useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   AppState,
   Platform,
   StyleSheet,
@@ -20,9 +22,18 @@ import Player, {
 } from "react-native-track-player";
 import ICONS from "../Assets/icons";
 import COLORS from "../Utilities/Colors";
-import { downloadFile } from "../Utilities/Helpers";
+import {
+  audioItem,
+  downloadFile,
+  saveDownloadedAudio,
+} from "../Utilities/Helpers";
 import { verticalScale } from "../Utilities/Metrics";
 import CustomIcon from "./CustomIcon";
+import Share from "react-native-share";
+import RNFS from "react-native-fs";
+import { useAppSelector } from "../Redux/store";
+import { getLocalStorageData } from "../Utilities/Storage";
+import STORAGE_KEYS from "../Utilities/Constants";
 
 export const useStopPlaybackOnBackground = () => {
   useEffect(() => {
@@ -42,32 +53,225 @@ export const useStopPlaybackOnBackground = () => {
 const TrackPlayer: FC<{
   handlePreviousTrack: () => void;
   handleNextTrack: () => void;
-}> = ({ handleNextTrack, handlePreviousTrack }) => {
+  isNextTrackAvailable: boolean;
+  isPreviousTrackAvailable: boolean;
+  trackData: audioItem;
+}> = ({
+  handleNextTrack,
+  handlePreviousTrack,
+  isNextTrackAvailable,
+  isPreviousTrackAvailable,
+  trackData,
+}) => {
   const { playing } = useIsPlaying();
   const track = useActiveTrack();
   const { position, duration, buffered } = useProgress();
 
   const [downloading, setDownloading] = useState(false);
-
   const formatPlayerSeconds = useCallback((time: number) => {
-    return new Date(time * 1000).toISOString().slice(14, 19);
+    return new Date(time * 1000)
+      .toISOString()
+      .slice(time >= 3600 ? 11 : 14, 19);
   }, []);
 
   const handleDownload = async () => {
     setDownloading(true);
-    const fileUrl = track?.url; // Replace with actual URL
-    const fileName = `${track?.title}.mp3`; // File name to save
+    const fileUrl = track?.url;
 
-    if (fileUrl) {
-      const filePath = await downloadFile(fileUrl, fileName);
-      if (filePath) {
-        Toast.show({
-          type: "success",
-          text1: "Download Successfull",
+    if (!fileUrl) {
+      setDownloading(false);
+      Toast.show({
+        type: "error",
+        text1: "Download Failed",
+        text2: "No audio URL provided",
+      });
+      return;
+    }
+
+    // Extract file extension from URL or default to .mp3
+    const urlParts = fileUrl.split(".");
+    const extension =
+      urlParts.length > 1 ? urlParts.pop()?.toLowerCase() : "mp3";
+    const supportedExtensions = ["mp3", "wav"]; // Add more if needed
+    const fileExt = supportedExtensions.includes(extension!)
+      ? extension
+      : "mp3";
+    const fileName = `${track?.title}.${fileExt}`;
+
+    // Handle notifications based on platform
+    if (Platform.OS !== "web") {
+      try {
+        // Request notification permission (iOS)
+        await notifee.requestPermission();
+
+        // Create a notification channel (Android)
+        const channelId = await notifee.createChannel({
+          id: "download",
+          name: "Download Channel",
         });
-        console.log("Downloaded file path:", filePath);
-        setDownloading(false);
+
+        // Display initial notification
+        const notificationId = await notifee.displayNotification({
+          title: "Downloading Audio",
+          body: `Starting download for ${track?.title}`,
+          android: {
+            channelId,
+            progress: { max: 100, current: 0 },
+            smallIcon: "ic_launcher",
+            pressAction: { id: "default" },
+          },
+        });
+
+        try {
+          const filePath = await downloadFile(fileUrl, fileName, (progress) => {
+            // Update notification progress
+            notifee.displayNotification({
+              id: notificationId,
+              title: "Downloading Audio",
+              body: `Downloading ${track?.title}`,
+              android: {
+                channelId,
+                progress: { max: 100, current: Number(progress) },
+              },
+            });
+          });
+
+          if (filePath) {
+            // Success notification
+            await notifee.displayNotification({
+              id: notificationId,
+              title: "Download Complete",
+              body: `${track?.title} downloaded successfully!`,
+              android: { channelId },
+            });
+
+            Toast.show({
+              type: "success",
+              text1: "Download Successful",
+              text2: `${track?.title} has been downloaded`,
+            });
+
+            console.log("Downloaded file path:", filePath);
+            await saveDownloadedAudio(trackData);
+          } else {
+            throw new Error("Download failed - no file path returned");
+          }
+        } catch (error) {
+          // Failure notification
+          await notifee.displayNotification({
+            id: notificationId,
+            title: "Download Failed",
+            body: `Error downloading ${track?.title}`,
+            android: { channelId },
+          });
+
+          Toast.show({
+            type: "error",
+            text1: "Download Failed",
+            text2:
+              error instanceof Error ? error.message : "Unknown error occurred",
+          });
+
+          console.error("Download error:", error);
+        } finally {
+          setTimeout(() => notifee.cancelNotification(notificationId), 3000);
+        }
+      } catch (error) {
+        console.error("Notification error:", error);
+        Toast.show({
+          type: "error",
+          text1: "Notification Error",
+          text2: "Could not show download notifications",
+        });
       }
+    } else {
+      // Web platform - simpler download process without notifications
+      try {
+        const filePath = await downloadFile(fileUrl, fileName, (progress) => {
+          console.log(`Download progress: ${progress}%`);
+        });
+
+        if (filePath) {
+          Toast.show({
+            type: "success",
+            text1: "Download Successful",
+            text2: `${track?.title} has been downloaded`,
+          });
+          await saveDownloadedAudio(trackData);
+        } else {
+          throw new Error("Download failed - no file path returned");
+        }
+      } catch (error) {
+        Toast.show({
+          type: "error",
+          text1: "Download Failed",
+          text2:
+            error instanceof Error ? error.message : "Unknown error occurred",
+        });
+        console.error("Download error:", error);
+      }
+    }
+
+    setDownloading(false);
+  };
+
+  const ShareAudioFile = async () => {
+    const audioUrl = encodeURI(trackData?.url); // Replace with actual audio file URL
+    // Extract file extension from URL or default to .mp3
+    const urlParts = audioUrl.split(".");
+    const extension =
+      urlParts.length > 1 ? urlParts.pop()?.toLowerCase() : "mp3";
+    const supportedExtensions = ["mp3", "wav"]; // Add more if needed
+    const fileExt = supportedExtensions.includes(extension!)
+      ? extension
+      : "mp3";
+    const fileName = `${track?.title}.${fileExt}`;
+
+    const token = await getLocalStorageData(STORAGE_KEYS.token);
+
+    try {
+      // Determine the save path on iOS
+      const downloadDest = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+      // Check if the file already exists
+      const fileExists = await RNFS.exists(downloadDest);
+      if (fileExists) {
+        Alert.alert("Download", "File already exists at this location.");
+        return;
+      }
+
+      // Download the file
+      const downloadResult = await RNFS.downloadFile({
+        fromUrl: audioUrl,
+        toFile: downloadDest,
+        begin: (res) => {
+          console.log("Download has begun");
+        },
+        headers: {
+          Authorization: `Bearer ${token} `, // Example with a Bearer token
+          // Or other authentication headers
+        },
+        progress: (res) => {
+          console.log(
+            "Download progress:",
+            res.bytesWritten / res.contentLength
+          );
+        },
+      }).promise;
+
+      if (downloadResult.statusCode === 200) {
+        Alert.alert("Download Successful", `File saved to ${downloadDest}`);
+        console.log("File downloaded successfully to:", downloadDest);
+      } else {
+        Alert.alert(
+          "Download Failed",
+          `Status code: ${downloadResult.statusCode}`
+        );
+        console.error("Download failed with status:", downloadResult);
+      }
+    } catch (error: any) {
+      Alert.alert("Download Error", error.message);
+      console.error("Download error:", error);
     }
   };
 
@@ -78,26 +282,26 @@ const TrackPlayer: FC<{
     }
   });
 
-  // Listen for track completion or end of queue
-  useTrackPlayerEvents(
-    [Event.PlaybackActiveTrackChanged, Event.PlaybackQueueEnded],
-    async (event) => {
-      const queue = await Player.getQueue();
-      const currentTrackIndex = await Player.getActiveTrackIndex();
+  // // Listen for track completion or end of queue
+  // useTrackPlayerEvents(
+  //   [Event.PlaybackActiveTrackChanged, Event.PlaybackQueueEnded],
+  //   async (event) => {
+  //     const queue = await Player.getQueue();
+  //     const currentTrackIndex = await Player.getActiveTrackIndex();
 
-      if (
-        event.type === Event.PlaybackQueueEnded ||
-        (event.type === Event.PlaybackActiveTrackChanged &&
-          currentTrackIndex === queue.length - 1)
-      ) {
-        // Stop player and seek to the beginning of the current track
-        await Player.stop();
-        if (currentTrackIndex !== null && queue[currentTrackIndex!]) {
-          await Player.seekTo(0);
-        }
-      }
-    }
-  );
+  //     if (
+  //       event.type === Event.PlaybackQueueEnded ||
+  //       (event.type === Event.PlaybackActiveTrackChanged &&
+  //         currentTrackIndex === queue.length - 1)
+  //     ) {
+  //       // Stop player and seek to the beginning of the current track
+  //       await Player.stop();
+  //       if (currentTrackIndex !== null && queue[currentTrackIndex!]) {
+  //         await Player.seekTo(0);
+  //       }
+  //     }
+  //   }
+  // );
 
   return (
     <View style={{ width: "100%" }}>
@@ -114,7 +318,7 @@ const TrackPlayer: FC<{
       <View style={styles.labelContainer}>
         <Text style={styles.labelText}>{formatPlayerSeconds(position)}</Text>
         <Text style={styles.labelText}>
-          {formatPlayerSeconds(Platform.OS === "android" ? duration : buffered)}
+          {formatPlayerSeconds(Platform.OS === "android" ? duration : duration)}
         </Text>
       </View>
 
@@ -131,6 +335,7 @@ const TrackPlayer: FC<{
           Icon={ICONS.playPreviousIcon}
           height={24}
           width={24}
+          disabled={!isPreviousTrackAvailable}
         />
         <TouchableOpacity
           onPress={playing ? Player.pause : Player.play}
@@ -151,12 +356,13 @@ const TrackPlayer: FC<{
           Icon={ICONS.playNextIcon}
           height={24}
           width={24}
+          disabled={!isNextTrackAvailable}
         />
         {downloading ? (
           <ActivityIndicator size={"small"} color={COLORS.white} />
         ) : (
           <CustomIcon
-            onPress={handleDownload}
+            onPress={Platform.OS === "ios" ? ShareAudioFile : handleDownload}
             Icon={ICONS.downloadIcon}
             height={24}
             width={24}

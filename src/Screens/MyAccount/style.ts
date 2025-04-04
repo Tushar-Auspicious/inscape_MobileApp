@@ -56,6 +56,13 @@ const styles = StyleSheet.create({
   btn: {
     marginVertical: verticalScale(20),
   },
+  flexInput: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: "row",
+    gap: horizontalScale(10),
+  },
 });
 
 export default styles;

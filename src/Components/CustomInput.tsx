@@ -29,6 +29,7 @@ type CustomInputProps = {
   onFilterPress?: () => void;
   label?: string;
   heigth?: number;
+  disabled?: boolean;
 };
 
 const CustomInput: FC<CustomInputProps> = ({
@@ -41,6 +42,7 @@ const CustomInput: FC<CustomInputProps> = ({
   isFilterIcon = false,
   onFilterPress,
   heigth = 56,
+  disabled = false,
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false); // State to toggle password visibility
 
@@ -90,14 +92,14 @@ const CustomInput: FC<CustomInputProps> = ({
         <TouchableOpacity
           activeOpacity={0.9}
           style={[{ flex: 1, height: heigth }]}
-          disabled={type !== "date"}
+          disabled={disabled ? disabled : type !== "date"}
           onPress={() => {
             type === "date" && setPickerVisible(!isPickerVisible);
           }}
         >
           <View
             pointerEvents={type === "date" ? "none" : "auto"}
-            style={{ flex: 1 }}
+            style={{ flex: 1, opacity: disabled ? 0.7 : 1 }}
           >
             <TextInput
               style={[styles.input]} // Input field style
@@ -106,7 +108,7 @@ const CustomInput: FC<CustomInputProps> = ({
               secureTextEntry={type === "password" && !isPasswordVisible} // Hide input text for password type if visibility is off
               onChangeText={onChangeText} // Handle text change
               value={value} // Display current value
-              editable={type !== "date"}
+              editable={disabled ? false : type !== "date"}
             />
           </View>
         </TouchableOpacity>
@@ -130,7 +132,11 @@ const CustomInput: FC<CustomInputProps> = ({
             style={styles.iconContainer} // Style for the icon container
             onPress={togglePasswordVisibility} // Toggle visibility on icon press
           >
-            <CustomIcon Icon={ICONS.eyeoffIcon} height={20} width={20} />
+            <CustomIcon
+              Icon={isPasswordVisible ? ICONS.eyeoffIcon : ICONS.eyeOnIcon}
+              height={20}
+              width={20}
+            />
           </TouchableOpacity>
         )}
 

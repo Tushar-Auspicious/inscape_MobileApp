@@ -1,11 +1,11 @@
-import { BlurView } from '@react-native-community/blur';
-import React, { FC } from 'react';
+import { BlurView } from "@react-native-community/blur";
+import React, { FC } from "react";
 import {
   ImageBackground,
   Platform,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import ICONS from "../../Assets/icons";
@@ -22,18 +22,19 @@ type ContentCardProps = {
   imageUrl: string;
   title: string;
   duration: string;
-  rating: string;
+  // rating: string;
   type?: "default" | "potrait";
   width?: number;
   height?: number;
   isSmall?: boolean;
   onPress: () => void;
+  isCollection?: boolean;
 };
 
 const ICON_SIZE = horizontalScale(12);
 
 const ContentCard: FC<ContentCardProps> = ({
-  rating,
+  // rating,
   title,
   imageUrl,
   duration,
@@ -42,6 +43,7 @@ const ContentCard: FC<ContentCardProps> = ({
   width = wp(88),
   height = hp(Platform.OS === "ios" ? 23 : 25),
   onPress,
+  isCollection = false,
 }) => {
   // Adjust width and height for portrait cards based on size
   if (type === "potrait") {
@@ -72,7 +74,7 @@ const ContentCard: FC<ContentCardProps> = ({
   const blurViewHeight = type === "default" ? "36%" : "32%";
 
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
+    <Pressable onPress={onPress}>
       <ImageBackground
         source={{ uri: imageUrl }}
         style={[
@@ -109,28 +111,18 @@ const ContentCard: FC<ContentCardProps> = ({
                   {title.slice(0, 20)}
                 </CustomText>
                 <View style={styles.infoRow}>
-                  <CustomIcon
-                    Icon={ICONS.Clock}
-                    width={ICON_SIZE}
-                    height={ICON_SIZE}
-                  />
+                  {!isCollection && (
+                    <CustomIcon
+                      Icon={ICONS.Clock}
+                      width={ICON_SIZE}
+                      height={ICON_SIZE}
+                    />
+                  )}
                   <CustomText type="small" fontFamily="bold">
                     {duration}
                   </CustomText>
                 </View>
               </View>
-              {type === "default" && (
-                <View style={styles.ratingContainer}>
-                  <CustomIcon
-                    Icon={ICONS.Star}
-                    width={ICON_SIZE}
-                    height={ICON_SIZE}
-                  />
-                  <CustomText type="small" fontFamily="bold">
-                    {rating}
-                  </CustomText>
-                </View>
-              )}
             </View>
           </>
         ) : (
@@ -143,7 +135,7 @@ const ContentCard: FC<ContentCardProps> = ({
             reducedTransparencyFallbackColor="white"
             overlayColor="transparent"
           >
-            <TouchableOpacity onPress={onPress} style={styles.content}>
+            <TouchableOpacity style={styles.content}>
               <View style={styles.textContainer}>
                 <CustomText
                   type={isSmall ? "default" : "subTitle"}
@@ -152,17 +144,19 @@ const ContentCard: FC<ContentCardProps> = ({
                   {title.slice(0, 20)}
                 </CustomText>
                 <View style={styles.infoRow}>
-                  <CustomIcon
-                    Icon={ICONS.Clock}
-                    width={ICON_SIZE}
-                    height={ICON_SIZE}
-                  />
+                  {!isCollection && (
+                    <CustomIcon
+                      Icon={ICONS.Clock}
+                      width={ICON_SIZE}
+                      height={ICON_SIZE}
+                    />
+                  )}
                   <CustomText type="small" fontFamily="bold">
                     {duration}
                   </CustomText>
                 </View>
               </View>
-              {type === "default" && (
+              {/* {type === "default" && (
                 <View style={styles.ratingContainer}>
                   <CustomIcon
                     Icon={ICONS.Star}
@@ -173,12 +167,12 @@ const ContentCard: FC<ContentCardProps> = ({
                     {rating}
                   </CustomText>
                 </View>
-              )}
+              )} */}
             </TouchableOpacity>
           </BlurView>
         )}
       </ImageBackground>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 };
 
@@ -188,66 +182,66 @@ const styles = StyleSheet.create({
   cardContainer: {
     marginVertical: verticalScale(10),
     borderRadius: verticalScale(10),
-    overflow: 'hidden',
-    alignSelf: 'center',
-    position: 'relative',
+    overflow: "hidden",
+    alignSelf: "center",
+    position: "relative",
   },
   backgroundImage: {
     borderRadius: verticalScale(10),
   },
   blurView:
-    Platform.OS === 'ios'
+    Platform.OS === "ios"
       ? {
-          position: 'absolute',
+          position: "absolute",
           bottom: 0,
-          width: '100%',
+          width: "100%",
           zIndex: 10,
         }
       : {
-          position: 'absolute',
+          position: "absolute",
           bottom: 0,
-          width: '100%',
-          height: '36%',
+          width: "100%",
+          height: "36%",
         },
 
   content:
-    Platform.OS === 'ios'
+    Platform.OS === "ios"
       ? {
-          position: 'absolute',
+          position: "absolute",
           bottom: 0,
-          width: '100%',
+          width: "100%",
           zIndex: 20,
           paddingVertical: verticalScale(10),
           paddingHorizontal: horizontalScale(20),
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          height: '36%',
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          height: "36%",
         }
       : {
-          width: '100%',
+          width: "100%",
           paddingVertical: verticalScale(10),
           paddingHorizontal: horizontalScale(10),
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
           zIndex: 1,
         },
 
   textContainer: {
-    justifyContent: 'center',
+    justifyContent: "center",
     gap: verticalScale(10),
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: horizontalScale(5),
   },
   ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: horizontalScale(3),
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: "rgba(0,0,0,0.7)",
     borderRadius: verticalScale(6),
     padding: verticalScale(7),
   },

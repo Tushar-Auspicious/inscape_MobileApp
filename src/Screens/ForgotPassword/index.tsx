@@ -13,12 +13,25 @@ import COLORS from "../../Utilities/Colors";
 import { patchData, postData } from "../../APIService/api";
 import ENDPOINTS from "../../APIService/endPoints";
 import Toast from "react-native-toast-message";
+import { isValidEmail } from "../../Utilities/Helpers";
 
 const ForgotPassword: FC<ForgotPasswordProps> = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleContinue = async () => {
+    if (!email.trim()) {
+      Toast.show({ type: "error", text1: "Email is required" });
+      return;
+    }
+    if (!isValidEmail(email)) {
+      Toast.show({
+        type: "error",
+        text1: "Please enter a valid email address",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
 

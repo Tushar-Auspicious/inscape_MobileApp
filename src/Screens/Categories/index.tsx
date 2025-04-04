@@ -1,57 +1,119 @@
-import React, {FC, useState} from 'react';
+import { IMAGE_BASE_URL } from "@env";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   ImageBackground,
   ScrollView,
   TouchableOpacity,
   View,
-} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import ICONS from '../../Assets/icons';
-import ContentCard from '../../Components/Cards/ContentCard';
-import CustomIcon from '../../Components/CustomIcon';
-import CustomInput from '../../Components/CustomInput';
-import {CustomText} from '../../Components/CustomText';
-import {TrendingData} from '../../Seeds/HomeSeeds';
-import {CategoryProps} from '../../Typings/route';
-import styles from './style';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+import { fetchData } from "../../APIService/api";
+import ENDPOINTS from "../../APIService/endPoints";
+import ICONS from "../../Assets/icons";
+import ContentCard from "../../Components/Cards/ContentCard";
+import CustomIcon from "../../Components/CustomIcon";
+import CustomInput from "../../Components/CustomInput";
+import { CustomText } from "../../Components/CustomText";
+import Loader from "../../Components/Loader";
+import { GetCollectionResponse } from "../../Typings/apiTypes";
+import { CategoryProps } from "../../Typings/route";
+import { horizontalScale } from "../../Utilities/Metrics";
+import styles from "./style";
 
-const Categories: FC<CategoryProps> = ({navigation, route}) => {
-  const {data} = route.params;
+const Categories: FC<CategoryProps> = ({ navigation, route }) => {
+  const { id } = route.params;
 
-  console.log(data);
-
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [collectionData, setCollectionData] = useState<GetCollectionResponse>();
+  const [filteredAudioFiles, setFilteredAudioFiles] = useState<any[]>([]); // State for filtered results
 
   const handleCardPress = () => {
-    navigation.navigate('playerList');
+    if (collectionData && collectionData.collection._id) {
+      navigation.navigate("playerList", {
+        id: collectionData?.collection._id,
+      });
+    }
   };
 
+  const getCollectionData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchData<GetCollectionResponse>(
+        `${ENDPOINTS.collectionData}${id}/audios`
+      );
+      if (response.data.success) {
+        setCollectionData(response.data.data);
+        setFilteredAudioFiles(response.data.data.audioFiles); // Initialize filtered list
+      }
+    } catch (error: any) {
+      console.error("Home data fetch error:", error);
+      Toast.show({
+        type: "error",
+        text1: error.message || "Something went wrong",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  // Search filter function
+  const filterAudioFiles = useCallback(() => {
+    if (!searchQuery || searchQuery.trim() === "") {
+      setFilteredAudioFiles(collectionData?.audioFiles || []);
+    } else {
+      const filtered = collectionData?.audioFiles.filter((item) =>
+        item.songName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredAudioFiles(filtered || []);
+    }
+  }, [searchQuery, collectionData]);
+
+  useEffect(() => {
+    getCollectionData();
+  }, [getCollectionData]);
+
+  // Update filtered list whenever searchQuery or collectionData changes
+  useEffect(() => {
+    filterAudioFiles();
+  }, [searchQuery, collectionData, filterAudioFiles]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Loader />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
+    <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
       <ImageBackground
         source={{
-          uri: data.imageUrl,
+          uri: IMAGE_BASE_URL + collectionData?.collection.imageUrl,
         }}
         style={styles.imageBackground}
-        resizeMode="cover">
+        resizeMode="cover"
+      >
         <View style={styles.imageContent}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            style={styles.backButton}>
+            style={styles.backButton}
+          >
             <CustomIcon Icon={ICONS.BackArrow} height={12} width={12} />
           </TouchableOpacity>
 
           <View style={styles.imageTextContent}>
             <CustomText type="heading" fontFamily="bold">
-              {data.title}
+              {collectionData?.collection.name}
             </CustomText>
 
-            <CustomText>34 practices</CustomText>
-            <CustomText>
-              Sounds of nature have a replenishing and restorative effect on the
-              body.
-            </CustomText>
+            <CustomText>{`${collectionData?.audioFiles.length} practices`}</CustomText>
+            <ScrollView>
+              <CustomText>{collectionData?.collection.description}</CustomText>
+            </ScrollView>
           </View>
         </View>
       </ImageBackground>
@@ -59,7 +121,9 @@ const Categories: FC<CategoryProps> = ({navigation, route}) => {
       <View style={styles.mainHeader}>
         <CustomInput
           value={searchQuery}
-          onChangeText={setSearchQuery}
+          onChangeText={(text) =>
+            setSearchQuery(text.trim().length === 0 ? text.trim() : text)
+          }
           type="search"
           placeholder="Search..."
           style={styles.searchInput}
@@ -69,86 +133,34 @@ const Categories: FC<CategoryProps> = ({navigation, route}) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        nestedScrollEnabled={true}>
-        <View style={styles.sectionHeader}>
-          <CustomText type="title" fontFamily="bold">
-            Rain and Storm Sounds
-          </CustomText>
-          <TouchableOpacity onPress={() => {}}>
-            <CustomText fontFamily="semiBold">24 sessions</CustomText>
-          </TouchableOpacity>
-        </View>
-
+        nestedScrollEnabled={true}
+      >
         <FlatList
-          data={TrendingData}
+          data={filteredAudioFiles} // Use filteredAudioFiles instead of collectionData.audioFiles
           contentContainerStyle={styles.horizontalList}
-          keyExtractor={(item, index) => item.title + index.toString()}
-          horizontal
-          renderItem={({item}) => (
+          keyExtractor={(item, index) => item._id}
+          numColumns={2}
+          columnWrapperStyle={{
+            justifyContent: "space-between",
+            paddingHorizontal: horizontalScale(30),
+          }}
+          renderItem={({ item }) => (
             <ContentCard
               duration={item.duration}
-              imageUrl={item.imageUrl}
-              rating={item.rating}
-              title={item.title}
-              type={item.type}
+              imageUrl={IMAGE_BASE_URL + item.imageUrl}
+              title={item.songName}
+              type={"potrait"}
               isSmall
               onPress={handleCardPress}
             />
           )}
-        />
-
-        <View style={styles.sectionHeader}>
-          <CustomText type="title" fontFamily="bold">
-            At the Beach
-          </CustomText>
-          <TouchableOpacity onPress={() => {}}>
-            <CustomText fontFamily="semiBold">20 sessions</CustomText>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          data={TrendingData}
-          contentContainerStyle={styles.horizontalList}
-          keyExtractor={(item, index) => item.title + index.toString()}
-          horizontal
-          renderItem={({item}) => (
-            <ContentCard
-              duration={item.duration}
-              imageUrl={item.imageUrl}
-              rating={item.rating}
-              title={item.title}
-              type={item.type}
-              isSmall
-              onPress={handleCardPress}
-            />
-          )}
-        />
-
-        <View style={styles.sectionHeader}>
-          <CustomText type="title" fontFamily="bold">
-            Wandering in Nature
-          </CustomText>
-          <TouchableOpacity onPress={() => {}}>
-            <CustomText fontFamily="semiBold">14 sessions</CustomText>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          data={TrendingData}
-          contentContainerStyle={styles.horizontalList}
-          keyExtractor={(item, index) => item.title + index.toString()}
-          horizontal
-          renderItem={({item}) => (
-            <ContentCard
-              duration={item.duration}
-              imageUrl={item.imageUrl}
-              rating={item.rating}
-              title={item.title}
-              type={item.type}
-              isSmall
-              onPress={handleCardPress}
-            />
-          )}
+          ListEmptyComponent={() => {
+            return (
+              <CustomText style={{ textAlign: "center" }}>
+                No results found
+              </CustomText>
+            );
+          }}
         />
       </ScrollView>
     </SafeAreaView>

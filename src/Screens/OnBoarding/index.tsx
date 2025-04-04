@@ -41,13 +41,13 @@ const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
       }
     } else {
       await storeLocalStorageData(STORAGE_KEYS.isOnBoarded, true);
-      navigation.navigate("termsAndConditions");
+      navigation.replace("termsAndConditions");
     }
   };
 
   const handleSkip = async () => {
     await storeLocalStorageData(STORAGE_KEYS.isOnBoarded, true);
-    navigation.navigate("termsAndConditions");
+    navigation.replace("termsAndConditions");
   };
 
   const renderSlides = ({

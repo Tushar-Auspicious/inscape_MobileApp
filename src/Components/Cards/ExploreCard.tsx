@@ -3,9 +3,9 @@ import React, { FC } from "react";
 import {
   ImageBackground,
   Platform,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import {
@@ -34,7 +34,7 @@ const ExploreCard: FC<ExploreCardProps> = ({
   height = hp(Platform.OS === "ios" ? 12 : 14),
 }) => {
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
+    <Pressable onPress={onPress} style={{}}>
       <ImageBackground
         source={{ uri: imageUrl }}
         style={[
@@ -59,7 +59,9 @@ const ExploreCard: FC<ExploreCardProps> = ({
 
             {/* Content */}
             <View style={styles.content}>
-              <CustomText fontFamily="bold">{title}</CustomText>
+              <CustomText style={{ flex: 1 }} fontFamily="bold">
+                {title.slice(0, 15)}
+              </CustomText>
               <CustomText type="extraSmall" fontFamily="bold">
                 {subTitle}
               </CustomText>
@@ -92,14 +94,16 @@ const ExploreCard: FC<ExploreCardProps> = ({
         >
           {/* Content */}
           <View style={styles.content}>
-            <CustomText fontFamily="bold">{title}</CustomText>
+            <CustomText style={{ flex: 1 }} fontFamily="bold">
+              {title.slice(0, 10)}
+            </CustomText>
             <CustomText type="extraSmall" fontFamily="bold">
               {subTitle}
             </CustomText>
           </View>
         </BlurView>
       </ImageBackground>
-    </TouchableWithoutFeedback>
+    </Pressable>
   );
 };
 

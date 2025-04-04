@@ -108,7 +108,7 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
           />
           <CustomText style={styles.flexText}>
             I agree that the app may use my personal data to send me product or
-            service offerings via app or email.*
+            service offerings via app or email.
           </CustomText>
         </View>
       </View>

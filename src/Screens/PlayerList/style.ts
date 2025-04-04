@@ -116,7 +116,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",
-    paddingHorizontal: horizontalScale(20),
+    paddingLeft: horizontalScale(20),
+    paddingRight: horizontalScale(50),
   },
 
   footerLeftCont: {

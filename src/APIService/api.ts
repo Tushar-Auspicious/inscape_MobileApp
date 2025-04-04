@@ -1,7 +1,7 @@
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import STORAGE_KEYS from "../Utilities/Constants";
 import { API_URL } from "@env";
+import axios from "axios";
+import STORAGE_KEYS from "../Utilities/Constants";
+import { getLocalStorageData } from "../Utilities/Storage";
 
 type ApiResponse<T> = {
   data: T;
@@ -11,8 +11,8 @@ type ApiResponse<T> = {
 
 // Create the Axios instance
 const api = axios.create({
-  baseURL: API_URL, // Replace with your actual API base URL
-  timeout: 10000, // 10-second timeout
+  baseURL: API_URL,
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,9 +21,12 @@ const api = axios.create({
 // Request interceptor to add auth token dynamically
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem(STORAGE_KEYS.token); // Fetch token from AsyncStorage
+    const token = await getLocalStorageData(STORAGE_KEYS.token); // Fetch token from AsyncStorage
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      config.headers.role = `user`;
+      config.headers["x-client-type"] = "mobile";
     }
     return config;
   },
@@ -50,13 +53,16 @@ api.interceptors.response.use(
 );
 
 // API methods with optional headers
-export const fetchData = <T>(endpoint: string, headers?: any) =>
-  api.get<ApiResponse<T>>(endpoint, { headers });
+export const fetchData = <T>(endpoint: string, params?: any, headers?: any) =>
+  api.get<ApiResponse<T>>(endpoint, { params, headers });
 
-export const postData = <T>(endpoint: string, data: any, headers?: any) =>
+export const postData = <T>(endpoint: string, data?: any, headers?: any) =>
   api.post<ApiResponse<T>>(endpoint, data, { headers });
 
 export const patchData = <T>(endpoint: string, data: any, headers?: any) =>
   api.patch<ApiResponse<T>>(endpoint, data, { headers });
 
-export default api; // Export the api instance for custom requests if needed
+export const putData = <T>(endpoint: string, data: any, headers?: any) =>
+  api.put<ApiResponse<T>>(endpoint, data, { headers });
+
+export default api;

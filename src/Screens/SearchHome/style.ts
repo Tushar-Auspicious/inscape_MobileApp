@@ -25,6 +25,12 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: horizontalScale(20),
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
 });
 
 export default styles;

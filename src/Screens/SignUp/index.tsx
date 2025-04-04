@@ -162,7 +162,7 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
           })
         );
 
-        navigation.navigate("registerSuccess");
+        navigation.replace("registerSuccess");
       } else {
         Toast.show({
           type: "error",
@@ -246,7 +246,7 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
               <CustomInput
                 value={birthDate}
                 onChangeText={setBirthDate}
-                placeholder="Birthday"
+                placeholder="Birthday Date"
                 type="date"
                 heigth={50}
               />

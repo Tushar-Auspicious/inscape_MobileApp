@@ -2,6 +2,20 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat"; // Import the plugin
 import { Alert, PermissionsAndroid, Platform } from "react-native";
 import RNFS from "react-native-fs";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import STORAGE_KEYS from "./Constants";
+import { FileSystem } from "react-native-file-access";
+
+export type audioItem = {
+  url: string;
+  artwork: string;
+  collectionName: string;
+  title: string;
+  description: string;
+  duration: string;
+  level: string;
+};
+
 export const getKeyboardBehaviour =
   Platform.OS === "ios" ? "padding" : "height";
 
@@ -21,13 +35,21 @@ export const getGreeting = () => {
 
 export const downloadFile = async (
   fileUrl: string,
-  fileName: string
+  fileName: string,
+  onProgress?: (percentage: string) => void
 ): Promise<string | null> => {
+  // Encode the URL to handle spaces and special characters
+  const encodedUrl = encodeURI(fileUrl);
+  const {} = RNFS;
+  // Sanitize file name to remove special characters
+  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
   try {
-    let downloadPath = "";
+    // Define temporary and final paths
+    const tempPath = `${RNFS.TemporaryDirectoryPath}/${sanitizedFileName}`;
+    let finalPath = "";
 
+    // Handle Android permissions and final path
     if (Platform.OS === "android") {
-      // Request permission only for Android 9 (API 28) and below
       if (Platform.Version < 29) {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -37,27 +59,33 @@ export const downloadFile = async (
             buttonPositive: "OK",
           }
         );
-
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-          Alert.alert(
-            "Permission Denied!",
-            "You need to give storage permission to download the file."
-          );
-          return null;
+          throw new Error("Storage permission denied");
         }
       }
-
-      // Use "Downloads" directory for Android 10+
-      downloadPath = `${RNFS.DownloadDirectoryPath}/${fileName}`;
+      finalPath = `${RNFS.DownloadDirectoryPath}/${sanitizedFileName}`;
     } else {
-      // Use Documents directory for iOS
-      downloadPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+      // iOS: Use Documents directory as final path
+      finalPath = `${RNFS.LibraryDirectoryPath}/${sanitizedFileName}`;
     }
 
-    // Download the file
-    const options = {
-      fromUrl: fileUrl,
-      toFile: downloadPath,
+    console.log("Temporary path:", tempPath);
+    console.log("Final download path:", finalPath);
+
+    // Remove existing files at temp and final paths to avoid conflicts
+    if (await RNFS.exists(tempPath)) {
+      console.log("Removing existing temp file...");
+      await RNFS.unlink(tempPath);
+    }
+    if (await RNFS.exists(finalPath)) {
+      console.log("Removing existing final file...");
+      await RNFS.unlink(finalPath);
+    }
+
+    // Download file to temporary directory
+    const downloadOptions = {
+      fromUrl: encodedUrl,
+      toFile: tempPath,
       background: true,
       progressDivider: 1,
       progress: (res: { bytesWritten: number; contentLength: number }) => {
@@ -66,22 +94,63 @@ export const downloadFile = async (
           100
         ).toFixed(2);
         console.log(`Download Progress: ${percentage}%`);
+        onProgress?.(percentage);
+      },
+      headers: {
+        "Cache-Control": "no-cache",
       },
     };
 
-    const result = await RNFS.downloadFile(options).promise;
+    const result = await RNFS.downloadFile(downloadOptions).promise;
+    console.log("Download result:", result);
 
-    if (result.statusCode === 200) {
-      console.log("File Downloaded:", downloadPath);
-      return downloadPath;
-    } else {
-      Alert.alert("Error", "Failed to download file.");
-      return null;
+    if (result.statusCode !== 200) {
+      throw new Error(`Download failed with status code: ${result.statusCode}`);
     }
+
+    // Verify temp file exists and has content
+    const tempFileExists = await RNFS.exists(tempPath);
+    if (!tempFileExists) {
+      throw new Error("Temporary file not found after download");
+    }
+    const tempFileStats = await RNFS.stat(tempPath);
+    if (tempFileStats.size === 0) {
+      await RNFS.unlink(tempPath);
+      throw new Error("Downloaded temporary file is empty");
+    }
+
+    // Copy file from temporary directory to final destination
+    if (Platform.OS === "android") {
+      // Use FileSystem.cpExternal for Android Downloads folder
+      await FileSystem.cpExternal(tempPath, sanitizedFileName, "downloads");
+    } else {
+      // On iOS, move directly to Documents directory
+      await RNFS.moveFile(tempPath, finalPath);
+    }
+
+    // Verify final file exists
+    const finalFileExists = await RNFS.exists(finalPath);
+    if (!finalFileExists) {
+      throw new Error("File not found in final destination after copy");
+    }
+
+    console.log("File successfully downloaded and copied to:", finalPath);
+    return finalPath;
   } catch (error) {
-    Alert.alert("Error", "Something went wrong while downloading.");
-    console.error(error);
+    console.error("Download error:", error);
+    Alert.alert(
+      "Download Error",
+      error instanceof Error ? error.message : "Failed to download file"
+    );
     return null;
+  } finally {
+    // Clean up temporary file if it still exists
+    const tempPath = `${RNFS.TemporaryDirectoryPath}/${sanitizedFileName}`;
+    if (await RNFS.exists(tempPath)) {
+      await RNFS.unlink(tempPath).catch((err) =>
+        console.warn("Failed to clean up temp file:", err)
+      );
+    }
   }
 };
 
@@ -102,3 +171,84 @@ export const convertDate = (inputDate: string): string => {
   // Format to "MM-DD-YYYY"
   return parsedDate.format("MM-DD-YYYY");
 };
+
+export const convertStringToDate = (dateString: string) => {
+  // The format "Do MMM YYYY" matches "20th Mar 2025"
+  const date = dayjs(dateString, "Do MMM YYYY");
+
+  if (date.isValid()) {
+    // Convert to Date object if needed
+    return date.toDate();
+  } else {
+    console.error("Invalid date string provided:", dateString);
+    return null; // or throw an error, or return a default date
+  }
+};
+
+// Save downloaded audio info
+export const saveDownloadedAudio = async (audioItem: audioItem) => {
+  try {
+    const existingAudios = await AsyncStorage.getItem(
+      STORAGE_KEYS.downloadedAudios
+    );
+    const audios = existingAudios ? JSON.parse(existingAudios) : [];
+
+    // Check if audio already exists to avoid duplicates
+    if (!audios.some((audio: { url: any }) => audio.url === audioItem.url)) {
+      audios.push({
+        artwork: audioItem.artwork,
+        collectionName: audioItem.collectionName,
+        title: audioItem.title,
+        description: audioItem.description,
+        url: audioItem.url,
+        downloadedAt: new Date().toISOString(),
+        level: audioItem.level,
+        duration: audioItem.duration,
+      });
+
+      await AsyncStorage.setItem(
+        STORAGE_KEYS.downloadedAudios,
+        JSON.stringify(audios)
+      );
+    }
+  } catch (error) {
+    console.error("Error saving downloaded audio:", error);
+  }
+};
+
+// Get all downloaded audios
+export const getDownloadedAudios = async () => {
+  try {
+    const storedAudios = await AsyncStorage.getItem(
+      STORAGE_KEYS.downloadedAudios
+    );
+
+    return storedAudios ? JSON.parse(storedAudios) : [];
+  } catch (error) {
+    console.error("Error retrieving audios:", error);
+    return [];
+  }
+};
+
+// Remove a specific audio
+export const removeDownloadedAudio = async (id: any) => {
+  try {
+    const storedAudios = await AsyncStorage.getItem(
+      STORAGE_KEYS.downloadedAudios
+    );
+    let audios = storedAudios ? JSON.parse(storedAudios) : [];
+
+    audios = audios.filter((audio: { id: any }) => audio.id !== id);
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.downloadedAudios,
+      JSON.stringify(audios)
+    );
+  } catch (error) {
+    console.error("Error removing audio:", error);
+  }
+};
+
+export function timeStringToSeconds(timeString: string) {
+  const [hours, minutes, seconds] = timeString.split(":").map(Number);
+  return hours * 3600 + minutes * 60 + seconds;
+}

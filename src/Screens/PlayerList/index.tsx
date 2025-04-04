@@ -1,6 +1,6 @@
-import React, { FC, useState } from "react";
+import { IMAGE_BASE_URL } from "@env";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   ImageBackground,
@@ -20,20 +20,29 @@ import {
   useIsPlaying,
   useProgress,
 } from "react-native-track-player";
+import { fetchData } from "../../APIService/api";
+import ENDPOINTS from "../../APIService/endPoints";
 import ICONS from "../../Assets/icons";
 import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
+import Loader from "../../Components/Loader";
+import { useStopPlaybackOnBackground } from "../../Components/TrackPlayer";
 import { TrackList } from "../../Seeds/PlayerTracks";
+import {
+  GetCollectionResponse,
+  GetSearchAudioResponse,
+} from "../../Typings/apiTypes";
 import { PlayerListProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
-import { getGreeting } from "../../Utilities/Helpers";
+import { getGreeting, timeStringToSeconds } from "../../Utilities/Helpers";
 import { hp } from "../../Utilities/Metrics";
 import { useSetupPlayer } from "../Player";
 import styles from "./style";
-import { useStopPlaybackOnBackground } from "../../Components/TrackPlayer";
 
-const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
+const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
+  const { id, isFromMeditation, meditationTypeData } = route.params;
+
   const insets = useSafeAreaInsets();
   const { position, duration, buffered } = useProgress();
   const { playing } = useIsPlaying();
@@ -41,6 +50,14 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
   const track = useActiveTrack();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [isNextAvailable, setIsNextAvailable] = useState(false);
+  const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [collectionData, setCollectionData] = useState<GetCollectionResponse>();
+
+  const [searchedAudios, setSearchedAudios] =
+    useState<GetSearchAudioResponse[]>();
 
   const playTrack = async (index: number) => {
     if (index < 0 || index >= TrackList.length) return; // Prevent out-of-bounds errors
@@ -77,33 +94,111 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
     }
   };
 
-  const handleGoToPLayer = async (track: any) => {
+  const handleGoToPLayer = async (track: any, index: number) => {
     const trackIndex = TrackList.findIndex((t) => t.id === track.id); // Find index of selected track
     setCurrentTrackIndex(trackIndex); // this is for this page mini player
 
-    navigation.navigate("player", {
-      trackList: TrackList, // Pass full TrackList
-      currentTrackIndex: trackIndex, // Pass current index
-    });
+    if (collectionData && collectionData?.audioFiles.length > 0) {
+      navigation.navigate("player", {
+        currentTrackIndex: index, // Pass current index
+        trackList: collectionData?.audioFiles.map((item) => ({
+          artwork: IMAGE_BASE_URL + item.imageUrl,
+          collectionName: collectionData.collection.name ?? "",
+          title: item.songName,
+          description: item.description,
+          url: IMAGE_BASE_URL + item.audioUrl,
+          duration: timeStringToSeconds(item.duration),
+          level: item.levels[0],
+        })),
+      });
+    }
   };
 
   useStopPlaybackOnBackground();
 
-  if (!isPlayerReady) {
+  const getCollectionData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchData<GetCollectionResponse>(
+        `${ENDPOINTS.collectionData}${id}/audios`
+      );
+      if (response.data.success) {
+        setCollectionData(response.data.data);
+      }
+    } catch (error: any) {
+      console.error("Home data fetch error:", error);
+      Toast.show({
+        type: "error",
+        text1: error.message || "Something went wrong",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const getmeditationTypeData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchData<GetSearchAudioResponse[]>(
+        ENDPOINTS.searchAudio,
+        {
+          bestFor: meditationTypeData?.title,
+        }
+      );
+      if (response.data.success) {
+        setSearchedAudios(response.data.data);
+      }
+    } catch (error: any) {
+      console.error("Home data fetch error:", error);
+      Toast.show({
+        type: "error",
+        text1: error.message || "Something went wrong",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isFromMeditation && meditationTypeData?.title) {
+      getmeditationTypeData();
+    } else {
+      getCollectionData();
+    }
+  }, [isFromMeditation, meditationTypeData]);
+
+  useEffect(() => {
+    if (collectionData && collectionData?.audioFiles.length > 0) {
+      setIsNextAvailable(
+        currentTrackIndex < collectionData?.audioFiles.length - 1
+      );
+      setIsPreviousAvailable(currentTrackIndex > 0);
+    }
+  }, [collectionData]);
+
+  if (isLoading) {
     return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          backgroundColor: COLORS.darkBlue,
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100%",
-        }}
-      >
-        <ActivityIndicator />
+      <SafeAreaView style={styles.container}>
+        <Loader />
       </SafeAreaView>
     );
   }
+
+  // if (!isPlayerReady) {
+  //   return (
+  //     <SafeAreaView
+  //       style={{
+  //         flex: 1,
+  //         backgroundColor: COLORS.darkBlue,
+  //         alignItems: "center",
+  //         justifyContent: "center",
+  //         minHeight: "100%",
+  //       }}
+  //     >
+  //       <ActivityIndicator />
+  //     </SafeAreaView>
+  //   );
+  // }
 
   return (
     <SafeAreaView
@@ -142,62 +237,118 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
 
           <View style={styles.headerTextCont}>
             <CustomText type="subHeading">{getGreeting()}</CustomText>
-
             <CustomText>
-              We want to acquaint you with the most effective mantras and you
-              will choose the ones that like best
+              {isFromMeditation
+                ? meditationTypeData?.title
+                : collectionData?.collection.description}
             </CustomText>
           </View>
         </View>
 
         <View>
-          <FlatList
-            data={TrackList}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item, index }) => {
-              return (
-                <View
-                  style={[
-                    styles.listCard,
-                    {
-                      height: hp(Platform.OS === 'ios' ? 60 : 60),
-                    },
-                  ]}>
-                  <ImageBackground
-                    source={{uri: item.artwork}}
-                    style={styles.cardImage}
-                    imageStyle={styles.cardImageStyle}>
-                    <View style={styles.cardContent}>
-                      <Image
-                        source={IMAGES.curvedView}
-                        style={styles.cardContentImage}
-                        resizeMode="contain"
-                      />
-                      <View style={styles.cardTextCont}>
-                        <CustomText type="subTitle" color={COLORS.darkPink}>
-                          {item.title}
-                        </CustomText>
-                        <CustomText type="small" color={COLORS.darkPink}>
-                          7 mantras for your for happy life balance
-                        </CustomText>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => handleGoToPLayer(item)}
-                        style={styles.cardPlayButton}>
-                        <CustomIcon
-                          Icon={ICONS.playIcon}
-                          height={14}
-                          width={14}
+          {isFromMeditation ? (
+            <FlatList
+              data={searchedAudios}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item, index }) => {
+                return (
+                  <View
+                    style={[
+                      styles.listCard,
+                      {
+                        height: hp(Platform.OS === "ios" ? 60 : 60),
+                      },
+                    ]}
+                  >
+                    <ImageBackground
+                      source={{ uri: IMAGE_BASE_URL + item.imageUrl }}
+                      style={styles.cardImage}
+                      imageStyle={styles.cardImageStyle}
+                    >
+                      <View style={styles.cardContent}>
+                        <Image
+                          source={IMAGES.curvedView}
+                          style={styles.cardContentImage}
+                          resizeMode="contain"
                         />
-                      </TouchableOpacity>
-                    </View>
-                  </ImageBackground>
-                </View>
-              );
-            }}
-          />
+                        <View style={styles.cardTextCont}>
+                          <CustomText type="subTitle" color={COLORS.darkPink}>
+                            {item.songName}
+                          </CustomText>
+                          <CustomText type="small" color={COLORS.darkPink}>
+                            {item.description}
+                          </CustomText>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => handleGoToPLayer(item, index)}
+                          style={styles.cardPlayButton}
+                        >
+                          <CustomIcon
+                            Icon={ICONS.playIcon}
+                            height={14}
+                            width={14}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </ImageBackground>
+                  </View>
+                );
+              }}
+            />
+          ) : (
+            <FlatList
+              data={collectionData?.audioFiles}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item, index }) => {
+                return (
+                  <View
+                    style={[
+                      styles.listCard,
+                      {
+                        height: hp(Platform.OS === "ios" ? 60 : 60),
+                      },
+                    ]}
+                  >
+                    <ImageBackground
+                      source={{ uri: IMAGE_BASE_URL + item.imageUrl }}
+                      style={styles.cardImage}
+                      imageStyle={styles.cardImageStyle}
+                    >
+                      <View style={styles.cardContent}>
+                        <Image
+                          source={IMAGES.curvedView}
+                          style={styles.cardContentImage}
+                          resizeMode="contain"
+                        />
+                        <View style={styles.cardTextCont}>
+                          <CustomText type="subTitle" color={COLORS.darkPink}>
+                            {item.songName}
+                          </CustomText>
+                          <CustomText type="small" color={COLORS.darkPink}>
+                            {item.description}
+                          </CustomText>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => handleGoToPLayer(item, index)}
+                          style={styles.cardPlayButton}
+                        >
+                          <CustomIcon
+                            Icon={ICONS.playIcon}
+                            height={14}
+                            width={14}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </ImageBackground>
+                  </View>
+                );
+              }}
+            />
+          )}
         </View>
 
         {track ? (
@@ -215,20 +366,22 @@ const PlayerList: FC<PlayerListProps> = ({ navigation }) => {
                 <CustomIcon
                   onPress={handlePreviousTrack}
                   Icon={ICONS.playPreviousIcon}
-                  height={15}
-                  width={15}
+                  height={20}
+                  width={20}
+                  disabled={!isPreviousAvailable}
                 />
                 <CustomIcon
                   onPress={playing ? Player.pause : Player.play}
                   Icon={playing ? ICONS.pauseIcon : ICONS.playIcon}
-                  height={14}
-                  width={14}
+                  height={18}
+                  width={18}
                 />
                 <CustomIcon
                   onPress={handleNextTrack}
                   Icon={ICONS.playNextIcon}
-                  height={15}
-                  width={15}
+                  height={20}
+                  width={20}
+                  disabled={!isNextAvailable}
                 />
               </View>
             </View>

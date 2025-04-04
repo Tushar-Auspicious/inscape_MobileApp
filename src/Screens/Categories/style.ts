@@ -15,6 +15,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: verticalScale(20),
     justifyContent: "space-between",
+    backgroundColor: "rgba( 0, 0, 0, 0.25 )",
   },
   backButton: {
     paddingVertical: verticalScale(8),
@@ -46,10 +47,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(15),
     paddingHorizontal: horizontalScale(20),
   },
-  horizontalList: {
-    gap: horizontalScale(20),
-    paddingHorizontal: horizontalScale(20),
-  },
+  horizontalList: {},
 });
 
 export default styles;

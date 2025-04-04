@@ -29,6 +29,10 @@ const setupPlayer = async (
 export const SetupService = async () => {
   await setupPlayer({
     autoHandleInterruptions: true,
+    minBuffer: 5, // Minimum buffer in seconds before playback starts
+    maxBuffer: 30, // Maximum buffer to hold (adjust based on needs)
+    playBuffer: 2, // Start playing after 2 seconds of buffering
+    backBuffer: 0, // No back buffer to reduce memory usage
   });
   await TrackPlayer.updateOptions({
     android: {

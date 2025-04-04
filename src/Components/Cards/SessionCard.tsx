@@ -1,17 +1,16 @@
+import React, { FC } from "react";
 import {
   Image,
-  ImageBackground,
+  Pressable,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { FC } from "react";
-import { horizontalScale, verticalScale, wp } from "../../Utilities/Metrics";
-import { CustomText } from "../CustomText";
 import ICONS from "../../Assets/icons";
+import { horizontalScale, verticalScale, wp } from "../../Utilities/Metrics";
 import CustomIcon from "../CustomIcon";
-import COLORS from "../../Utilities/Colors";
+import { CustomText } from "../CustomText";
+
 type SessionCardrops = {
   imageUrl: string;
   title: string;
@@ -28,11 +27,7 @@ const SessionCard: FC<SessionCardrops> = ({
   onPress,
 }) => {
   return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={onPress}
-      style={styles.cardContainer}
-    >
+    <Pressable onPress={onPress} style={styles.cardContainer}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <View style={styles.content}>
         <CustomText type="subTitle" fontFamily="semiBold">
@@ -52,7 +47,7 @@ const SessionCard: FC<SessionCardrops> = ({
         </View>
         <CustomText type="small">{level}</CustomText>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

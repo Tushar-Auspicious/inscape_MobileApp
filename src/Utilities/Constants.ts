@@ -4,6 +4,7 @@ const STORAGE_KEYS = {
   isOnBoarded: "isOnBoarded",
   isTermsAccepted: "isTermsAccepted",
   isRegistered: "isRegistered",
+  downloadedAudios: "downloaded_audios",
 };
 
 export default STORAGE_KEYS;

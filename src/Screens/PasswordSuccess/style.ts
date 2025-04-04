@@ -12,11 +12,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.darkBlue,
     paddingHorizontal: horizontalScale(20),
-    paddingTop: verticalScale(20),
+    paddingVertical: verticalScale(20),
     gap: verticalScale(40),
   },
   image: {
-    height: hp(65),
+    height: hp(60),
     width: wp(95),
     alignSelf: "center",
     resizeMode: "cover",

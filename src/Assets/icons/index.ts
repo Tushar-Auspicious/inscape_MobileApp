@@ -28,6 +28,7 @@ import SearchWhite from "./search-white.svg";
 import shuffleIcon from "./shuffle.svg";
 import Star from "./star.svg";
 import upArrowIcon from "./upArrow.svg";
+import eyeOnIcon from "./eyeOpenIcon.svg";
 
 const ICONS = {
   Home,
@@ -60,6 +61,7 @@ const ICONS = {
   crossIcon,
   tickIcon,
   eyeoffIcon,
+  eyeOnIcon,
 };
 
 export default ICONS;

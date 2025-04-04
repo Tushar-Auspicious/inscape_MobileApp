@@ -8,6 +8,7 @@ import CustomButton from "../../Components/Buttons/CustomButton";
 import CustomInput from "../../Components/CustomInput";
 import { CustomText } from "../../Components/CustomText";
 import { KeyboardAvoidingContainer } from "../../Components/KeyboardAvoidingComponent";
+import { useAppSelector } from "../../Redux/store";
 import { LoginResponse } from "../../Typings/apiTypes";
 import { SignInProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
@@ -15,7 +16,6 @@ import STORAGE_KEYS from "../../Utilities/Constants";
 import { isValidEmail } from "../../Utilities/Helpers";
 import { storeLocalStorageData } from "../../Utilities/Storage";
 import styles from "./style";
-import { useAppSelector } from "../../Redux/store";
 
 const SignIn: FC<SignInProps> = ({ navigation }) => {
   const [inputData, setInputData] = useState({
@@ -23,9 +23,7 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
     password: "12345",
   });
 
-  const { isOnBoarded, isTermsAccepted, token, isRegistered } = useAppSelector(
-    (state) => state.initial
-  );
+  const { isRegistered } = useAppSelector((state) => state.initial);
 
   const handleInputChange = (fieldName: string, value: string) => {
     setInputData((prev) => ({
@@ -38,21 +36,28 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
 
   const validateForm = (): boolean => {
     let isValid = true;
-    const newErrors = { email: "", password: "" };
 
-    // Email validation
     if (!inputData.email.trim()) {
-      newErrors.email = "Email is required";
+      Toast.show({ type: "error", text1: "Email is required" });
       isValid = false;
+      return isValid;
     } else if (!isValidEmail(inputData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      Toast.show({
+        type: "error",
+        text1: "Please enter a valid email address",
+      });
       isValid = false;
+      return isValid;
     }
 
     // Password validation
     if (!inputData.password.trim()) {
-      newErrors.password = "Password is required";
+      Toast.show({
+        type: "error",
+        text1: "Password is required",
+      });
       isValid = false;
+      return isValid;
     }
 
     return isValid;
@@ -77,14 +82,12 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
         }
       );
 
-      console.log(response);
-
       if (response.data.success) {
         await storeLocalStorageData(
           STORAGE_KEYS.token,
           response.data.data.token
         );
-        navigation.navigate("mainStack", {
+        navigation.replace("mainStack", {
           screen: "tabs",
           params: { screen: "homeTab" },
         });
@@ -103,6 +106,7 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
       setIsLoading(false);
     }
   };
+
   const handleForgotPassword = () => {
     navigation.navigate("forgotPassword");
   };

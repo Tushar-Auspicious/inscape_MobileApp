@@ -23,14 +23,20 @@ export type AuthStackParams = {
 export type MainStackParams = {
   tabs: NavigatorScreenParams<BottomTabParams>;
   searchHome: undefined;
-  categories: { data: any };
+  categories: { id: string };
   myAccount: undefined;
   Faq: undefined;
   settingsTermsAndConditions: undefined;
   settingsPrivacyPolicy: undefined;
-  playerList: undefined;
+  playerList: {
+    id?: string;
+    isFromMeditation?: boolean;
+    meditationTypeData?: {
+      title: string;
+    };
+  };
   player: {
-    trackList: TrackData[]; // Pass full TrackList
+    trackList: TrackData[];
     currentTrackIndex: number;
   };
 };

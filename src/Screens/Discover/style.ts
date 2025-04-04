@@ -24,6 +24,14 @@ const styles = StyleSheet.create({
   },
 
   flatListCont: { paddingBottom: verticalScale(60) },
+
+  list: {},
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
 });
 
 export default styles;

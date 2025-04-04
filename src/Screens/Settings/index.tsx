@@ -5,6 +5,8 @@ import ICONS from "../../Assets/icons";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import LogOutModal from "../../Components/Modals/LogOutModal";
+import { setIsRegistered, setToken } from "../../Redux/slices/initialSlice";
+import { useAppDispatch } from "../../Redux/store";
 import { SettingScreenProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import STORAGE_KEYS from "../../Utilities/Constants";
@@ -14,6 +16,7 @@ import styles from "./style";
 
 const Settings: FC<SettingScreenProps> = ({ navigation }) => {
   const sheetRef = useRef<any>(null);
+  const dispatch = useAppDispatch();
 
   const handleCancel = () => {
     sheetRef.current.close();
@@ -23,10 +26,11 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
     await deleteLocalStorageData(STORAGE_KEYS.isAuth);
     await deleteLocalStorageData(STORAGE_KEYS.token);
     await deleteLocalStorageData(STORAGE_KEYS.isRegistered);
+    dispatch(setToken(null));
+    dispatch(setIsRegistered(null));
 
     navigation.replace("authStack", { screen: "signIn" });
     sheetRef.current.close();
-    console.log("User logged out");
   };
 
   const renderBars = (title: string, onPress: () => void) => {
