@@ -18,6 +18,8 @@ import { myAccountProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import { convertStringToDate } from "../../Utilities/Helpers";
 import styles from "./style";
+import { deleteLocalStorageData } from "../../Utilities/Storage";
+import STORAGE_KEYS from "../../Utilities/Constants";
 
 dayjs.extend(customParseFormat);
 
@@ -115,6 +117,12 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
         type: "error",
         text1: error.message || "Something went wrong.",
       });
+      if (error.status === 404 || error.status === 401) {
+        await deleteLocalStorageData(STORAGE_KEYS.token);
+        await deleteLocalStorageData(STORAGE_KEYS.isAuth);
+        await deleteLocalStorageData(STORAGE_KEYS.isRegistered);
+        navigation.replace("authStack", { screen: "signIn" });
+      }
     } finally {
       setGetDataLoading(false);
     }

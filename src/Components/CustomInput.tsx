@@ -30,6 +30,7 @@ type CustomInputProps = {
   label?: string;
   heigth?: number;
   disabled?: boolean;
+  maxDate?: Date;
 };
 
 const CustomInput: FC<CustomInputProps> = ({
@@ -43,6 +44,7 @@ const CustomInput: FC<CustomInputProps> = ({
   onFilterPress,
   heigth = 56,
   disabled = false,
+  maxDate = new Date(),
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false); // State to toggle password visibility
 
@@ -122,6 +124,7 @@ const CustomInput: FC<CustomInputProps> = ({
               mode={type}
               onConfirm={handleConfirm}
               onCancel={handleCancel}
+              maximumDate={maxDate}
             />
           </>
         )}

@@ -74,17 +74,15 @@ const ContentCard: FC<ContentCardProps> = ({
   const blurViewHeight = type === "default" ? "36%" : "32%";
 
   return (
-    <Pressable onPress={onPress}>
-      <ImageBackground
-        source={{ uri: imageUrl }}
-        style={[
-          styles.cardContainer,
-          { width, height, justifyContent: "flex-end" },
-        ]}
-        imageStyle={styles.backgroundImage}
+    <ImageBackground
+      source={{ uri: imageUrl }}
+      style={[styles.cardContainer]}
+      imageStyle={styles.backgroundImage}
+    >
+      <Pressable
+        onPress={onPress}
+        style={{ width, height, justifyContent: "flex-end" }}
       >
-        {/* Blur Overlay */}
-
         {Platform.OS === "ios" ? (
           <>
             <BlurView
@@ -135,7 +133,7 @@ const ContentCard: FC<ContentCardProps> = ({
             reducedTransparencyFallbackColor="white"
             overlayColor="transparent"
           >
-            <TouchableOpacity style={styles.content}>
+            <TouchableOpacity style={styles.content} onPress={onPress}>
               <View style={styles.textContainer}>
                 <CustomText
                   type={isSmall ? "default" : "subTitle"}
@@ -171,8 +169,8 @@ const ContentCard: FC<ContentCardProps> = ({
             </TouchableOpacity>
           </BlurView>
         )}
-      </ImageBackground>
-    </Pressable>
+      </Pressable>
+    </ImageBackground>
   );
 };
 
@@ -212,7 +210,7 @@ const styles = StyleSheet.create({
           width: "100%",
           zIndex: 20,
           paddingVertical: verticalScale(10),
-          paddingHorizontal: horizontalScale(20),
+          paddingHorizontal: horizontalScale(10),
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",

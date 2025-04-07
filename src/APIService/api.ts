@@ -40,7 +40,10 @@ api.interceptors.response.use(
     if (error.response) {
       // Extract API error response
       console.error("API Error:", error.response);
-      return Promise.reject(error.response.data); // Reject with only response data
+      return Promise.reject({
+        ...error.response.data,
+        status: error.response.status,
+      }); // Reject with only response data
     } else {
       // Handle network or unexpected errors
       console.error("Network/Unexpected Error:", error.message);

@@ -1,7 +1,7 @@
 import { IMAGE_BASE_URL } from "@env";
 import { FlashList } from "@shopify/flash-list";
 import React, { FC, useCallback, useEffect, useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -25,7 +25,7 @@ import {
 import { HomeScreenProps } from "../../Typings/route";
 import styles from "./style";
 import { timeStringToSeconds } from "../../Utilities/Helpers";
-import { horizontalScale, hp, wp } from "../../Utilities/Metrics";
+import { horizontalScale } from "../../Utilities/Metrics";
 
 const Home: FC<HomeScreenProps> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -106,33 +106,37 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
   );
 
   const renderCollectionItem = useCallback(
-    ({ item, index }: { item: Audio; index: number }) => (
-      <View style={{ marginRight: horizontalScale(10) }}>
-        <ContentCard
-          duration={item.duration}
-          imageUrl={IMAGE_BASE_URL + item.imageUrl}
-          title={item.songName}
-          type="potrait"
-          isSmall
-          onPress={() => {
-            if (!homeData?.collection.audios) return;
-            navigation.navigate("player", {
-              trackList: homeData.collection.audios.map((item) => ({
-                artwork: IMAGE_BASE_URL + item.imageUrl,
-                collectionName: homeData.collection.name ?? "",
-                title: item.songName,
-                duration: timeStringToSeconds(item.duration),
-                description: item.description,
-                url: IMAGE_BASE_URL + item.audioUrl,
-                level: item.levels[0]?.name,
-              })),
-              currentTrackIndex: index,
-            });
-          }}
-        />
-      </View>
-    ),
-    [navigation]
+    ({ item, index }: { item: Audio; index: number }) => {
+      const handlePress = () => {
+        if (!homeData?.collection.audios) return;
+        navigation.navigate("player", {
+          trackList: homeData.collection.audios.map((item) => ({
+            artwork: IMAGE_BASE_URL + item.imageUrl,
+            collectionName: homeData.collection.name ?? "",
+            title: item.songName,
+            duration: timeStringToSeconds(item.duration),
+            description: item.description,
+            url: IMAGE_BASE_URL + item.audioUrl,
+            level: item.levels[0]?.name,
+          })),
+          currentTrackIndex: index,
+        });
+      };
+
+      return (
+        <View style={{ marginRight: horizontalScale(10) }}>
+          <ContentCard
+            duration={item.duration}
+            imageUrl={IMAGE_BASE_URL + item.imageUrl}
+            title={item.songName}
+            type="potrait"
+            isSmall
+            onPress={handlePress}
+          />
+        </View>
+      );
+    },
+    [navigation, homeData]
   );
 
   const renderMeditationTypeItem = useCallback(
@@ -269,7 +273,6 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
               keyExtractor={keyExtractor}
               horizontal
               renderItem={renderCollectionItem}
-              estimatedItemSize={50}
               showsHorizontalScrollIndicator={false}
             />
           </>

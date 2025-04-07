@@ -65,8 +65,9 @@ export const downloadFile = async (
       }
       finalPath = `${RNFS.DownloadDirectoryPath}/${sanitizedFileName}`;
     } else {
-      // iOS: Use Documents directory as final path
-      finalPath = `${RNFS.LibraryDirectoryPath}/${sanitizedFileName}`;
+      // iOS: Use DocumentDirectory for audio files
+      // This makes files accessible to the app and can be shared
+      finalPath = `${RNFS.DocumentDirectoryPath}/${sanitizedFileName}`;
     }
 
     console.log("Temporary path:", tempPath);
@@ -126,6 +127,10 @@ export const downloadFile = async (
     } else {
       // On iOS, move directly to Documents directory
       await RNFS.moveFile(tempPath, finalPath);
+
+      // For iOS, log the file URL that can be used to access the file
+      const fileUrl = `file://${finalPath}`;
+      console.log("iOS file URL:", fileUrl);
     }
 
     // Verify final file exists
