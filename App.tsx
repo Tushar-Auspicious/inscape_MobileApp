@@ -13,7 +13,10 @@ import { useAppDispatch } from "./src/Redux/store";
 import Routing from "./src/Routes";
 import COLORS from "./src/Utilities/Colors";
 import STORAGE_KEYS from "./src/Utilities/Constants";
-import { getLocalStorageData } from "./src/Utilities/Storage";
+import {
+  deleteLocalStorageData,
+  getLocalStorageData,
+} from "./src/Utilities/Storage";
 
 LogBox.ignoreAllLogs();
 Appearance.setColorScheme("light");
@@ -31,6 +34,13 @@ const App = () => {
         const isRegistered = await getLocalStorageData(
           STORAGE_KEYS.isRegistered
         );
+
+        // await deleteLocalStorageData(STORAGE_KEYS.isAuth);
+        // await deleteLocalStorageData(STORAGE_KEYS.isOnBoarded);
+        // await deleteLocalStorageData(STORAGE_KEYS.isRegistered);
+        // await deleteLocalStorageData(STORAGE_KEYS.isTermsAccepted);
+        // await deleteLocalStorageData(STORAGE_KEYS.token);
+        // await deleteLocalStorageData(STORAGE_KEYS.downloadedAudios);
 
         dispatch(setToken(token));
         dispatch(setIsOnBoarded(isOnboarded));

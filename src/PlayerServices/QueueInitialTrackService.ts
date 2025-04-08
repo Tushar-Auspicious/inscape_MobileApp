@@ -2,6 +2,7 @@ import TrackPlayer from "react-native-track-player";
 import IMAGES from "../Assets/images";
 
 export type TrackData = {
+  id?: string;
   url: string;
   title: string;
   collectionName: string;

@@ -13,7 +13,7 @@ export type AuthStackParams = {
   termsAndConditions: undefined;
   signUp: undefined;
   registerSuccess: undefined;
-  otpScreen: { isFromForgotPassword?: boolean; email: string };
+  otpScreen: { isFromForgotPassword?: boolean; email?: string };
   signIn: undefined;
   forgotPassword: undefined;
   createNewPassword: { otp: string };
@@ -38,6 +38,7 @@ export type MainStackParams = {
   player: {
     trackList: TrackData[];
     currentTrackIndex: number;
+    isFromLibrary?: boolean;
   };
 };
 

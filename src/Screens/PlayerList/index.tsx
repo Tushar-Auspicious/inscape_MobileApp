@@ -98,19 +98,37 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
     const trackIndex = TrackList.findIndex((t) => t.id === track.id); // Find index of selected track
     setCurrentTrackIndex(trackIndex); // this is for this page mini player
 
-    if (collectionData && collectionData?.audioFiles.length > 0) {
-      navigation.navigate("player", {
-        currentTrackIndex: index, // Pass current index
-        trackList: collectionData?.audioFiles.map((item) => ({
-          artwork: IMAGE_BASE_URL + item.imageUrl,
-          collectionName: collectionData.collection.name ?? "",
-          title: item.songName,
-          description: item.description,
-          url: IMAGE_BASE_URL + item.audioUrl,
-          duration: timeStringToSeconds(item.duration),
-          level: item.levels[0],
-        })),
-      });
+    if (isFromMeditation) {
+      if (searchedAudios && searchedAudios.length > 0) {
+        navigation.navigate("player", {
+          currentTrackIndex: index, // Pass current index
+          trackList: searchedAudios?.map((item) => ({
+            id: item._id,
+            artwork: IMAGE_BASE_URL + item.imageUrl,
+            collectionName: item.collectionType.name ?? "",
+            title: item.songName,
+            description: item.description,
+            url: IMAGE_BASE_URL + item.audioUrl,
+            duration: timeStringToSeconds(item.duration),
+            level: item.levels.length > 0 ? item.levels[0].name : "Basic",
+          })),
+        });
+      }
+    } else {
+      if (collectionData && collectionData?.audioFiles.length > 0) {
+        navigation.navigate("player", {
+          currentTrackIndex: index, // Pass current index
+          trackList: collectionData?.audioFiles.map((item) => ({
+            artwork: IMAGE_BASE_URL + item.imageUrl,
+            collectionName: collectionData.collection.name ?? "",
+            title: item.songName,
+            description: item.description,
+            url: IMAGE_BASE_URL + item.audioUrl,
+            duration: timeStringToSeconds(item.duration),
+            level: item.levels[0] ?? "Basic",
+          })),
+        });
+      }
     }
   };
 

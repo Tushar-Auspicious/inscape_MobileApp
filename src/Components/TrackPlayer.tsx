@@ -1,6 +1,6 @@
 import notifee from "@notifee/react-native"; // Import Notifee
 import Slider from "@react-native-community/slider";
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
@@ -24,6 +24,7 @@ import COLORS from "../Utilities/Colors";
 import {
   audioItem,
   downloadFile,
+  formatPlayerSeconds,
   saveDownloadedAudio,
 } from "../Utilities/Helpers";
 import { verticalScale } from "../Utilities/Metrics";
@@ -46,26 +47,29 @@ export const useStopPlaybackOnBackground = () => {
 const TrackPlayer: FC<{
   handlePreviousTrack: () => void;
   handleNextTrack: () => void;
+  handleShuffle: () => void;
   isNextTrackAvailable: boolean;
   isPreviousTrackAvailable: boolean;
   trackData: audioItem;
+  isTrackLoaded?: boolean;
+  shuffleMode?: boolean;
+  isDownload?: boolean;
 }> = ({
   handleNextTrack,
   handlePreviousTrack,
+  handleShuffle,
   isNextTrackAvailable,
   isPreviousTrackAvailable,
   trackData,
+  isTrackLoaded = true,
+  shuffleMode = false,
+  isDownload = true,
 }) => {
   const { playing } = useIsPlaying();
   const track = useActiveTrack();
   const { position, duration, buffered } = useProgress();
 
   const [downloading, setDownloading] = useState(false);
-  const formatPlayerSeconds = useCallback((time: number) => {
-    return new Date(time * 1000)
-      .toISOString()
-      .slice(time >= 3600 ? 11 : 14, 19);
-  }, []);
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -76,7 +80,7 @@ const TrackPlayer: FC<{
       Toast.show({
         type: "error",
         text1: "Download Failed",
-        text2: "No audio URL provided",
+        text2: "Something went wrong",
       });
       return;
     }
@@ -160,15 +164,14 @@ const TrackPlayer: FC<{
               ios: iosOptions,
             });
 
-            if (
-              Platform.OS === "android" &&
+            if (Platform.OS === "android") {
               Toast.show({
                 type: "success",
                 text1: "Download Successful",
                 text2: `${track?.title} has been downloaded`,
-              })
-            )
-              console.log("Downloaded file path:", filePath);
+              });
+            }
+
             await saveDownloadedAudio(trackData);
           } else {
             throw new Error("Download failed - no file path returned");
@@ -266,7 +269,21 @@ const TrackPlayer: FC<{
           alignItems: "center",
         }}
       >
-        <CustomIcon Icon={ICONS.shuffleIcon} height={24} width={24} />
+        <TouchableOpacity
+          onPress={handleShuffle}
+          style={{
+            padding: 5,
+            backgroundColor: shuffleMode ? COLORS.darkNavyBlue : "transparent",
+            borderRadius: 20,
+          }}
+        >
+          <CustomIcon
+            Icon={ICONS.shuffleIcon}
+            height={24}
+            width={24}
+            style={{ color: shuffleMode ? COLORS.white : undefined }}
+          />
+        </TouchableOpacity>
         <CustomIcon
           onPress={handlePreviousTrack}
           Icon={ICONS.playPreviousIcon}
@@ -298,12 +315,31 @@ const TrackPlayer: FC<{
         {downloading ? (
           <ActivityIndicator size={"small"} color={COLORS.white} />
         ) : (
-          <CustomIcon
-            onPress={handleDownload}
-            Icon={ICONS.downloadIcon}
-            height={24}
-            width={24}
-          />
+          <TouchableOpacity
+            disabled={!isTrackLoaded}
+            style={{ opacity: isTrackLoaded ? 1 : 0.5 }}
+          >
+            <CustomIcon
+              onPress={
+                isTrackLoaded
+                  ? handleDownload
+                  : () => {
+                      if (!isTrackLoaded) {
+                        Toast.show({
+                          type: "info",
+                          text1: "Track not ready",
+                          text2: "Please wait for the track to load completely",
+                          position: "bottom",
+                        });
+                      }
+                    }
+              }
+              Icon={ICONS.downloadIcon}
+              height={24}
+              width={24}
+              disabled={!isTrackLoaded || !isDownload}
+            />
+          </TouchableOpacity>
         )}
       </View>
     </View>

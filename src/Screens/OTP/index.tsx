@@ -120,6 +120,7 @@ const OTP: FC<OTPProps> = ({ navigation, route }) => {
       }
     } catch (error: any) {
       console.log(error);
+      setOtp(["", "", "", ""]);
       Toast.show({
         type: "error",
         text1: error.message || "Something went wrong.",

@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react";
-import { View } from "react-native";
+import { Linking, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../../Components/Buttons/CustomButton";
 import CustomCheckBox from "../../Components/Buttons/CustomCheckBox";
@@ -28,43 +28,15 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
   );
 
   const handlePrivacyCheck = () => {
-    if (!isPrivacyChecked) {
-      setActiveModalState("privacy");
-      togglePrivacyModal();
-    }
+    setIsPrivacyChecked(!isPrivacyChecked);
   };
 
   const handleTermsCheck = () => {
-    if (!isTermsChecked) {
-      if (isPrivacyChecked) {
-        setActiveModalState("terms");
-        togglePrivacyModal();
-      } else {
-        togglePrivacyModal();
-      }
-    }
+    setIsTermsCheked(!isTermsChecked);
   };
 
   const handleHealthDataCheck = () => {
     setIsHealthDataChecked(!isHealthDataChecked);
-  };
-
-  const togglePrivacyModal = () => {
-    setIsPolicyModal(!isPolicyModal);
-  };
-  const handleAcceptAll = () => {
-    togglePrivacyModal();
-  };
-
-  const onAgreePolicy = () => {
-    if (activeModalState === "privacy") {
-      setIsPrivacyChecked(true);
-      setActiveModalState("terms");
-    } else {
-      setIsTermsCheked(true);
-      togglePrivacyModal();
-      setIsHealthDataChecked(true);
-    }
   };
 
   return (
@@ -82,7 +54,14 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
           <CustomText style={styles.flexText}>
             I agree to processing of my personal health data for providing me
             Meditation app functions. See more in{" "}
-            <CustomText style={styles.linkText} fontFamily="bold">
+            <CustomText
+              onPress={() => {
+                setActiveModalState("privacy");
+                setIsPolicyModal(true);
+              }}
+              style={styles.linkText}
+              fontFamily="bold"
+            >
               Privacy Policy.
             </CustomText>
           </CustomText>
@@ -95,7 +74,14 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
           />
           <CustomText>
             I agree to{" "}
-            <CustomText style={styles.linkText} fontFamily="bold">
+            <CustomText
+              onPress={() => {
+                setActiveModalState("terms");
+                setIsPolicyModal(true);
+              }}
+              style={styles.linkText}
+              fontFamily="bold"
+            >
               Terms of Use
             </CustomText>{" "}
           </CustomText>
@@ -120,7 +106,13 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
       >
         <CustomButton
           title="Accept all"
-          onPress={handleAcceptAll}
+          onPress={async () => {
+            setIsPrivacyChecked(true);
+            setIsHealthDataChecked(true);
+            setIsTermsCheked(true);
+            await storeLocalStorageData(STORAGE_KEYS.isTermsAccepted, true);
+            navigation.replace("signIn");
+          }}
           backgroundColor={COLORS.navyBlue}
           disabled={isPrivacyChecked && isHealthDataChecked && isTermsChecked}
         />
@@ -128,7 +120,7 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
           title="Next"
           onPress={async () => {
             await storeLocalStorageData(STORAGE_KEYS.isTermsAccepted, true);
-            navigation.replace("signUp");
+            navigation.replace("signIn");
           }}
           disabled={
             !isPrivacyChecked || !isHealthDataChecked || !isTermsChecked
@@ -139,13 +131,22 @@ const TermsAndConditions: FC<TermsAndConditionProps> = ({
 
         <CustomText style={styles.footerText}>
           You can withdraw your consent anytime by contacting us at{" "}
-          <CustomText fontFamily="bold">danglobus@support.com</CustomText>
+          <CustomText
+            onPress={() => {
+              Linking.openURL("mailto:support@example.com");
+            }}
+            fontFamily="bold"
+          >
+            support@inscape.life
+          </CustomText>
         </CustomText>
       </View>
       <PrivacyModal
         isVisible={isPolicyModal}
         setIsVisible={setIsPolicyModal}
-        onAgree={onAgreePolicy}
+        onAgree={() => {
+          setIsPolicyModal(false);
+        }}
         activeIndex={activeModalState}
       />
     </SafeAreaView>

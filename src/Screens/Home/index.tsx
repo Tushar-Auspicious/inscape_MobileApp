@@ -61,6 +61,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
 
       navigation.navigate("player", {
         trackList: homeData.breathing.map((item) => ({
+          id: item._id,
           artwork: IMAGE_BASE_URL + item.imageUrl,
           collectionName: item.collectionType?.name ?? "",
           title: item.songName,
@@ -87,6 +88,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
           navigation.navigate("player", {
             trackList: [
               {
+                id: item._id,
                 artwork: IMAGE_BASE_URL + item.audioDetails.imageUrl,
                 collectionName:
                   homeData?.trendingAudio[0].audioDetails.songName ?? "",
@@ -111,6 +113,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
         if (!homeData?.collection.audios) return;
         navigation.navigate("player", {
           trackList: homeData.collection.audios.map((item) => ({
+            id: item._id,
             artwork: IMAGE_BASE_URL + item.imageUrl,
             collectionName: homeData.collection.name ?? "",
             title: item.songName,

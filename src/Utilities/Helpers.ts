@@ -5,15 +5,17 @@ import RNFS from "react-native-fs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import STORAGE_KEYS from "./Constants";
 import { FileSystem } from "react-native-file-access";
+import { getLocalStorageData } from "./Storage";
 
 export type audioItem = {
+  id: string;
   url: string;
   artwork: string;
   collectionName: string;
   title: string;
   description: string;
   duration: string;
-  level: string;
+  level: any;
 };
 
 export const getKeyboardBehaviour =
@@ -193,14 +195,15 @@ export const convertStringToDate = (dateString: string) => {
 // Save downloaded audio info
 export const saveDownloadedAudio = async (audioItem: audioItem) => {
   try {
-    const existingAudios = await AsyncStorage.getItem(
+    const existingAudios = await getLocalStorageData(
       STORAGE_KEYS.downloadedAudios
     );
-    const audios = existingAudios ? JSON.parse(existingAudios) : [];
+    const audios = existingAudios ? existingAudios : [];
 
     // Check if audio already exists to avoid duplicates
     if (!audios.some((audio: { url: any }) => audio.url === audioItem.url)) {
       audios.push({
+        id: audioItem.id,
         artwork: audioItem.artwork,
         collectionName: audioItem.collectionName,
         title: audioItem.title,
@@ -257,3 +260,21 @@ export function timeStringToSeconds(timeString: string) {
   const [hours, minutes, seconds] = timeString.split(":").map(Number);
   return hours * 3600 + minutes * 60 + seconds;
 }
+
+export function secondsToTimeString(input: string | number): string {
+  const totalSeconds = typeof input === "string" ? parseInt(input, 10) : input;
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const paddedHours = String(hours).padStart(2, "0");
+  const paddedMinutes = String(minutes).padStart(2, "0");
+  const paddedSeconds = String(seconds).padStart(2, "0");
+
+  return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
+}
+
+export const formatPlayerSeconds = (time: number) => {
+  return new Date(time * 1000).toISOString().slice(time >= 3600 ? 11 : 14, 19);
+};

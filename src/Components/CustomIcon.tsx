@@ -8,6 +8,7 @@ type CustomIconProps = {
   height?: number; // Optional height for the icon, default is 24
   onPress?: () => void; // Optional callback for press events
   disabled?: boolean; // Optional prop to disable the icon
+  style?: any; // Optional style prop
 };
 
 // Functional component to render a custom SVG icon
@@ -17,6 +18,7 @@ const CustomIcon: FC<CustomIconProps> = ({
   height = 24, // Default height of the icon
   onPress, // Optional onPress callback
   disabled,
+  style,
 }) => {
   // Render the SVG icon with specified width, height, and optional onPress handler
   return (
@@ -25,7 +27,7 @@ const CustomIcon: FC<CustomIconProps> = ({
       width={width}
       height={height}
       disabled={disabled}
-      style={{ opacity: disabled ? 0.7 : 1 }}
+      style={{ opacity: disabled ? 0.7 : 1, ...style }}
     />
   );
 };

@@ -24,8 +24,8 @@ const RegisterSuccess: FC<RegisterSuccessProps> = ({ navigation }) => {
           Registration Successful!
         </CustomText>
         <CustomText style={styles.infoText}>
-          If you do not receive an approval email in 48 hours, please contact
-          us. The Contact us would be a link to an email support@inscape.life.
+          If you do not receive an approval email in 48 hours, please contact us
+          at support@inscape.life.
         </CustomText>
       </View>
       <CustomButton title="OK" onPress={handleOk} />

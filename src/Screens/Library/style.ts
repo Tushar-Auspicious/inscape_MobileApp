@@ -8,11 +8,39 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkBlue,
   },
   scrollContainer: {
-    paddingVertical: verticalScale(10),
+    paddingVertical: verticalScale(15),
     paddingHorizontal: horizontalScale(15),
     gap: verticalScale(20),
+    flex: 1,
   },
-  flatListCont: { paddingBottom: verticalScale(60) },
+  flatListCont: {
+    paddingBottom: verticalScale(60),
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: verticalScale(50),
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: verticalScale(100),
+  },
+  emptyStateText: {
+    textAlign: "center",
+    marginBottom: verticalScale(10),
+  },
+  emptyStateSubText: {
+    textAlign: "center",
+    color: COLORS.darkGrey,
+  },
+  emptyListContainer: {
+    flex: 1,
+    justifyContent: "center",
+    minHeight: hp(50),
+  },
 });
 
 export default styles;

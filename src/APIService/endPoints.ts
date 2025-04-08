@@ -14,6 +14,7 @@ const ENDPOINTS = {
   searchAudio: "user/search/audio",
   collectionData: "user/collections/",
   discoverData: "user/search/collections/",
+  audioHistory: "user/audio-history",
 };
 
 export default ENDPOINTS;

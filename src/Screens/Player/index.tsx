@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState, useCallback } from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -10,26 +10,22 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import {
+import Toast from "react-native-toast-message";
+import PlayerInstance, {
   Event,
-  State,
   useActiveTrack,
-  usePlaybackState,
   useTrackPlayerEvents,
 } from "react-native-track-player";
-import PlayerInstance from "react-native-track-player";
 import ICONS from "../../Assets/icons";
 import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
+import TrackPlayer from "../../Components/TrackPlayer";
 import { SetupService } from "../../PlayerServices/SetupService";
 import { PlayerProps } from "../../Typings/route";
+import COLORS from "../../Utilities/Colors";
 import { hp, verticalScale } from "../../Utilities/Metrics";
 import styles from "./style";
-import Toast from "react-native-toast-message";
-import TrackPlayer from "../../Components/TrackPlayer";
-import COLORS from "../../Utilities/Colors";
-import { IMAGE_BASE_URL } from "@env";
 
 export function useSetupPlayer() {
   const [playerReady, setPlayerReady] = useState(false);
@@ -60,22 +56,34 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const isPlayerReady = useSetupPlayer();
   const track = useActiveTrack();
-  const playbackState = usePlaybackState();
+
+  const { isFromLibrary } = route.params;
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState(
     route.params?.currentTrackIndex || 0
   );
+
   const [isTrackLoading, setIsTrackLoading] = useState(false); // Renamed for clarity
   const [isTrackLoaded, setIsTrackLoaded] = useState(false); // Track fully loaded and playable
-  const trackList = route.params?.trackList || [];
+  const trackList: any = route.params?.trackList || [];
   const [isNextAvailable, setIsNextAvailable] = useState(false);
   const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
+  const [shuffleMode, setShuffleMode] = useState(false);
+  const [shuffledIndices, setShuffledIndices] = useState<number[]>([]);
 
   // Update availability of next and previous tracks
   useEffect(() => {
-    setIsNextAvailable(currentTrackIndex < trackList.length - 1);
-    setIsPreviousAvailable(currentTrackIndex > 0);
-  }, [currentTrackIndex, trackList]);
+    if (shuffleMode) {
+      // In shuffle mode, we can always go next if there are unplayed tracks
+      const currentShuffleIndex = shuffledIndices.indexOf(currentTrackIndex);
+      setIsNextAvailable(currentShuffleIndex < shuffledIndices.length - 1);
+      setIsPreviousAvailable(currentShuffleIndex > 0);
+    } else {
+      // Normal sequential mode
+      setIsNextAvailable(currentTrackIndex < trackList.length - 1);
+      setIsPreviousAvailable(currentTrackIndex > 0);
+    }
+  }, [currentTrackIndex, trackList, shuffleMode, shuffledIndices]);
 
   // Load a track without playing it
   const loadTrack = useCallback(
@@ -83,20 +91,37 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
       if (!isPlayerReady || index < 0 || index >= trackList.length) return;
 
       try {
-        setIsTrackLoading(true); // Show loader while loading
-        setIsTrackLoaded(false); // Reset loaded state
+        setIsTrackLoading(true);
+        setIsTrackLoaded(false);
         setCurrentTrackIndex(index);
 
         const newTrack = trackList[index];
-        console.log("Loading track:", newTrack.url);
 
-        if (!newTrack.url || typeof newTrack.url !== "string") {
-          throw new Error("Invalid track URL");
+        if (!newTrack || typeof newTrack !== "object") {
+          throw new Error("Invalid track object");
         }
 
+        // Validate required fields
+        if (!newTrack.url || typeof newTrack.url !== "string") {
+          throw new Error("Invalid or missing track URL");
+        }
+        if (!newTrack.id && !newTrack._id) {
+          // Assign a temporary ID if not present
+          newTrack.id = `track_${index}`;
+        }
+
+        // Create a sanitized track object
+        const sanitizedTrack = {
+          id: newTrack.id,
+          url: newTrack.url,
+          title: newTrack.title || "Unknown Track",
+          artwork: newTrack.artwork || undefined,
+          duration: newTrack.duration || 0,
+        };
+
         await PlayerInstance.reset();
-        await PlayerInstance.add([newTrack]);
-        setIsTrackLoaded(true); // Track is loaded and ready
+        await PlayerInstance.add([sanitizedTrack]); // Add the sanitized track
+        setIsTrackLoaded(true);
       } catch (error: any) {
         console.error("Error loading track:", error);
         Toast.show({
@@ -106,16 +131,61 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
         });
         setIsTrackLoaded(false);
       } finally {
-        setIsTrackLoading(false); // Hide loader regardless of success/failure
+        setIsTrackLoading(false);
       }
     },
     [isPlayerReady, trackList]
   );
 
+  // const loadTrack = useCallback(
+  //   async (index: number) => {
+  //     if (!isPlayerReady || index < 0 || index >= trackList.length) return;
+
+  //     try {
+  //       setIsTrackLoading(true); // Show loader while loading
+  //       setIsTrackLoaded(false); // Reset loaded state
+  //       setCurrentTrackIndex(index);
+
+  //       const newTrack = trackList[index];
+
+  //       if (!newTrack.url || typeof newTrack.url !== "string") {
+  //         throw new Error("Invalid track URL");
+  //       }
+
+  //       console.log("Loading track:", newTrack);
+
+  //       await PlayerInstance.reset();
+  //       await PlayerInstance.add([newTrack]);
+  //       setIsTrackLoaded(true); // Track is loaded and ready
+  //     } catch (error: any) {
+  //       console.error("Error loading track:", error);
+  //       Toast.show({
+  //         type: "error",
+  //         text1: "Error",
+  //         text2: `Failed to load track: ${error.message}`,
+  //       });
+  //       setIsTrackLoaded(false);
+  //     } finally {
+  //       setIsTrackLoading(false); // Hide loader regardless of success/failure
+  //     }
+  //   },
+  //   [isPlayerReady, trackList]
+  // );
+
   // Handle next track
+
   const handleNextTrack = useCallback(() => {
     if (isNextAvailable) {
-      loadTrack(currentTrackIndex + 1);
+      if (shuffleMode) {
+        // In shuffle mode, get the next track from shuffled indices
+        const currentShuffleIndex = shuffledIndices.indexOf(currentTrackIndex);
+        if (currentShuffleIndex < shuffledIndices.length - 1) {
+          loadTrack(shuffledIndices[currentShuffleIndex + 1]);
+        }
+      } else {
+        // Normal sequential mode
+        loadTrack(currentTrackIndex + 1);
+      }
     } else {
       Toast.show({
         type: "error",
@@ -123,12 +193,27 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
         text2: "No next track available",
       });
     }
-  }, [currentTrackIndex, isNextAvailable, loadTrack]);
+  }, [
+    currentTrackIndex,
+    isNextAvailable,
+    loadTrack,
+    shuffleMode,
+    shuffledIndices,
+  ]);
 
   // Handle previous track
   const handlePreviousTrack = useCallback(() => {
     if (isPreviousAvailable) {
-      loadTrack(currentTrackIndex - 1);
+      if (shuffleMode) {
+        // In shuffle mode, get the previous track from shuffled indices
+        const currentShuffleIndex = shuffledIndices.indexOf(currentTrackIndex);
+        if (currentShuffleIndex > 0) {
+          loadTrack(shuffledIndices[currentShuffleIndex - 1]);
+        }
+      } else {
+        // Normal sequential mode
+        loadTrack(currentTrackIndex - 1);
+      }
     } else {
       Toast.show({
         type: "error",
@@ -136,22 +221,72 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
         text2: "No previous track available",
       });
     }
-  }, [currentTrackIndex, isPreviousAvailable, loadTrack]);
+  }, [
+    currentTrackIndex,
+    isPreviousAvailable,
+    loadTrack,
+    shuffleMode,
+    shuffledIndices,
+  ]);
 
-  // Preload the initial track when player is ready
+  // Shuffle function to randomize track order
+  const handleShuffle = useCallback(() => {
+    // Toggle shuffle mode
+    const newShuffleMode = !shuffleMode;
+    setShuffleMode(newShuffleMode);
+
+    if (newShuffleMode) {
+      // Create a shuffled array of indices
+      const indices = Array.from({ length: trackList.length }, (_, i) => i);
+
+      // Fisher-Yates shuffle algorithm
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+
+      // Make sure current track is first in the shuffled list
+      const currentIndex = indices.indexOf(currentTrackIndex);
+      if (currentIndex > 0) {
+        indices.splice(currentIndex, 1);
+        indices.unshift(currentTrackIndex);
+      }
+
+      setShuffledIndices(indices);
+
+      Toast.show({
+        type: "info",
+        text1: "Shuffle On",
+        text2: "Tracks will play in random order",
+        position: "bottom",
+      });
+    } else {
+      // Reset to sequential play
+      setShuffledIndices([]);
+
+      Toast.show({
+        type: "info",
+        text1: "Shuffle Off",
+        text2: "Tracks will play in order",
+        position: "bottom",
+      });
+    }
+  }, [shuffleMode, trackList.length, currentTrackIndex]);
+
+  // // Preload the initial track when player is ready
   useEffect(() => {
     if (isPlayerReady && trackList.length > 0 && !isTrackLoaded) {
       loadTrack(currentTrackIndex);
     }
   }, [isPlayerReady, currentTrackIndex, trackList, isTrackLoaded, loadTrack]);
 
-  // Handle track end and queue management
+  // // Handle track end and queue management
   useTrackPlayerEvents(
-    [Event.PlaybackTrackChanged, Event.PlaybackQueueEnded],
+    [Event.PlaybackActiveTrackChanged, Event.PlaybackQueueEnded],
     async (event) => {
       if (
-        event.type === Event.PlaybackTrackChanged &&
-        event.nextTrack !== null
+        event.type === Event.PlaybackActiveTrackChanged &&
+        event.track !== null
       ) {
         setIsTrackLoaded(true);
         console.log("Track loaded successfully");
@@ -182,14 +317,13 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
   // Ensure playback state is correct
   useEffect(() => {
     const checkPlaybackState = async () => {
-      const state = await PlayerInstance.getState();
-      if (
-        state === State.None &&
-        isPlayerReady &&
-        trackList.length > 0 &&
-        !isTrackLoaded
-      ) {
-        loadTrack(currentTrackIndex);
+      try {
+        // Use a safer way to check if we need to load a track
+        if (isPlayerReady && trackList.length > 0 && !isTrackLoaded) {
+          loadTrack(currentTrackIndex);
+        }
+      } catch (error) {
+        console.error("Error checking playback state:", error);
       }
     };
     checkPlaybackState();
@@ -212,8 +346,9 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
     );
   }
 
-  // If no track is loaded yet but not loading, show placeholder or wait for load
-  if (!track || !isTrackLoaded) {
+  // If no track is loaded yet but not loading, show the player UI with a loading indicator
+  // This allows users to see the player UI while the track is loading
+  if (!track) {
     return (
       <SafeAreaView
         style={{
@@ -254,9 +389,16 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
           <CustomText color={COLORS.grey}>
             {trackList[currentTrackIndex].collectionName}
           </CustomText>
-          <CustomText fontFamily="regular" type="title" color={COLORS.white}>
-            {track.title}
-          </CustomText>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <CustomText fontFamily="regular" type="title" color={COLORS.white}>
+              {track.title}
+            </CustomText>
+            {!isTrackLoaded && (
+              <View style={{ marginLeft: 10 }}>
+                <ActivityIndicator size="small" color={COLORS.white} />
+              </View>
+            )}
+          </View>
         </View>
         <CustomText type="default" color={COLORS.darkGrey}>
           {trackList[currentTrackIndex].description}
@@ -264,17 +406,25 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
         <TrackPlayer
           handleNextTrack={handleNextTrack}
           handlePreviousTrack={handlePreviousTrack}
+          handleShuffle={handleShuffle}
           isNextTrackAvailable={isNextAvailable}
           isPreviousTrackAvailable={isPreviousAvailable}
+          isTrackLoaded={isTrackLoaded}
+          shuffleMode={shuffleMode}
           trackData={{
+            id: track.id,
             artwork: track.artwork!,
             collectionName: trackList[currentTrackIndex].collectionName,
             title: track.title!,
             duration: trackList[currentTrackIndex].duration.toString(),
             description: trackList[currentTrackIndex].description,
-            url: IMAGE_BASE_URL + track.url,
-            level: trackList[currentTrackIndex].level,
+            url: track.url,
+            level:
+              typeof trackList[currentTrackIndex].level === "object"
+                ? trackList[currentTrackIndex].level.name
+                : trackList[currentTrackIndex].level,
           }}
+          isDownload={!isFromLibrary}
         />
       </View>
     </SafeAreaView>

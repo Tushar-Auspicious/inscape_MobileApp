@@ -19,8 +19,8 @@ import styles from "./style";
 
 const SignIn: FC<SignInProps> = ({ navigation }) => {
   const [inputData, setInputData] = useState({
-    email: "tushar@auspicioussoft.com",
-    password: "12345",
+    email: "",
+    password: "",
   });
 
   const { isRegistered } = useAppSelector((state) => state.initial);

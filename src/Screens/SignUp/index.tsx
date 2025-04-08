@@ -121,12 +121,12 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
       return isValid;
     }
 
-    // Birth Date validation
-    if (!birthDate.trim()) {
-      Toast.show({ type: "error", text1: "Birth Date is required" });
-      isValid = false;
-      return isValid;
-    }
+    // // Birth Date validation
+    // if (!birthDate.trim()) {
+    //   Toast.show({ type: "error", text1: "Birth Date is required" });
+    //   isValid = false;
+    //   return isValid;
+    // }
 
     return isValid;
   };
@@ -143,8 +143,8 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
         email: inputData.email,
         firstName: inputData.firstName,
         lastName: inputData.lastName,
-        dob: convertDate(birthDate),
-        gender: selectedGender.toLowerCase(),
+        // dob: convertDate(birthDate),
+        // gender: selectedGender.toLowerCase(),
         companyName: inputData.companyName,
         isTermsAccepted: true,
       });
@@ -203,14 +203,12 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
                     handleInputChange("firstName", value)
                   }
                   style={styles.flexInput}
-                  heigth={50}
                 />
                 <CustomInput
                   value={inputData.lastName}
                   placeholder="Last Name"
                   onChangeText={(value) => handleInputChange("lastName", value)}
                   style={styles.flexInput}
-                  heigth={50}
                 />
               </View>
               <CustomInput
@@ -219,20 +217,17 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
                 onChangeText={(value) =>
                   handleInputChange("companyName", value)
                 }
-                heigth={50}
               />
               <CustomInput
                 value={inputData.email}
                 placeholder="Email"
                 onChangeText={(value) => handleInputChange("email", value)}
-                heigth={50}
               />
               <CustomInput
                 value={inputData.password}
                 placeholder="Password"
                 type="password"
                 onChangeText={(value) => handleInputChange("password", value)}
-                heigth={50}
               />
               <CustomInput
                 value={inputData.confirmPassword}
@@ -241,16 +236,15 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
                 onChangeText={(value) =>
                   handleInputChange("confirmPassword", value)
                 }
-                heigth={50}
               />
-              <CustomInput
+              {/* <CustomInput
                 value={birthDate}
                 onChangeText={setBirthDate}
                 placeholder="Birthday Date"
                 type="date"
                 heigth={50}
-              />
-              <View style={styles.genderCont}>
+              /> */}
+              {/* <View style={styles.genderCont}>
                 <CustomText fontFamily="medium">Gender</CustomText>
                 <View style={styles.genderRow}>
                   {genderTypes.map((gender) => {
@@ -286,7 +280,7 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
                     );
                   })}
                 </View>
-              </View>
+              </View> */}
 
               <CustomButton
                 title="Create account"
