@@ -1,6 +1,6 @@
 import notifee from "@notifee/react-native"; // Import Notifee
 import Slider from "@react-native-community/slider";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useRef } from "react";
 import {
   ActivityIndicator,
   AppState,
@@ -29,6 +29,9 @@ import {
 } from "../Utilities/Helpers";
 import { verticalScale } from "../Utilities/Metrics";
 import CustomIcon from "./CustomIcon";
+import { postData } from "../APIService/api";
+import ENDPOINTS from "../APIService/endPoints";
+
 export const useStopPlaybackOnBackground = () => {
   useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
@@ -70,6 +73,8 @@ const TrackPlayer: FC<{
   const { position, duration, buffered } = useProgress();
 
   const [downloading, setDownloading] = useState(false);
+  const [playHistoryTracked, setPlayHistoryTracked] = useState(false);
+  const trackIdRef = useRef<string | null>(null);
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -236,12 +241,41 @@ const TrackPlayer: FC<{
     setDownloading(false);
   };
 
+  // Track play history when user plays a track
+  const trackPlayHistory = async () => {
+    // Get the track ID
+    const trackId = trackData.id;
+
+    // Only track if we have a track ID and haven't tracked this session yet
+    if (trackId && !playHistoryTracked && trackId !== trackIdRef.current) {
+      try {
+        await postData(ENDPOINTS.audioHistory, {
+          type: "LISTEN",
+          audio_id: trackId,
+        });
+        console.log("Play history tracked for track ID:", trackId);
+        setPlayHistoryTracked(true);
+        trackIdRef.current = trackId;
+      } catch (error) {
+        console.log("Error tracking play history:", error);
+      }
+    }
+  };
+
   useTrackPlayerEvents([Event.PlaybackState], async (event) => {
     if (event.state === State.Ended) {
       Player.seekTo(0);
       Player.pause();
+    } else if (event.state === State.Playing) {
+      // Track play history when the track starts playing
+      trackPlayHistory();
     }
   });
+
+  // Reset play history tracking when track changes
+  useEffect(() => {
+    setPlayHistoryTracked(false);
+  }, [trackData.id]);
 
   return (
     <View style={{ width: "100%" }}>
@@ -292,7 +326,13 @@ const TrackPlayer: FC<{
           disabled={!isPreviousTrackAvailable}
         />
         <TouchableOpacity
-          onPress={playing ? Player.pause : Player.play}
+          onPress={() => {
+            if (!playing) {
+              // Track play history when user manually plays
+              trackPlayHistory();
+            }
+            playing ? Player.pause() : Player.play();
+          }}
           style={{
             backgroundColor: COLORS.navyBlue,
             padding: 15,

@@ -62,6 +62,16 @@ const styles = StyleSheet.create({
   signInLink: {
     textDecorationLine: "underline",
   },
+
+  // Skeleton loading styles
+  skeletonBackground: {
+    flex: 1,
+    marginBottom: verticalScale(60),
+    backgroundColor: COLORS.darkNavyBlue,
+    borderTopRightRadius: 30,
+    borderTopLeftRadius: 30,
+    opacity: 0.5,
+  },
 });
 
 export default styles;

@@ -6,6 +6,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import STORAGE_KEYS from "./Constants";
 import { FileSystem } from "react-native-file-access";
 import { getLocalStorageData } from "./Storage";
+import { postData } from "../APIService/api";
+import ENDPOINTS from "../APIService/endPoints";
 
 export type audioItem = {
   id: string;
@@ -198,11 +200,22 @@ export const saveDownloadedAudio = async (audioItem: audioItem) => {
     const existingAudios = await getLocalStorageData(
       STORAGE_KEYS.downloadedAudios
     );
+
+    try {
+      await postData(ENDPOINTS.audioHistory, {
+        type: "DOWNLOAD",
+        audio_id: audioItem.id,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
     const audios = existingAudios ? existingAudios : [];
 
     // Check if audio already exists to avoid duplicates
     if (!audios.some((audio: { url: any }) => audio.url === audioItem.url)) {
-      audios.push({
+      // Prepare the audio object to be saved
+      const audioData = {
         id: audioItem.id,
         artwork: audioItem.artwork,
         collectionName: audioItem.collectionName,
@@ -212,15 +225,24 @@ export const saveDownloadedAudio = async (audioItem: audioItem) => {
         downloadedAt: new Date().toISOString(),
         level: audioItem.level,
         duration: audioItem.duration,
-      });
+      };
 
+      // Save to local storage
+      audios.push(audioData);
       await AsyncStorage.setItem(
         STORAGE_KEYS.downloadedAudios,
         JSON.stringify(audios)
       );
+
+      // Make API call to record download history
+
+      // Optional: You might want to handle the API response
+      // console.log('API response:', response);
     }
   } catch (error) {
     console.error("Error saving downloaded audio:", error);
+    // Optional: You might want to add additional error handling
+    // For example, you could remove the item from local storage if the API call fails
   }
 };
 

@@ -65,11 +65,14 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
 
   const [isTrackLoading, setIsTrackLoading] = useState(false); // Renamed for clarity
   const [isTrackLoaded, setIsTrackLoaded] = useState(false); // Track fully loaded and playable
+  const [isImageLoading, setIsImageLoading] = useState(true); // Track background image loading state
   const trackList: any = route.params?.trackList || [];
   const [isNextAvailable, setIsNextAvailable] = useState(false);
   const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
   const [shuffleMode, setShuffleMode] = useState(false);
   const [shuffledIndices, setShuffledIndices] = useState<number[]>([]);
+
+  console.log(trackList, "UUUUU");
 
   // Update availability of next and previous tracks
   useEffect(() => {
@@ -93,6 +96,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
       try {
         setIsTrackLoading(true);
         setIsTrackLoaded(false);
+        setIsImageLoading(true); // Reset image loading state for new track
         setCurrentTrackIndex(index);
 
         const newTrack = trackList[index];
@@ -134,7 +138,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
         setIsTrackLoading(false);
       }
     },
-    [isPlayerReady, trackList]
+    [isPlayerReady, trackList, setIsImageLoading]
   );
 
   // const loadTrack = useCallback(
@@ -366,11 +370,20 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom }]}>
+      {/* Skeleton placeholder for background image */}
+      <View style={isImageLoading ? styles.skeletonBackground : {}} />
+
+      {/* Actual background image */}
       <ImageBackground
         source={{ uri: track?.artwork }}
         imageStyle={styles.imageStyle}
-        style={styles.backgroundImage}
+        style={[styles.backgroundImage, { opacity: isImageLoading ? 0 : 1 }]}
+        onLoadStart={() => setIsImageLoading(true)}
+        onLoad={() => setIsImageLoading(false)}
+        onError={() => setIsImageLoading(false)}
+        loadingIndicatorSource={IMAGES.logo}
       />
+
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         style={[styles.backButton, { top: insets.top + verticalScale(20) }]}
@@ -387,7 +400,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
           style={{ gap: verticalScale(4), marginBottom: verticalScale(15) }}
         >
           <CustomText color={COLORS.grey}>
-            {trackList[currentTrackIndex].collectionName}
+            {trackList[currentTrackIndex]?.collectionName}
           </CustomText>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <CustomText fontFamily="regular" type="title" color={COLORS.white}>
@@ -401,7 +414,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
           </View>
         </View>
         <CustomText type="default" color={COLORS.darkGrey}>
-          {trackList[currentTrackIndex].description}
+          {trackList[currentTrackIndex]?.description}
         </CustomText>
         <TrackPlayer
           handleNextTrack={handleNextTrack}
@@ -414,15 +427,15 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
           trackData={{
             id: track.id,
             artwork: track.artwork!,
-            collectionName: trackList[currentTrackIndex].collectionName,
+            collectionName: trackList[currentTrackIndex]?.collectionName,
             title: track.title!,
-            duration: trackList[currentTrackIndex].duration.toString(),
-            description: trackList[currentTrackIndex].description,
+            duration: trackList[currentTrackIndex]?.duration.toString(),
+            description: trackList[currentTrackIndex]?.description,
             url: track.url,
             level:
-              typeof trackList[currentTrackIndex].level === "object"
-                ? trackList[currentTrackIndex].level.name
-                : trackList[currentTrackIndex].level,
+              typeof trackList[currentTrackIndex]?.level === "object"
+                ? trackList[currentTrackIndex]?.level.name
+                : trackList[currentTrackIndex]?.level,
           }}
           isDownload={!isFromLibrary}
         />

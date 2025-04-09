@@ -24,8 +24,6 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
     try {
       setIsLoading(true);
       const result = await getDownloadedAudios();
-      console.log(result, "IIII");
-
       setAudios(result);
     } catch (error) {
       console.error("Error fetching downloaded audios:", error);
@@ -106,7 +104,6 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
             keyExtractor={(item, index) => item.title + index.toString()}
             ListEmptyComponent={renderEmptyState}
             renderItem={({ item, index }) => {
-              console.log(item, "ITEM");
               return (
                 <SessionCard
                   imageUrl={item.artwork}

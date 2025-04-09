@@ -1,11 +1,13 @@
 import { IMAGE_BASE_URL } from "@env";
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   ImageBackground,
   ScrollView,
   TouchableOpacity,
   View,
+  RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
@@ -19,6 +21,7 @@ import { CustomText } from "../../Components/CustomText";
 import Loader from "../../Components/Loader";
 import { GetCollectionResponse } from "../../Typings/apiTypes";
 import { CategoryProps } from "../../Typings/route";
+import COLORS from "../../Utilities/Colors";
 import { horizontalScale } from "../../Utilities/Metrics";
 import styles from "./style";
 
@@ -27,8 +30,12 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [collectionData, setCollectionData] = useState<GetCollectionResponse>();
   const [filteredAudioFiles, setFilteredAudioFiles] = useState<any[]>([]); // State for filtered results
+
+  // Ref for abort controller to cancel ongoing requests
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleCardPress = () => {
     if (collectionData && collectionData.collection._id) {
@@ -38,26 +45,61 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
     }
   };
 
-  const getCollectionData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchData<GetCollectionResponse>(
-        `${ENDPOINTS.collectionData}${id}/audios`
-      );
-      if (response.data.success) {
-        setCollectionData(response.data.data);
-        setFilteredAudioFiles(response.data.data.audioFiles); // Initialize filtered list
+  const getCollectionData = useCallback(
+    async (forceRefresh = false) => {
+      // Cancel any ongoing requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
-    } catch (error: any) {
-      console.error("Home data fetch error:", error);
-      Toast.show({
-        type: "error",
-        text1: error.message || "Something went wrong",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [id]);
+
+      // Create a new abort controller for this request
+      abortControllerRef.current = new AbortController();
+
+      if (!forceRefresh) {
+        setIsLoading(true);
+      } else {
+        setRefreshing(true);
+      }
+
+      try {
+        // Fetch with timeout
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Request timeout")), 10000);
+        });
+
+        const fetchPromise = fetchData<GetCollectionResponse>(
+          `${ENDPOINTS.collectionData}${id}/audios`,
+          {},
+          { signal: abortControllerRef.current.signal }
+        );
+
+        // Race between fetch and timeout
+        const response = (await Promise.race([
+          fetchPromise,
+          timeoutPromise,
+        ])) as any;
+
+        if (response.data.success) {
+          setCollectionData(response.data.data);
+          setFilteredAudioFiles(response.data.data.audioFiles); // Initialize filtered list
+        }
+      } catch (error: any) {
+        // Don't show error if it's an abort error (user navigated away)
+        if (error.name !== "AbortError") {
+          console.error("Collection data fetch error:", error);
+          Toast.show({
+            type: "error",
+            text1: error.message || "Something went wrong",
+            position: "bottom",
+          });
+        }
+      } finally {
+        setIsLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [id]
+  );
 
   // Search filter function
   const filterAudioFiles = useCallback(() => {
@@ -71,8 +113,20 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
     }
   }, [searchQuery, collectionData]);
 
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(() => {
+    getCollectionData(true);
+  }, [getCollectionData]);
+
   useEffect(() => {
     getCollectionData();
+
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [getCollectionData]);
 
   // Update filtered list whenever searchQuery or collectionData changes
@@ -80,10 +134,25 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
     filterAudioFiles();
   }, [searchQuery, collectionData, filterAudioFiles]);
 
-  if (isLoading) {
+  // Render skeleton loading placeholders
+  const renderSkeletonLoading = () => (
+    <View style={styles.skeletonContainer}>
+      <View style={styles.skeletonImageBackground} />
+      <View style={styles.skeletonHeader}>
+        <View style={styles.skeletonSearchBar} />
+      </View>
+      <View style={styles.skeletonGrid}>
+        {[1, 2, 3, 4, 5, 6].map((item) => (
+          <View key={item} style={styles.skeletonCard} />
+        ))}
+      </View>
+    </View>
+  );
+
+  if (isLoading && !collectionData) {
     return (
       <SafeAreaView style={styles.container}>
-        <Loader />
+        {renderSkeletonLoading()}
       </SafeAreaView>
     );
   }
@@ -134,6 +203,14 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         nestedScrollEnabled={true}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.darkNavyBlue]}
+            tintColor={COLORS.white}
+          />
+        }
       >
         <FlatList
           data={filteredAudioFiles} // Use filteredAudioFiles instead of collectionData.audioFiles

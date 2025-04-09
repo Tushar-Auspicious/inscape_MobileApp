@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 
-  content: { flex: 1, justifyContent: "space-between" },
+  content: { flex: 1 },
 
   mainHeader: {
     flexDirection: "row",
@@ -150,6 +150,62 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
+  },
+
+  // Skeleton loading styles
+  skeletonContainer: {
+    flex: 1,
+    backgroundColor: COLORS.darkBlue,
+  },
+  skeletonCurvedCont: {
+    backgroundColor: COLORS.darkNavyBlue,
+    width: wp(100),
+    height: hp(55),
+    position: "absolute",
+    borderTopRightRadius: 70,
+    borderBottomLeftRadius: 70,
+    opacity: 0.7,
+  },
+  skeletonHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: horizontalScale(20),
+    paddingTop: verticalScale(20),
+    paddingHorizontal: horizontalScale(20),
+  },
+  skeletonBackButton: {
+    width: 30,
+    height: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 5,
+  },
+  skeletonHeaderText: {
+    width: wp(60),
+    height: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  skeletonHeaderSubText: {
+    width: wp(40),
+    height: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 5,
+  },
+  skeletonCardContainer: {
+    marginTop: verticalScale(30),
+    alignItems: "center",
+  },
+  skeletonCard: {
+    width: wp(70),
+    height: hp(40),
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

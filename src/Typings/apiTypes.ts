@@ -129,11 +129,16 @@ export interface TrendingAudio {
   count: number;
   audioDetails: AudioDetails;
 }
+export interface TrendingAudio {
+  _id: string;
+  count: number;
+  audioDetails: AudioDetails;
+}
 
 export interface AudioDetails {
   _id: string;
   songName: string;
-  collectionType: string;
+  collectionType: CollectionType;
   audioUrl: string;
   imageUrl: string;
   description: string;
@@ -143,7 +148,7 @@ export interface AudioDetails {
   updatedAt: string;
   __v: number;
   bestFor: BestFor[];
-  levels: any[];
+  levels: Level[];
 }
 
 export interface Collection {

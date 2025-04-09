@@ -1,12 +1,14 @@
 import { IMAGE_BASE_URL } from "@env";
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Image,
   ImageBackground,
   Platform,
+  ScrollView,
   TouchableOpacity,
   View,
+  RefreshControl,
 } from "react-native";
 import {
   SafeAreaView,
@@ -26,7 +28,7 @@ import ICONS from "../../Assets/icons";
 import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
-import Loader from "../../Components/Loader";
+// import Loader from "../../Components/Loader";
 import { useStopPlaybackOnBackground } from "../../Components/TrackPlayer";
 import { TrackList } from "../../Seeds/PlayerTracks";
 import {
@@ -39,6 +41,7 @@ import { getGreeting, timeStringToSeconds } from "../../Utilities/Helpers";
 import { hp } from "../../Utilities/Metrics";
 import { useSetupPlayer } from "../Player";
 import styles from "./style";
+import Loader from "../../Components/Loader";
 
 const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
   const { id, isFromMeditation, meditationTypeData } = route.params;
@@ -46,7 +49,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const { position, duration, buffered } = useProgress();
   const { playing } = useIsPlaying();
-  const isPlayerReady = useSetupPlayer();
+  useSetupPlayer(); // Initialize player
   const track = useActiveTrack();
 
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
@@ -54,10 +57,13 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
   const [isPreviousAvailable, setIsPreviousAvailable] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [collectionData, setCollectionData] = useState<GetCollectionResponse>();
-
   const [searchedAudios, setSearchedAudios] =
     useState<GetSearchAudioResponse[]>();
+
+  // Ref for abort controller to cancel ongoing requests
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const playTrack = async (index: number) => {
     if (index < 0 || index >= TrackList.length) return; // Prevent out-of-bounds errors
@@ -134,48 +140,131 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
 
   useStopPlaybackOnBackground();
 
-  const getCollectionData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchData<GetCollectionResponse>(
-        `${ENDPOINTS.collectionData}${id}/audios`
-      );
-      if (response.data.success) {
-        setCollectionData(response.data.data);
+  const getCollectionData = useCallback(
+    async (forceRefresh = false) => {
+      // Cancel any ongoing requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
-    } catch (error: any) {
-      console.error("Home data fetch error:", error);
-      Toast.show({
-        type: "error",
-        text1: error.message || "Something went wrong",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
-  const getmeditationTypeData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetchData<GetSearchAudioResponse[]>(
-        ENDPOINTS.searchAudio,
-        {
-          bestFor: meditationTypeData?.title,
-        }
-      );
-      if (response.data.success) {
-        setSearchedAudios(response.data.data);
+      // Create a new abort controller for this request
+      abortControllerRef.current = new AbortController();
+
+      if (!forceRefresh) {
+        setIsLoading(true);
+      } else {
+        setRefreshing(true);
       }
-    } catch (error: any) {
-      console.error("Home data fetch error:", error);
-      Toast.show({
-        type: "error",
-        text1: error.message || "Something went wrong",
-      });
-    } finally {
-      setIsLoading(false);
+
+      try {
+        // Fetch with timeout
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Request timeout")), 10000);
+        });
+
+        const fetchPromise = fetchData<GetCollectionResponse>(
+          `${ENDPOINTS.collectionData}${id}/audios`,
+          {},
+          { signal: abortControllerRef.current.signal }
+        );
+
+        // Race between fetch and timeout
+        const response = (await Promise.race([
+          fetchPromise,
+          timeoutPromise,
+        ])) as any;
+
+        if (response.data.success) {
+          setCollectionData(response.data.data);
+        }
+      } catch (error: any) {
+        // Don't show error if it's an abort error (user navigated away)
+        if (error.name !== "AbortError") {
+          console.error("Collection data fetch error:", error);
+          Toast.show({
+            type: "error",
+            text1: error.message || "Something went wrong",
+            position: "bottom",
+          });
+        }
+      } finally {
+        setIsLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [id]
+  );
+
+  const getmeditationTypeData = useCallback(
+    async (forceRefresh = false) => {
+      // Cancel any ongoing requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create a new abort controller for this request
+      abortControllerRef.current = new AbortController();
+
+      if (!forceRefresh) {
+        setIsLoading(true);
+      } else {
+        setRefreshing(true);
+      }
+
+      try {
+        // Fetch with timeout
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("Request timeout")), 10000);
+        });
+
+        const fetchPromise = fetchData<GetSearchAudioResponse[]>(
+          ENDPOINTS.searchAudio,
+          {
+            bestFor: meditationTypeData?.title,
+          },
+          { signal: abortControllerRef.current.signal }
+        );
+
+        // Race between fetch and timeout
+        const response = (await Promise.race([
+          fetchPromise,
+          timeoutPromise,
+        ])) as any;
+
+        if (response.data.success) {
+          setSearchedAudios(response.data.data);
+        }
+      } catch (error: any) {
+        // Don't show error if it's an abort error (user navigated away)
+        if (error.name !== "AbortError") {
+          console.error("Meditation data fetch error:", error);
+          Toast.show({
+            type: "error",
+            text1: error.message || "Something went wrong",
+            position: "bottom",
+          });
+        }
+      } finally {
+        setIsLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [meditationTypeData?.title]
+  );
+
+  // Handle pull-to-refresh
+  const onRefresh = useCallback(() => {
+    if (isFromMeditation && meditationTypeData?.title) {
+      getmeditationTypeData(true);
+    } else {
+      getCollectionData(true);
     }
-  }, []);
+  }, [
+    getmeditationTypeData,
+    getCollectionData,
+    isFromMeditation,
+    meditationTypeData,
+  ]);
 
   useEffect(() => {
     if (isFromMeditation && meditationTypeData?.title) {
@@ -183,7 +272,19 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
     } else {
       getCollectionData();
     }
-  }, [isFromMeditation, meditationTypeData]);
+
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [
+    isFromMeditation,
+    meditationTypeData,
+    getmeditationTypeData,
+    getCollectionData,
+  ]);
 
   useEffect(() => {
     if (collectionData && collectionData?.audioFiles.length > 0) {
@@ -194,29 +295,13 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
     }
   }, [collectionData]);
 
-  if (isLoading) {
+  if (isLoading && !collectionData && !searchedAudios) {
     return (
       <SafeAreaView style={styles.container}>
         <Loader />
       </SafeAreaView>
     );
   }
-
-  // if (!isPlayerReady) {
-  //   return (
-  //     <SafeAreaView
-  //       style={{
-  //         flex: 1,
-  //         backgroundColor: COLORS.darkBlue,
-  //         alignItems: "center",
-  //         justifyContent: "center",
-  //         minHeight: "100%",
-  //       }}
-  //     >
-  //       <ActivityIndicator />
-  //     </SafeAreaView>
-  //   );
-  // }
 
   return (
     <SafeAreaView
@@ -244,7 +329,17 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
         />
       </View>
 
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[COLORS.darkNavyBlue]}
+            tintColor={COLORS.white}
+          />
+        }
+      >
         <View style={styles.mainHeader}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -255,11 +350,13 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
 
           <View style={styles.headerTextCont}>
             <CustomText type="subHeading">{getGreeting()}</CustomText>
-            <CustomText>
-              {isFromMeditation
-                ? meditationTypeData?.title
-                : collectionData?.collection.description}
-            </CustomText>
+            <ScrollView style={{ height: hp(10) }}>
+              <CustomText>
+                {isFromMeditation
+                  ? meditationTypeData?.title
+                  : collectionData?.collection.description}
+              </CustomText>
+            </ScrollView>
           </View>
         </View>
 
@@ -368,61 +465,61 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
             />
           )}
         </View>
+      </ScrollView>
 
-        {track ? (
-          <View style={styles.footerCont}>
-            <View style={styles.footerContent}>
-              <View style={styles.footerLeftCont}>
-                <Image
-                  source={{ uri: track?.artwork }}
-                  style={styles.footerLeftImage}
-                />
-                <CustomText>{track?.title}</CustomText>
-              </View>
-
-              <View style={styles.footerRight}>
-                <CustomIcon
-                  onPress={handlePreviousTrack}
-                  Icon={ICONS.playPreviousIcon}
-                  height={20}
-                  width={20}
-                  disabled={!isPreviousAvailable}
-                />
-                <CustomIcon
-                  onPress={playing ? Player.pause : Player.play}
-                  Icon={playing ? ICONS.pauseIcon : ICONS.playIcon}
-                  height={18}
-                  width={18}
-                />
-                <CustomIcon
-                  onPress={handleNextTrack}
-                  Icon={ICONS.playNextIcon}
-                  height={20}
-                  width={20}
-                  disabled={!isNextAvailable}
-                />
-              </View>
+      {track ? (
+        <View style={styles.footerCont}>
+          <View style={styles.footerContent}>
+            <View style={styles.footerLeftCont}>
+              <Image
+                source={{ uri: track?.artwork }}
+                style={styles.footerLeftImage}
+              />
+              <CustomText>{track?.title}</CustomText>
             </View>
 
-            <View style={styles.footerProgressBar}>
-              <View
-                style={[
-                  styles.footerProgressComplete,
-                  {
-                    width: `${
-                      (position /
-                        (Platform.OS === "android" ? duration : buffered)) *
-                      100
-                    }%`,
-                  },
-                ]}
+            <View style={styles.footerRight}>
+              <CustomIcon
+                onPress={handlePreviousTrack}
+                Icon={ICONS.playPreviousIcon}
+                height={20}
+                width={20}
+                disabled={!isPreviousAvailable}
+              />
+              <CustomIcon
+                onPress={playing ? Player.pause : Player.play}
+                Icon={playing ? ICONS.pauseIcon : ICONS.playIcon}
+                height={18}
+                width={18}
+              />
+              <CustomIcon
+                onPress={handleNextTrack}
+                Icon={ICONS.playNextIcon}
+                height={20}
+                width={20}
+                disabled={!isNextAvailable}
               />
             </View>
           </View>
-        ) : (
-          <View style={styles.footerCont}></View>
-        )}
-      </View>
+
+          <View style={styles.footerProgressBar}>
+            <View
+              style={[
+                styles.footerProgressComplete,
+                {
+                  width: `${
+                    (position /
+                      (Platform.OS === "android" ? duration : buffered)) *
+                    100
+                  }%`,
+                },
+              ]}
+            />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.footerCont}></View>
+      )}
     </SafeAreaView>
   );
 };

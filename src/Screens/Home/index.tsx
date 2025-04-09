@@ -1,11 +1,11 @@
 import { IMAGE_BASE_URL } from "@env";
 import { FlashList } from "@shopify/flash-list";
-import React, { FC, useCallback, useEffect, useState, useRef } from "react";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  RefreshControl,
   TouchableOpacity,
   View,
-  RefreshControl,
-  ActivityIndicator,
 } from "react-native";
 import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,15 +28,15 @@ import {
   TrendingAudio,
 } from "../../Typings/apiTypes";
 import { HomeScreenProps } from "../../Typings/route";
-import styles from "./style";
+import COLORS from "../../Utilities/Colors";
+import STORAGE_KEYS from "../../Utilities/Constants";
 import { timeStringToSeconds } from "../../Utilities/Helpers";
 import { horizontalScale } from "../../Utilities/Metrics";
 import {
   getLocalStorageData,
   storeLocalStorageData,
 } from "../../Utilities/Storage";
-import STORAGE_KEYS from "../../Utilities/Constants";
-import COLORS from "../../Utilities/Colors";
+import styles from "./style";
 
 const Home: FC<HomeScreenProps> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -73,14 +73,14 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
         if (cachedData && timestamp) {
           const now = new Date().getTime();
           const cacheTime = parseInt(timestamp);
-          const fifteenMinutesInMs = 15 * 60 * 1000;
+          const fifteenMinutesInMs = 5 * 60 * 1000;
 
           if (now - cacheTime < fifteenMinutesInMs) {
             setHomeData(cachedData);
             setIsLoading(false);
 
             // Fetch fresh data in the background
-            fetchFreshDataInBackground();
+            // fetchFreshDataInBackground();
             return;
           }
         }
@@ -132,30 +132,6 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
     }
   }, []);
 
-  // Fetch fresh data in the background without showing loading indicators
-  const fetchFreshDataInBackground = async () => {
-    try {
-      const response = await fetchData<GetHomeDataResponse>(
-        ENDPOINTS.getHomeData
-      );
-      if (response.data.success) {
-        setHomeData(response.data.data);
-
-        // Update the cache
-        await storeLocalStorageData(
-          STORAGE_KEYS.cachedHomeData,
-          response.data.data
-        );
-        await storeLocalStorageData(
-          STORAGE_KEYS.homeDataTimestamp,
-          new Date().getTime().toString()
-        );
-      }
-    } catch (error) {
-      console.log("Background fetch error:", error);
-    }
-  };
-
   // Handle pull-to-refresh
   const onRefresh = useCallback(() => {
     getHomeData(true);
@@ -188,33 +164,34 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
 
   const renderTrendingItem = useCallback(
     ({ item, index }: { item: TrendingAudio; index: number }) => (
-      <ContentCard
-        key={item._id}
-        duration={item.audioDetails.duration}
-        imageUrl={IMAGE_BASE_URL + item.audioDetails.imageUrl}
-        title={item.audioDetails.songName}
-        type="potrait"
-        onPress={() => {
-          navigation.navigate("player", {
-            trackList: [
-              {
-                id: item._id,
-                artwork: IMAGE_BASE_URL + item.audioDetails.imageUrl,
-                collectionName:
-                  homeData?.trendingAudio[0].audioDetails.songName ?? "",
-                title: item.audioDetails.songName,
-                duration: timeStringToSeconds(item.audioDetails.duration),
-                description: item.audioDetails.description,
-                url: IMAGE_BASE_URL + item.audioDetails.audioUrl,
-                level: item.audioDetails.levels[0]?.name,
-              },
-            ],
-            currentTrackIndex: index,
-          });
-        }}
-      />
+      <View style={{ marginRight: horizontalScale(10) }}>
+        <ContentCard
+          key={item._id}
+          duration={item.audioDetails.duration}
+          imageUrl={IMAGE_BASE_URL + item.audioDetails.imageUrl}
+          title={item.audioDetails.songName}
+          type="potrait"
+          onPress={() => {
+            homeData &&
+              homeData.trendingAudio.length > 0 &&
+              navigation.navigate("player", {
+                trackList: homeData?.trendingAudio.map((trend) => ({
+                  id: trend._id,
+                  artwork: IMAGE_BASE_URL + trend.audioDetails.imageUrl,
+                  collectionName: trend.audioDetails.collectionType?.name ?? "",
+                  title: trend.audioDetails.songName,
+                  duration: timeStringToSeconds(trend.audioDetails.duration),
+                  description: trend.audioDetails.description,
+                  url: IMAGE_BASE_URL + trend.audioDetails.audioUrl,
+                  level: trend.audioDetails.levels[0]?.name,
+                })),
+                currentTrackIndex: index,
+              });
+          }}
+        />
+      </View>
     ),
-    [navigation]
+    [homeData]
   );
 
   const renderCollectionItem = useCallback(
@@ -270,7 +247,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
         />
       </View>
     ),
-    [navigation]
+    [navigation, homeData]
   );
 
   const renderBreathingSessionItem = useCallback(
@@ -283,7 +260,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
         onPress={() => handleBreathingSessionPress(index)}
       />
     ),
-    [handleBreathingSessionPress]
+    [handleBreathingSessionPress, homeData]
   );
 
   const keyExtractor = useCallback((item: any) => item._id, []);
@@ -359,15 +336,6 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
                 <CustomText type="title" fontFamily="bold">
                   Trending
                 </CustomText>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate("playerList", {
-                      id: homeData.trendingAudio[0]._id,
-                    });
-                  }}
-                >
-                  <CustomText fontFamily="semiBold">View all</CustomText>
-                </TouchableOpacity>
               </View>
 
               <FlashList
