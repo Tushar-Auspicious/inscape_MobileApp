@@ -34,6 +34,7 @@ const Splash: FC<SplashProps> = ({ navigation }) => {
     }, 2000);
     return () => clearTimeout(timeout);
   }, [token, isOnBoarded, isTermsAccepted]);
+
   return (
     <SafeAreaView style={styles.container}>
       <Image source={IMAGES.logo} style={styles.logo} />
