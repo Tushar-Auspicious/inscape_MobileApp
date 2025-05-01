@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.darkBlue,
   },
   scrollContainer: {
-    paddingVertical: verticalScale(20),
+    paddingTop: verticalScale(20),
   },
   mainHeader: {
     flexDirection: "row",

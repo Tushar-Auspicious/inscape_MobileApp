@@ -1,10 +1,12 @@
-import React, { FC, useRef } from "react";
+import React, { FC, useEffect, useRef } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ICONS from "../../Assets/icons";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import LogOutModal from "../../Components/Modals/LogOutModal";
+import NoInternetCard from "../../Components/NoInternetCard";
+import useNetworkStatus from "../../Hooks/useNetworkStatus";
 import { setIsRegistered, setToken } from "../../Redux/slices/initialSlice";
 import { useAppDispatch } from "../../Redux/store";
 import { SettingScreenProps } from "../../Typings/route";
@@ -22,10 +24,16 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
     sheetRef.current.close();
   };
 
+  // Network status
+  const { isConnected, retryConnection } = useNetworkStatus();
+  const previousConnectionRef = useRef<boolean | null>(null);
+
   const handleLogout = async () => {
     await deleteLocalStorageData(STORAGE_KEYS.isAuth);
     await deleteLocalStorageData(STORAGE_KEYS.token);
     await deleteLocalStorageData(STORAGE_KEYS.isRegistered);
+    await deleteLocalStorageData(STORAGE_KEYS.downloadedAudios);
+
     dispatch(setToken(null));
     dispatch(setIsRegistered(null));
 
@@ -52,6 +60,32 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
+
+  // Monitor network status changes and refresh data when connection is restored
+  useEffect(() => {
+    // If connection was previously offline and now it's online, refresh the data
+    if (previousConnectionRef.current === false && isConnected === true) {
+      console.log("Network connection restored, refreshing discover data...");
+    }
+
+    // Update the previous connection state
+    previousConnectionRef.current = isConnected;
+  }, [isConnected]);
+
+  // Show no internet card when offline
+  if (!isConnected) {
+    return (
+      <SafeAreaView style={styles.main}>
+        <NoInternetCard
+          onRetry={() => {
+            retryConnection();
+            // If retryConnection succeeds, it will trigger the useEffect above
+            // due to the isConnected dependency
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.main}>

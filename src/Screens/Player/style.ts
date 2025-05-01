@@ -72,6 +72,40 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     opacity: 0.5,
   },
+
+  // Error styles
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: horizontalScale(20),
+  },
+  errorTitle: {
+    marginBottom: verticalScale(10),
+    color: COLORS.white,
+    textAlign: "center",
+  },
+  errorMessage: {
+    color: COLORS.white,
+    textAlign: "center",
+    marginBottom: verticalScale(30),
+    opacity: 0.8,
+  },
+  retryButton: {
+    backgroundColor: COLORS.navyBlue,
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: horizontalScale(30),
+    borderRadius: 25,
+    marginBottom: verticalScale(15),
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontWeight: "bold",
+  },
+
+  backButtonText: {
+    color: COLORS.white,
+  },
 });
 
 export default styles;

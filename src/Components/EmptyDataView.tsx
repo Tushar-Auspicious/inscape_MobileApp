@@ -1,18 +1,36 @@
-import React, { FC } from "react";
+import React, { Dispatch, FC, SetStateAction } from "react";
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import ICONS from "../Assets/icons";
 import COLORS from "../Utilities/Colors";
 import { horizontalScale, hp, verticalScale, wp } from "../Utilities/Metrics";
-import CustomButton from "./Buttons/CustomButton";
 import CustomIcon from "./CustomIcon";
 import { CustomText } from "./CustomText";
 
 type EmptyDataViewProps = {
   height?: any;
   searchData: any;
+  selectedLevel: string;
+  setSelectedLevel: Dispatch<SetStateAction<string>>;
+  selectedFilters: string[];
+  setSelectedFilters: Dispatch<SetStateAction<string[]>>;
+  setSearchQuery: Dispatch<SetStateAction<string>>;
+  fetchFilteredData: any;
 };
 
-const EmptyDataView: FC<EmptyDataViewProps> = ({ height = "100%" }) => {
+const EmptyDataView: FC<EmptyDataViewProps> = ({
+  height = "100%",
+  searchData,
+  setSelectedFilters,
+  setSelectedLevel,
+  setSearchQuery,
+  fetchFilteredData,
+}) => {
+  const toggleFilter = (id: string) => {
+    setSelectedFilters((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
   return (
     <View style={[styles.container, { height }]}>
       <View
@@ -45,30 +63,50 @@ const EmptyDataView: FC<EmptyDataViewProps> = ({ height = "100%" }) => {
         </View>
 
         <FlatList
-          data={[
-            "Relaxation",
-            "Breathing",
-            "Focus",
-            "Nature",
-            "Energy",
-            "Peace",
-          ]}
+          data={searchData.bestFor}
           numColumns={3}
           columnWrapperStyle={styles.columnWrapper}
           style={{ width: " 100%", rowGap: 10 }}
           renderItem={({ item }) => {
             return (
-              <TouchableOpacity style={styles.suggestionButton}>
+              <TouchableOpacity
+                onPress={() => {
+                  toggleFilter(item);
+                  fetchFilteredData();
+                  setSearchQuery("");
+                }}
+                style={styles.suggestionButton}
+              >
                 <CustomText>{item}</CustomText>
               </TouchableOpacity>
             );
           }}
         />
-        <CustomButton
+        <FlatList
+          data={searchData.level}
+          numColumns={3}
+          columnWrapperStyle={styles.columnWrapper}
+          style={{ width: " 100%", rowGap: 10 }}
+          renderItem={({ item }) => {
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedLevel(item);
+                  fetchFilteredData();
+                  setSearchQuery("");
+                }}
+                style={styles.suggestionButton}
+              >
+                <CustomText>{item}</CustomText>
+              </TouchableOpacity>
+            );
+          }}
+        />
+        {/* <CustomButton
           title="Search"
           onPress={() => []}
           style={{ marginTop: verticalScale(40) }}
-        />
+        /> */}
       </View>
     </View>
   );
@@ -101,6 +139,7 @@ const styles = StyleSheet.create({
   },
   columnWrapper: {
     columnGap: horizontalScale(10),
+    marginVertical: verticalScale(5),
   },
   suggestionButton: {
     paddingVertical: verticalScale(10),

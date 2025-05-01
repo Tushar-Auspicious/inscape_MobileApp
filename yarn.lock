@@ -2194,6 +2194,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-community/netinfo@npm:^11.4.1":
+  version: 11.4.1
+  resolution: "@react-native-community/netinfo@npm:11.4.1"
+  peerDependencies:
+    react-native: ">=0.59"
+  checksum: d347ae522da6b8c045d6378754d4928bdf23cc85b74571b91fa8a03fa168bdac5e3c65eb97eac0dd0c7cbd20e782f99d41b090fb79ce7d815cbaf6fb5d1abe37
+  languageName: node
+  linkType: hard
+
 "@react-native-community/slider@npm:^4.5.6":
   version: 4.5.6
   resolution: "@react-native-community/slider@npm:4.5.6"
@@ -3144,6 +3153,7 @@ __metadata:
     "@react-native-community/cli": 15.0.1
     "@react-native-community/cli-platform-android": 15.0.1
     "@react-native-community/cli-platform-ios": 15.0.1
+    "@react-native-community/netinfo": ^11.4.1
     "@react-native-community/slider": ^4.5.6
     "@react-native/babel-preset": 0.78.0
     "@react-native/eslint-config": 0.78.0
@@ -3166,6 +3176,7 @@ __metadata:
     react-native: 0.78.0
     react-native-date-picker: ^5.0.10
     react-native-dotenv: ^3.4.11
+    react-native-fast-image: ^8.6.3
     react-native-file-access: ^3.1.1
     react-native-fs: ^2.20.0
     react-native-gesture-handler: ^2.24.0
@@ -8459,6 +8470,16 @@ __metadata:
   peerDependencies:
     "@babel/runtime": ^7.20.6
   checksum: 3ebac2c2ed79dd7e4920fd3fc2da9187413b7190231618e4858b46c47833677838b96d531afe7bd5c4b0a60454dba40cb8708722210df5d522e30aefbf41da05
+  languageName: node
+  linkType: hard
+
+"react-native-fast-image@npm:^8.6.3":
+  version: 8.6.3
+  resolution: "react-native-fast-image@npm:8.6.3"
+  peerDependencies:
+    react: ^17 || ^18
+    react-native: ">=0.60.0"
+  checksum: 29289cb6b2eae0983c8922b22e2d9de3be07322bb7991c5def19f95eadefaedb0e308ff0b38cc1d0444e8bd4fe94a7621a99a2d3d9298100bcb60b3144677234
   languageName: node
   linkType: hard
 

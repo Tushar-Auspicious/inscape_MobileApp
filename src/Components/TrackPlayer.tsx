@@ -1,6 +1,7 @@
 import notifee from "@notifee/react-native"; // Import Notifee
 import Slider from "@react-native-community/slider";
-import React, { FC, useEffect, useState, useRef } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
+import { usePlayerContext } from "../Context/PlayerContext";
 import {
   ActivityIndicator,
   AppState,
@@ -19,6 +20,8 @@ import Player, {
   useProgress,
   useTrackPlayerEvents,
 } from "react-native-track-player";
+import { postData } from "../APIService/api";
+import ENDPOINTS from "../APIService/endPoints";
 import ICONS from "../Assets/icons";
 import COLORS from "../Utilities/Colors";
 import {
@@ -29,8 +32,6 @@ import {
 } from "../Utilities/Helpers";
 import { verticalScale } from "../Utilities/Metrics";
 import CustomIcon from "./CustomIcon";
-import { postData } from "../APIService/api";
-import ENDPOINTS from "../APIService/endPoints";
 
 export const useStopPlaybackOnBackground = () => {
   useEffect(() => {
@@ -48,26 +49,37 @@ export const useStopPlaybackOnBackground = () => {
 };
 
 const TrackPlayer: FC<{
-  handlePreviousTrack: () => void;
-  handleNextTrack: () => void;
-  handleShuffle: () => void;
-  isNextTrackAvailable: boolean;
-  isPreviousTrackAvailable: boolean;
   trackData: audioItem;
   isTrackLoaded?: boolean;
-  shuffleMode?: boolean;
   isDownload?: boolean;
+  // We'll keep these props for backward compatibility but use context internally
+  handlePreviousTrack?: () => void;
+  handleNextTrack?: () => void;
+  handleShuffle?: () => void;
+  isNextTrackAvailable?: boolean;
+  isPreviousTrackAvailable?: boolean;
+  shuffleMode?: boolean;
 }> = ({
-  handleNextTrack,
-  handlePreviousTrack,
-  handleShuffle,
-  isNextTrackAvailable,
-  isPreviousTrackAvailable,
   trackData,
   isTrackLoaded = true,
-  shuffleMode = false,
   isDownload = true,
+  // Optional props with fallbacks to context
+  handleNextTrack: propHandleNextTrack,
+  handlePreviousTrack: propHandlePreviousTrack,
+  handleShuffle: propHandleShuffle,
+  isNextTrackAvailable: propIsNextTrackAvailable,
+  isPreviousTrackAvailable: propIsPreviousTrackAvailable,
+  shuffleMode: propShuffleMode = false,
 }) => {
+  // Use player context
+  const {
+    skipToNext,
+    skipToPrevious,
+    toggleShuffle,
+    isShuffleEnabled,
+    seekTo,
+    playPause,
+  } = usePlayerContext();
   const { playing } = useIsPlaying();
   const track = useActiveTrack();
   const { position, duration, buffered } = useProgress();
@@ -75,6 +87,7 @@ const TrackPlayer: FC<{
   const [downloading, setDownloading] = useState(false);
   const [playHistoryTracked, setPlayHistoryTracked] = useState(false);
   const trackIdRef = useRef<string | null>(null);
+  const [isBuffering, setIsBuffering] = useState(false);
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -101,141 +114,118 @@ const TrackPlayer: FC<{
     const fileName = `${track?.title}.${fileExt}`;
 
     // Handle notifications based on platform
-    if (Platform.OS !== "web") {
-      try {
-        // Request notification permission (iOS)
-        await notifee.requestPermission();
+    try {
+      // Request notification permission (iOS)
+      await notifee.requestPermission();
 
-        // Create a notification channel (Android) or get iOS options
-        let channelId = "";
-        let iosOptions = {};
+      // Create a notification channel (Android) or get iOS options
+      let channelId = "";
+      let iosOptions = {};
 
-        if (Platform.OS === "android") {
-          channelId = await notifee.createChannel({
-            id: "download",
-            name: "Download Channel",
-          });
-        } else {
-          // iOS specific options
-          iosOptions = {
-            sound: "default",
-            foregroundPresentationOptions: {
-              badge: true,
-              sound: true,
-              banner: true,
-              list: true,
-            },
-          };
-        }
-
-        // Display initial notification
-        const notificationId = await notifee.displayNotification({
-          title: "Downloading Audio",
-          body: `Starting download for ${track?.title}`,
-          android: {
-            channelId,
-            progress: { max: 100, current: 0 },
-            smallIcon: "ic_launcher",
-            pressAction: { id: "default" },
+      if (Platform.OS === "android") {
+        channelId = await notifee.createChannel({
+          id: "download",
+          name: "Download Channel",
+        });
+      } else {
+        // iOS specific options
+        iosOptions = {
+          sound: "default",
+          foregroundPresentationOptions: {
+            badge: true,
+            sound: true,
+            banner: true,
+            list: true,
           },
-          ios: iosOptions,
+        };
+      }
+
+      // Display initial notification
+      const notificationId = await notifee.displayNotification({
+        title: "Downloading Audio",
+        body: `Starting download for ${track?.title}`,
+        android: {
+          channelId,
+          progress: { max: 100, current: 0 },
+          smallIcon: "ic_launcher",
+          pressAction: { id: "default" },
+        },
+        ios: iosOptions,
+      });
+
+      try {
+        const filePath = await downloadFile(fileUrl, fileName, (progress) => {
+          // Update notification progress
+          notifee.displayNotification({
+            id: notificationId,
+            title: "Downloading Audio",
+            body:
+              Platform.OS === "ios"
+                ? `Downloading ${track?.title} (${progress}%)`
+                : `Downloading ${track?.title}`,
+            android: {
+              channelId,
+              progress: { max: 100, current: Number(progress) },
+            },
+            ios: iosOptions,
+          });
         });
 
-        try {
-          const filePath = await downloadFile(fileUrl, fileName, (progress) => {
-            // Update notification progress
-            notifee.displayNotification({
-              id: notificationId,
-              title: "Downloading Audio",
-              body:
-                Platform.OS === "ios"
-                  ? `Downloading ${track?.title} (${progress}%)`
-                  : `Downloading ${track?.title}`,
-              android: {
-                channelId,
-                progress: { max: 100, current: Number(progress) },
-              },
-              ios: iosOptions,
-            });
-          });
-
-          if (filePath) {
-            // Success notification
-            await notifee.displayNotification({
-              id: notificationId,
-              title: "Download Complete",
-              body: `${track?.title} downloaded successfully!`,
-              android: { channelId },
-              ios: iosOptions,
-            });
-
-            if (Platform.OS === "android") {
-              Toast.show({
-                type: "success",
-                text1: "Download Successful",
-                text2: `${track?.title} has been downloaded`,
-              });
-            }
-
-            await saveDownloadedAudio(trackData);
-          } else {
-            throw new Error("Download failed - no file path returned");
-          }
-        } catch (error) {
-          // Failure notification
+        if (filePath) {
+          // Success notification
           await notifee.displayNotification({
             id: notificationId,
-            title: "Download Failed",
-            body: `Error downloading ${track?.title}`,
+            title: "Download Complete",
+            body: `${track?.title} downloaded successfully!`,
             android: { channelId },
             ios: iosOptions,
           });
 
-          Toast.show({
-            type: "error",
-            text1: "Download Failed",
-            text2:
-              error instanceof Error ? error.message : "Unknown error occurred",
-          });
+          if (Platform.OS === "android") {
+            Toast.show({
+              type: "success",
+              text1: "Download Successful",
+              text2: `${track?.title} has been downloaded`,
+            });
+          }
 
-          console.error("Download error:", error);
-        } finally {
-          setTimeout(() => notifee.cancelNotification(notificationId), 3000);
-        }
-      } catch (error) {
-        console.error("Notification error:", error);
-        Toast.show({
-          type: "error",
-          text1: "Notification Error",
-          text2: "Could not show download notifications",
-        });
-      }
-    } else {
-      // Web platform - simpler download process without notifications
-      try {
-        const filePath = await downloadFile(fileUrl, fileName, (progress) => {
-          console.log(`Download progress: ${progress}%`);
-        });
+          const normalizedPath =
+            Platform.OS === "android" && !filePath.startsWith("file://")
+              ? `file://${filePath}`
+              : filePath;
 
-        if (filePath) {
-          Toast.show({
-            type: "success",
-            text1: "Download Successful",
-            text2: `${track?.title} has been downloaded`,
-          });
-          await saveDownloadedAudio(trackData);
+          await saveDownloadedAudio(trackData, normalizedPath);
         } else {
           throw new Error("Download failed - no file path returned");
         }
       } catch (error) {
+        // Failure notification
+        await notifee.displayNotification({
+          id: notificationId,
+          title: "Download Failed",
+          body: `Error downloading ${track?.title}`,
+          android: { channelId },
+          ios: iosOptions,
+        });
+
         Toast.show({
           type: "error",
           text1: "Download Failed",
           text2:
             error instanceof Error ? error.message : "Unknown error occurred",
         });
+
         console.error("Download error:", error);
+      } finally {
+        setTimeout(() => notifee.cancelNotification(notificationId), 3000);
       }
+    } catch (error) {
+      console.error("Notification error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Notification Error",
+        text2: "Could not show download notifications",
+      });
     }
 
     setDownloading(false);
@@ -266,6 +256,10 @@ const TrackPlayer: FC<{
     if (event.state === State.Ended) {
       Player.seekTo(0);
       Player.pause();
+    } else if (event.state === State.Buffering) {
+      setIsBuffering(true);
+    } else if (event.state === State.Ready) {
+      setIsBuffering(false);
     } else if (event.state === State.Playing) {
       // Track play history when the track starts playing
       trackPlayHistory();
@@ -276,6 +270,30 @@ const TrackPlayer: FC<{
   useEffect(() => {
     setPlayHistoryTracked(false);
   }, [trackData.id]);
+
+  // // Make sure the track data is properly set in the player for the MiniPlayer
+  // useEffect(() => {
+  //   const updateTrackMetadata = async () => {
+  //     try {
+  //       const currentTrack = await Player.getActiveTrack();
+
+  //       // If the track is already loaded but metadata might be missing
+  //       if (currentTrack && currentTrack.id === trackData.id) {
+  //         // Update metadata if needed
+  //         await Player.updateMetadataForTrack(currentTrack.id, {
+  //           artwork: trackData.artwork,
+  //           artist: trackData.collectionName || "Unknown",
+  //           album: trackData.collectionName || "Unknown",
+  //           title: trackData.title,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.log("Error updating track metadata:", error);
+  //     }
+  //   };
+
+  //   updateTrackMetadata();
+  // }, [trackData]);
 
   return (
     <View style={{ width: "100%" }}>
@@ -326,6 +344,7 @@ const TrackPlayer: FC<{
           disabled={!isPreviousTrackAvailable}
         />
         <TouchableOpacity
+          disabled={!isTrackLoaded}
           onPress={() => {
             if (!playing) {
               // Track play history when user manually plays
@@ -335,11 +354,23 @@ const TrackPlayer: FC<{
           }}
           style={{
             backgroundColor: COLORS.navyBlue,
-            padding: 15,
+            height: 39,
+            width: 39,
             borderRadius: 100,
+            justifyContent: "center",
+            alignItems: "center",
+            opacity: isBuffering ? 0.6 : 1,
           }}
         >
           <CustomIcon
+            onPress={() => {
+              if (!playing) {
+                // Track play history when user manually plays
+                trackPlayHistory();
+              }
+              playing ? Player.pause() : Player.play();
+            }}
+            disabled={!isTrackLoaded}
             Icon={playing ? ICONS.pauseIcon : ICONS.playIcon}
             height={14}
             width={14}

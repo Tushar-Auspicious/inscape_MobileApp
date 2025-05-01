@@ -26,15 +26,33 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: verticalScale(100),
+    paddingHorizontal: horizontalScale(20),
+  },
+  emptyStateIcon: {
+    marginBottom: verticalScale(20),
+    opacity: 0.8,
   },
   emptyStateText: {
     textAlign: "center",
     marginBottom: verticalScale(10),
+    color: COLORS.white,
   },
   emptyStateSubText: {
     textAlign: "center",
-    color: COLORS.darkGrey,
+    color: COLORS.grey,
+    marginBottom: verticalScale(30),
+    paddingHorizontal: horizontalScale(20),
+  },
+  discoverButton: {
+    backgroundColor: COLORS.navyBlue,
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: horizontalScale(30),
+    borderRadius: 25,
+    marginTop: verticalScale(10),
+  },
+  discoverButtonText: {
+    color: COLORS.white,
+    fontWeight: "bold",
   },
   emptyListContainer: {
     flex: 1,

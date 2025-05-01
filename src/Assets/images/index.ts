@@ -9,8 +9,6 @@ const IMAGES = {
   curvedView: require("./curvedView.png"),
   registerSuccessImg: require("./registerSuccessImage.png"),
   passwordSuccessImg: require("./passwordSucccesImg.png"),
-  meditationType1: require("./meditationType1.png"),
-  meditationType2: require("./meditationType2.png"),
   meditationType3: require("./meditationType3.png"),
 };
 

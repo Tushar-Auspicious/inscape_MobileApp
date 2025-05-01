@@ -41,12 +41,13 @@ export const downloadFile = async (
   fileUrl: string,
   fileName: string,
   onProgress?: (percentage: string) => void
-): Promise<string | null> => {
+): Promise<{ path: string; statusCode: number } | null> => {
   // Encode the URL to handle spaces and special characters
   const encodedUrl = encodeURI(fileUrl);
   const {} = RNFS;
   // Sanitize file name to remove special characters
   const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+
   try {
     // Define temporary and final paths
     const tempPath = `${RNFS.TemporaryDirectoryPath}/${sanitizedFileName}`;
@@ -73,9 +74,6 @@ export const downloadFile = async (
       // This makes files accessible to the app and can be shared
       finalPath = `${RNFS.DocumentDirectoryPath}/${sanitizedFileName}`;
     }
-
-    console.log("Temporary path:", tempPath);
-    console.log("Final download path:", finalPath);
 
     // Remove existing files at temp and final paths to avoid conflicts
     if (await RNFS.exists(tempPath)) {
@@ -107,7 +105,6 @@ export const downloadFile = async (
     };
 
     const result = await RNFS.downloadFile(downloadOptions).promise;
-    console.log("Download result:", result);
 
     if (result.statusCode !== 200) {
       throw new Error(`Download failed with status code: ${result.statusCode}`);
@@ -144,7 +141,10 @@ export const downloadFile = async (
     }
 
     console.log("File successfully downloaded and copied to:", finalPath);
-    return finalPath;
+    return {
+      path: finalPath,
+      statusCode: result.statusCode,
+    };
   } catch (error) {
     console.error("Download error:", error);
     Alert.alert(
@@ -195,7 +195,10 @@ export const convertStringToDate = (dateString: string) => {
 };
 
 // Save downloaded audio info
-export const saveDownloadedAudio = async (audioItem: audioItem) => {
+export const saveDownloadedAudio = async (
+  audioItem: audioItem,
+  localFilePath: string
+) => {
   try {
     const existingAudios = await getLocalStorageData(
       STORAGE_KEYS.downloadedAudios
@@ -205,6 +208,7 @@ export const saveDownloadedAudio = async (audioItem: audioItem) => {
       await postData(ENDPOINTS.audioHistory, {
         type: "DOWNLOAD",
         audio_id: audioItem.id,
+        downloadUrl: localFilePath,
       });
     } catch (error) {
       console.log(error);
@@ -221,7 +225,8 @@ export const saveDownloadedAudio = async (audioItem: audioItem) => {
         collectionName: audioItem.collectionName,
         title: audioItem.title,
         description: audioItem.description,
-        url: audioItem.url,
+        url: audioItem.url, // Original URL
+        localUrl: localFilePath, // Add local file path
         downloadedAt: new Date().toISOString(),
         level: audioItem.level,
         duration: audioItem.duration,

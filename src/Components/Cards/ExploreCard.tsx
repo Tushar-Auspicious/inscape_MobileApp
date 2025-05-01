@@ -1,13 +1,14 @@
 import { BlurView } from "@react-native-community/blur";
-import React, { FC } from "react";
+import React, { FC, useRef } from "react";
 import {
-  ImageBackground,
+  Animated,
   Platform,
   Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import FastImage from "react-native-fast-image";
 import {
   horizontalScale,
   hp,
@@ -33,19 +34,27 @@ const ExploreCard: FC<ExploreCardProps> = ({
   width = wp(48),
   height = hp(Platform.OS === "ios" ? 12 : 14),
 }) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
   return (
-    <Pressable onPress={onPress} style={{}}>
-      <ImageBackground
+    <Animated.View
+      style={[styles.cardContainer, { width, height }, { opacity: fadeAnim }]}
+    >
+      <FastImage
         source={{ uri: imageUrl }}
-        style={[
-          styles.cardContainer,
-          {
-            width,
-            height,
-            justifyContent: "flex-end",
-          },
-        ]}
-        imageStyle={styles.backgroundImage}
+        style={[StyleSheet.absoluteFill, styles.backgroundImage]}
+        resizeMode={FastImage.resizeMode.cover}
+        onLoad={() => {
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }).start();
+        }}
+      />
+      <Pressable
+        onPress={onPress}
+        style={{ flex: 1, justifyContent: "flex-end" }}
       >
         {Platform.OS === "ios" ? (
           <>
@@ -54,10 +63,7 @@ const ExploreCard: FC<ExploreCardProps> = ({
               blurType="light"
               blurAmount={5}
               reducedTransparencyFallbackColor="white"
-              overlayColor="transparent"
             />
-
-            {/* Content */}
             <View style={styles.content}>
               <CustomText style={{ flex: 1 }} fontFamily="bold">
                 {title.slice(0, 15)}
@@ -69,41 +75,24 @@ const ExploreCard: FC<ExploreCardProps> = ({
           </>
         ) : (
           <BlurView
+            style={styles.blurView}
             blurType="light"
             blurAmount={5}
             reducedTransparencyFallbackColor="rgba(255,255,255,.2)"
             overlayColor="transparent"
           >
-            {/* Content */}
-            <TouchableOpacity onPress={onPress} style={styles.content}>
-              <CustomText fontFamily="bold">{title}</CustomText>
+            <TouchableOpacity style={styles.content} onPress={onPress}>
+              <CustomText style={{ flex: 1 }} fontFamily="bold">
+                {title.slice(0, 15)}
+              </CustomText>
               <CustomText type="extraSmall" fontFamily="bold">
                 {subTitle}
               </CustomText>
             </TouchableOpacity>
           </BlurView>
         )}
-
-        {/* Blur Overlay */}
-        <BlurView
-          style={styles.blurView}
-          blurType="light"
-          blurAmount={5}
-          reducedTransparencyFallbackColor="rgba(255,255,255,.2)"
-          overlayColor="transparent"
-        >
-          {/* Content */}
-          <View style={styles.content}>
-            <CustomText style={{ flex: 1 }} fontFamily="bold">
-              {title.slice(0, 10)}
-            </CustomText>
-            <CustomText type="extraSmall" fontFamily="bold">
-              {subTitle}
-            </CustomText>
-          </View>
-        </BlurView>
-      </ImageBackground>
-    </Pressable>
+      </Pressable>
+    </Animated.View>
   );
 };
 
@@ -120,42 +109,24 @@ const styles = StyleSheet.create({
   backgroundImage: {
     borderRadius: verticalScale(10),
   },
-  blurView:
-    Platform.OS === "ios"
-      ? {
-          position: "absolute",
-          bottom: 0,
-          width: "100%",
-          zIndex: 10,
-        }
-      : {
-          position: "absolute",
-          bottom: 0,
-          width: "100%",
-          height: "36%",
-        },
-
-  content:
-    Platform.OS === "ios"
-      ? {
-          position: "absolute",
-          bottom: 0,
-          width: "100%",
-          zIndex: 20,
-          paddingVertical: verticalScale(10),
-          paddingHorizontal: horizontalScale(20),
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          backgroundColor: "rgba(0, 0, 0, 0.2)",
-        }
-      : {
-          width: "100%",
-          paddingVertical: verticalScale(10),
-          paddingHorizontal: horizontalScale(10),
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          zIndex: 1,
-        },
+  blurView: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    height: Platform.OS === "ios" ? "auto" : "36%",
+    zIndex: 10,
+  },
+  content: {
+    width: "100%",
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: horizontalScale(20),
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    ...(Platform.OS === "ios" && {
+      position: "absolute",
+      bottom: 0,
+      zIndex: 20,
+    }),
+  },
 });

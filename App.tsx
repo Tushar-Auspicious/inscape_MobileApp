@@ -3,6 +3,8 @@ import React, { useEffect } from "react";
 import { Appearance, LogBox, StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import MiniPlayer from "./src/Components/MiniPlayer";
+import { PlayerProvider } from "./src/Context/PlayerContext";
 import {
   setIsOnBoarded,
   setIsRegistered,
@@ -13,10 +15,7 @@ import { useAppDispatch } from "./src/Redux/store";
 import Routing from "./src/Routes";
 import COLORS from "./src/Utilities/Colors";
 import STORAGE_KEYS from "./src/Utilities/Constants";
-import {
-  deleteLocalStorageData,
-  getLocalStorageData,
-} from "./src/Utilities/Storage";
+import { getLocalStorageData } from "./src/Utilities/Storage";
 
 LogBox.ignoreAllLogs();
 Appearance.setColorScheme("light");
@@ -56,13 +55,17 @@ const App = () => {
 
   return (
     <>
-      <SafeAreaProvider>
-        <StatusBar backgroundColor={COLORS.darkBlue} />
-        <NavigationContainer>
-          <Routing />
-          <Toast />
-        </NavigationContainer>
-      </SafeAreaProvider>
+      <PlayerProvider>
+        <SafeAreaProvider>
+          <StatusBar backgroundColor={COLORS.darkBlue} />
+          <NavigationContainer>
+            <Routing />
+          </NavigationContainer>
+          {/* MiniPlayer is placed outside NavigationContainer to avoid navigation context issues */}
+          {/* <MiniPlayer /> */}
+        </SafeAreaProvider>
+        <Toast />
+      </PlayerProvider>
     </>
   );
 };

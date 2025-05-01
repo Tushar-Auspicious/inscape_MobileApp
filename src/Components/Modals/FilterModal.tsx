@@ -113,11 +113,13 @@ const FilterModalSheet: FC<FilterModalProps> = ({
                         backgroundColor: COLORS.navyBlue,
                         borderColor: COLORS.grey,
                         borderWidth: 1,
+                        marginVertical: verticalScale(5),
                       }
                     : {
                         backgroundColor: COLORS.white,
-                        borderColor: "transparent",
+                        borderColor: COLORS.grey,
                         borderWidth: 1,
+                        marginVertical: verticalScale(5),
                       },
                 ]}
               >
@@ -228,7 +230,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.grey,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
+    flexWrap: "wrap",
     borderRadius: 12,
     padding: 5,
   },
@@ -245,9 +248,9 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(10),
     paddingHorizontal: horizontalScale(10),
     borderRadius: 8,
-    flex: 0.3,
     alignItems: "center",
     justifyContent: "center",
+    minWidth: "30%",
   },
   Applyfilter: {},
   titlebtn: {

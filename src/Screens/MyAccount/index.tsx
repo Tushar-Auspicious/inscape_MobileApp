@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import React, { FC, useEffect, useState } from "react";
-import { Pressable, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { fetchData, putData } from "../../APIService/api";
@@ -16,10 +16,9 @@ import Loader from "../../Components/Loader";
 import { GetUserDataResponse } from "../../Typings/apiTypes";
 import { myAccountProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
-import { convertStringToDate } from "../../Utilities/Helpers";
-import styles from "./style";
-import { deleteLocalStorageData } from "../../Utilities/Storage";
 import STORAGE_KEYS from "../../Utilities/Constants";
+import { deleteLocalStorageData } from "../../Utilities/Storage";
+import styles from "./style";
 
 dayjs.extend(customParseFormat);
 
@@ -28,16 +27,6 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [selectedGender, setSelectedGender] = useState<
-    "Male" | "Female" | "Other"
-  >("Male"); // Gender state
-
-  const genderTypes: ("Male" | "Female" | "Other")[] = [
-    "Male",
-    "Female",
-    "Other",
-  ];
 
   const [isLoading, setIsLoading] = useState(false);
   const [getDataLoading, setGetDataLoading] = useState(false);
@@ -45,16 +34,9 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
   // Initial state of fields (to compare for changes)
   const [initialFirstName, setInitialFirstName] = useState("");
   const [initialLastName, setInitialLastName] = useState("");
-  const [initialBirthDate, setInitialBirthDate] = useState("");
-  const [initialGender, setInitialGender] = useState<
-    "Male" | "Female" | "Other"
-  >("Male");
 
   const hasChanges =
-    firstName !== initialFirstName ||
-    lastName !== initialLastName ||
-    birthDate !== initialBirthDate ||
-    selectedGender !== initialGender;
+    firstName !== initialFirstName || lastName !== initialLastName;
 
   const handleUpdateProfile = async () => {
     setIsLoading(true);
@@ -62,8 +44,6 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
       const response = await putData(ENDPOINTS.updateUserData, {
         firstName,
         lastName,
-        dob: dayjs(convertStringToDate(birthDate)).format("DD-MM-YYYY"),
-        gender: selectedGender.toLowerCase(),
       });
 
       if (response.data.success) {
@@ -93,23 +73,15 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
       );
 
       if (response.data.success) {
-        const { firstName, lastName, email, companyName, dob, gender } =
-          response.data.data;
+        const { firstName, lastName, email, companyName } = response.data.data;
         setFirstName(firstName);
         setLastName(lastName);
         setEmail(email);
         setCompanyName(companyName);
-        const formattedDob = dayjs(dob).format("D[th] MMM YYYY");
-        setBirthDate(formattedDob);
-        const normalizedGender =
-          gender === "male" ? "Male" : gender === "female" ? "Female" : "Other";
-        setSelectedGender(normalizedGender);
 
         // Set initial values for comparison
         setInitialFirstName(firstName);
         setInitialLastName(lastName);
-        setInitialBirthDate(formattedDob);
-        setInitialGender(normalizedGender);
       }
     } catch (error: any) {
       console.log(error);
@@ -188,51 +160,6 @@ const MyAccount: FC<myAccountProps> = ({ navigation }) => {
                 label="Company Name"
                 disabled
               />
-
-              <CustomInput
-                value={birthDate}
-                onChangeText={setBirthDate}
-                placeholder="Birthday"
-                label="Birthday"
-                type="date"
-              />
-
-              <View style={styles.genderCont}>
-                <CustomText fontFamily="medium">Gender</CustomText>
-                <View style={styles.genderRow}>
-                  {genderTypes.map((gender) => {
-                    const renderGenderIcon = () => {
-                      if (gender === "Male") {
-                        return ICONS.maleIcon;
-                      }
-                      if (gender === "Female") {
-                        return ICONS.femaleIcon;
-                      } else {
-                        return ICONS.otherIcon;
-                      }
-                    };
-
-                    const isSelected = gender === selectedGender;
-
-                    return (
-                      <Pressable
-                        style={[
-                          styles.genderOption,
-                          isSelected && styles.selectedGenderOption,
-                        ]}
-                        onPress={() => setSelectedGender(gender)}
-                      >
-                        <CustomIcon
-                          Icon={renderGenderIcon()}
-                          width={20}
-                          height={20}
-                        />
-                        <CustomText>{gender}</CustomText>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
             </View>
 
             <CustomButton

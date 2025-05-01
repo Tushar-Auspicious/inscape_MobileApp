@@ -5,10 +5,10 @@ import {
   Image,
   ImageBackground,
   Platform,
+  RefreshControl,
   ScrollView,
   TouchableOpacity,
   View,
-  RefreshControl,
 } from "react-native";
 import {
   SafeAreaView,
@@ -41,7 +41,10 @@ import { getGreeting, timeStringToSeconds } from "../../Utilities/Helpers";
 import { hp } from "../../Utilities/Metrics";
 import { useSetupPlayer } from "../Player";
 import styles from "./style";
+// import Loader from "../../Components/Loader";
 import Loader from "../../Components/Loader";
+import NoInternetCard from "../../Components/NoInternetCard";
+import useNetworkStatus from "../../Hooks/useNetworkStatus";
 
 const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
   const { id, isFromMeditation, meditationTypeData } = route.params;
@@ -64,6 +67,10 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
 
   // Ref for abort controller to cancel ongoing requests
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Network status
+  const { isConnected, retryConnection } = useNetworkStatus();
+  const previousConnectionRef = useRef<boolean | null>(null);
 
   const playTrack = async (index: number) => {
     if (index < 0 || index >= TrackList.length) return; // Prevent out-of-bounds errors
@@ -125,6 +132,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
         navigation.navigate("player", {
           currentTrackIndex: index, // Pass current index
           trackList: collectionData?.audioFiles.map((item) => ({
+            id: item._id,
             artwork: IMAGE_BASE_URL + item.imageUrl,
             collectionName: collectionData.collection.name ?? "",
             title: item.songName,
@@ -286,6 +294,30 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
     getCollectionData,
   ]);
 
+  // Monitor network status changes and refresh data when connection is restored
+  useEffect(() => {
+    // If connection was previously offline and now it's online, refresh the data
+    if (previousConnectionRef.current === false && isConnected === true) {
+      console.log(
+        "Network connection restored, refreshing player list data..."
+      );
+      if (isFromMeditation && meditationTypeData?.title) {
+        getmeditationTypeData(true);
+      } else {
+        getCollectionData(true);
+      }
+    }
+
+    // Update the previous connection state
+    previousConnectionRef.current = isConnected;
+  }, [
+    isConnected,
+    getmeditationTypeData,
+    getCollectionData,
+    isFromMeditation,
+    meditationTypeData,
+  ]);
+
   useEffect(() => {
     if (collectionData && collectionData?.audioFiles.length > 0) {
       setIsNextAvailable(
@@ -295,6 +327,42 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
     }
   }, [collectionData]);
 
+  // Render skeleton loading placeholders
+  const renderSkeletonLoading = () => (
+    <View style={styles.skeletonContainer}>
+      <View style={styles.skeletonCurvedCont} />
+      <View style={styles.content}>
+        <View style={styles.skeletonHeader}>
+          <View style={styles.skeletonBackButton} />
+          <View>
+            <View style={styles.skeletonHeaderText} />
+            <View style={styles.skeletonHeaderSubText} />
+          </View>
+        </View>
+
+        <View style={styles.skeletonCardContainer}>
+          <View style={styles.skeletonCard} />
+        </View>
+      </View>
+    </View>
+  );
+
+  // Show no internet card when offline
+  if (!isConnected) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NoInternetCard
+          onRetry={() => {
+            retryConnection();
+            // If retryConnection succeeds, it will trigger the useEffect above
+            // due to the isConnected dependency
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // Show skeleton loading when loading initial data
   if (isLoading && !collectionData && !searchedAudios) {
     return (
       <SafeAreaView style={styles.container}>
@@ -350,7 +418,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
 
           <View style={styles.headerTextCont}>
             <CustomText type="subHeading">{getGreeting()}</CustomText>
-            <ScrollView style={{ height: hp(10) }}>
+            <ScrollView style={{ height: hp(7) }}>
               <CustomText>
                 {isFromMeditation
                   ? meditationTypeData?.title
@@ -379,6 +447,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
                   >
                     <ImageBackground
                       source={{ uri: IMAGE_BASE_URL + item.imageUrl }}
+                      loadingIndicatorSource={IMAGES.pinkBg}
                       style={styles.cardImage}
                       imageStyle={styles.cardImageStyle}
                     >

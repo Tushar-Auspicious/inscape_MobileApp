@@ -145,7 +145,7 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
         lastName: inputData.lastName,
         // dob: convertDate(birthDate),
         // gender: selectedGender.toLowerCase(),
-        companyName: inputData.companyName,
+        companyName: inputData.companyName.trim(),
         isTermsAccepted: true,
       });
 

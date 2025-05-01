@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
   headerTextCont: {
     gap: verticalScale(5),
     flex: 1,
+    marginBottom: verticalScale(30),
   },
 
   listCard: {

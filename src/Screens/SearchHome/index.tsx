@@ -14,10 +14,14 @@ import { CustomText } from "../../Components/CustomText";
 import Loader from "../../Components/Loader";
 import FilterModalSheet from "../../Components/Modals/FilterModal";
 import { useDebounce } from "../../Hooks/useDebounceValue";
-import { GetSearchAudioResponse } from "../../Typings/apiTypes";
+import {
+  GetFilterResponse,
+  GetSearchAudioResponse,
+} from "../../Typings/apiTypes";
 import { SearchHomeProps } from "../../Typings/route";
 import { timeStringToSeconds } from "../../Utilities/Helpers";
 import styles from "./style";
+import EmptyDataView from "../../Components/EmptyDataView";
 
 // Memoize ContentCard to prevent unnecessary re-renders
 const MemoizedContentCard = React.memo(ContentCard);
@@ -32,6 +36,11 @@ const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
   const [filteredResults, setFilteredResults] = useState<
     GetSearchAudioResponse[]
   >([]); // Locally filtered
+
+  const [filtertags, setFiltertags] = useState<{
+    bestFor: string[];
+    level: string[];
+  }>();
 
   const [isFilterModal, setIsFilterModal] = useState(false);
 
@@ -159,6 +168,30 @@ const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
     });
   }, []);
 
+  const getFilterData = async () => {
+    try {
+      const response = await fetchData<GetFilterResponse>(ENDPOINTS.getFilters);
+      if (response.data.success) {
+        setFiltertags({
+          bestFor: [...response.data.data.bestForList.map((item) => item.name)],
+
+          level: [...response.data.data.levels.map((item) => item.name)],
+        });
+      }
+    } catch (error: any) {
+      console.log(error);
+      Toast.show({
+        type: "error",
+        text1: error.message || "Something went wrong.",
+      });
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    getFilterData();
+  }, []);
+
   // Fetch initial data on mount
   useEffect(() => {
     fetchInitialData();
@@ -217,9 +250,15 @@ const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
         ListEmptyComponent={
           !isLoading &&
           (searchQuery || selectedFilters.length || selectedLevel) ? (
-            <View style={styles.emptyContainer}>
-              <CustomText>No results found</CustomText>
-            </View>
+            <EmptyDataView
+              searchData={filtertags}
+              selectedLevel={selectedLevel}
+              setSelectedLevel={setSelectedLevel}
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+              setSearchQuery={setSearchQuery}
+              fetchFilteredData={fetchFilteredData}
+            />
           ) : null
         }
         estimatedItemSize={100}

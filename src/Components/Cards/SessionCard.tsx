@@ -10,6 +10,7 @@ import ICONS from "../../Assets/icons";
 import { horizontalScale, verticalScale, wp } from "../../Utilities/Metrics";
 import CustomIcon from "../CustomIcon";
 import { CustomText } from "../CustomText";
+import FastImage from "react-native-fast-image";
 
 type SessionCardrops = {
   imageUrl: string;
@@ -17,6 +18,7 @@ type SessionCardrops = {
   duration: string;
   level: string;
   onPress: () => void;
+  onPressDelete?: () => void;
 };
 
 const SessionCard: FC<SessionCardrops> = ({
@@ -25,10 +27,14 @@ const SessionCard: FC<SessionCardrops> = ({
   duration,
   level,
   onPress,
+  onPressDelete,
 }) => {
   return (
     <Pressable onPress={onPress} style={styles.cardContainer}>
-      <Image source={{ uri: imageUrl }} style={styles.image} />
+      <FastImage
+        source={{ uri: `${imageUrl}?width=200&height=200`, priority: "high" }}
+        style={styles.image}
+      />
       <View style={styles.content}>
         <CustomText type="subTitle" fontFamily="semiBold">
           {title}
@@ -47,6 +53,19 @@ const SessionCard: FC<SessionCardrops> = ({
         </View>
         <CustomText type="small">{level}</CustomText>
       </View>
+      {onPressDelete && (
+        <TouchableOpacity
+          style={{
+            borderRadius: 10,
+            backgroundColor: "#00000010",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={onPressDelete}
+        >
+          <CustomIcon Icon={ICONS.deleteIcon} height={20} width={20} />
+        </TouchableOpacity>
+      )}
     </Pressable>
   );
 };

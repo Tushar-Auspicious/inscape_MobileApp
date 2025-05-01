@@ -1,13 +1,14 @@
 import { BlurView } from "@react-native-community/blur";
-import React, { FC } from "react";
+import { FC, useRef } from "react";
 import {
-  ImageBackground,
+  Animated,
   Platform,
   Pressable,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import FastImage from "react-native-fast-image";
 import ICONS from "../../Assets/icons";
 import {
   horizontalScale,
@@ -22,7 +23,6 @@ type ContentCardProps = {
   imageUrl: string;
   title: string;
   duration: string;
-  // rating: string;
   type?: "default" | "potrait";
   width?: number;
   height?: number;
@@ -34,7 +34,6 @@ type ContentCardProps = {
 const ICON_SIZE = horizontalScale(12);
 
 const ContentCard: FC<ContentCardProps> = ({
-  // rating,
   title,
   imageUrl,
   duration,
@@ -45,18 +44,20 @@ const ContentCard: FC<ContentCardProps> = ({
   onPress,
   isCollection = false,
 }) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
   // Adjust width and height for portrait cards based on size
   if (type === "potrait") {
     if (isSmall) {
-      width = wp(37); // Custom width for portrait
-      height = hp(Platform.OS === "ios" ? 20 : 22); // Custom height for portrait
+      width = wp(37);
+      height = hp(Platform.OS === "ios" ? 20 : 22);
     } else {
-      width = wp(51); // Custom width for portrait
-      height = hp(Platform.OS === "ios" ? 28 : 30); // Custom height for portrait
+      width = wp(51);
+      height = hp(Platform.OS === "ios" ? 28 : 30);
     }
   }
 
-  // Adjust the title length based on card type and size
+  // Adjust title length based on card type and size
   title =
     type === "default"
       ? title.length > 30
@@ -70,43 +71,44 @@ const ContentCard: FC<ContentCardProps> = ({
       ? `${title.slice(0, 15)}...`
       : title;
 
-  // Define the height of the blur view based on the card type
+  // Define blur view height based on card type
   const blurViewHeight = type === "default" ? "36%" : "32%";
 
   return (
-    <ImageBackground
-      source={{ uri: imageUrl }}
-      style={[styles.cardContainer]}
-      imageStyle={styles.backgroundImage}
+    <Animated.View
+      style={[styles.cardContainer, { width, height }, { opacity: fadeAnim }]}
     >
+      <FastImage
+        source={{ uri: `${imageUrl}?width=200&height=200` }}
+        style={[StyleSheet.absoluteFillObject, styles.backgroundImage]}
+        resizeMode={FastImage.resizeMode.cover}
+        onLoad={() => {
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: true,
+          }).start();
+        }}
+      />
       <Pressable
         onPress={onPress}
-        style={{ width, height, justifyContent: "flex-end" }}
+        style={{ flex: 1, justifyContent: "flex-end" }}
       >
         {Platform.OS === "ios" ? (
           <>
             <BlurView
-              style={[styles.blurView, { height: blurViewHeight }]}
+              style={[styles.blurView]}
               blurType="light"
               blurAmount={10}
               reducedTransparencyFallbackColor="white"
             />
-
-            {/* Content */}
-            <View
-              style={[
-                styles.content,
-                {
-                  height: blurViewHeight,
-                },
-              ]}
-            >
+            <View style={[styles.content]}>
               <View style={styles.textContainer}>
                 <CustomText
                   type={isSmall ? "default" : "subTitle"}
                   fontFamily="bold"
                 >
-                  {title.slice(0, 20)}
+                  {title}
                 </CustomText>
                 <View style={styles.infoRow}>
                   {!isCollection && (
@@ -125,9 +127,7 @@ const ContentCard: FC<ContentCardProps> = ({
           </>
         ) : (
           <BlurView
-            style={{
-              height: blurViewHeight,
-            }}
+            style={{ height: blurViewHeight }}
             blurType="light"
             blurAmount={10}
             reducedTransparencyFallbackColor="white"
@@ -139,7 +139,7 @@ const ContentCard: FC<ContentCardProps> = ({
                   type={isSmall ? "default" : "subTitle"}
                   fontFamily="bold"
                 >
-                  {title.slice(0, 20)}
+                  {title}
                 </CustomText>
                 <View style={styles.infoRow}>
                   {!isCollection && (
@@ -154,23 +154,11 @@ const ContentCard: FC<ContentCardProps> = ({
                   </CustomText>
                 </View>
               </View>
-              {/* {type === "default" && (
-                <View style={styles.ratingContainer}>
-                  <CustomIcon
-                    Icon={ICONS.Star}
-                    width={ICON_SIZE}
-                    height={ICON_SIZE}
-                  />
-                  <CustomText type="small" fontFamily="bold">
-                    {rating}
-                  </CustomText>
-                </View>
-              )} */}
             </TouchableOpacity>
           </BlurView>
         )}
       </Pressable>
-    </ImageBackground>
+    </Animated.View>
   );
 };
 
@@ -201,7 +189,6 @@ const styles = StyleSheet.create({
           width: "100%",
           height: "36%",
         },
-
   content:
     Platform.OS === "ios"
       ? {
@@ -225,7 +212,6 @@ const styles = StyleSheet.create({
           alignItems: "center",
           zIndex: 1,
         },
-
   textContainer: {
     justifyContent: "center",
     gap: verticalScale(10),

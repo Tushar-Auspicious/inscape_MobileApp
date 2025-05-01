@@ -136,10 +136,9 @@ const OTP: FC<OTPProps> = ({ navigation, route }) => {
     if (isFromForgotPassword) {
       try {
         const response = await postData(ENDPOINTS.resendOtp, {
-          email: isRegistered?.email,
+          email: email?.toLocaleLowerCase(),
+          type: "forgotpassword",
         });
-
-        console.log(response, "RESSS");
 
         if (response.data.success) {
           Toast.show({
@@ -149,35 +148,32 @@ const OTP: FC<OTPProps> = ({ navigation, route }) => {
         }
       } catch (error: any) {
         console.log(error);
-
         Toast.show({
           type: "error",
-          text1: error.message || "Login failed",
+          text1: error.message || "Somethig went wrong.",
         });
       }
-    }
+    } else {
+      if (isRegistered?.email) {
+        try {
+          const response = await postData(ENDPOINTS.resendOtp, {
+            email: isRegistered?.email,
+            type: "signUp",
+          });
 
-    if (isRegistered?.email) {
-      try {
-        const response = await postData(ENDPOINTS.resendOtp, {
-          email: isRegistered?.email,
-        });
-
-        console.log(response, "RESSS");
-
-        if (response.data.success) {
+          if (response.data.success) {
+            Toast.show({
+              type: "success",
+              text1: response.data.message,
+            });
+          }
+        } catch (error: any) {
+          console.log(error);
           Toast.show({
-            type: "success",
-            text1: response.data.message,
+            type: "error",
+            text1: error.message || "Login failed",
           });
         }
-      } catch (error: any) {
-        console.log(error);
-
-        Toast.show({
-          type: "error",
-          text1: error.message || "Login failed",
-        });
       }
     }
   };

@@ -10,6 +10,7 @@ import {
 import Animated from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import { useActiveTrack } from "react-native-track-player";
 import { fetchData } from "../../APIService/api";
 import ENDPOINTS from "../../APIService/endPoints";
 import ICONS from "../../Assets/icons";
@@ -19,7 +20,8 @@ import SessionCard from "../../Components/Cards/SessionCard";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import Loader from "../../Components/Loader";
-import meditationTypes from "../../Seeds/DiscoverSeeds";
+import NoInternetCard from "../../Components/NoInternetCard";
+import useNetworkStatus from "../../Hooks/useNetworkStatus";
 import {
   Audio,
   Breathing,
@@ -31,7 +33,7 @@ import { HomeScreenProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import STORAGE_KEYS from "../../Utilities/Constants";
 import { timeStringToSeconds } from "../../Utilities/Helpers";
-import { horizontalScale } from "../../Utilities/Metrics";
+import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
 import {
   getLocalStorageData,
   storeLocalStorageData,
@@ -43,6 +45,10 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [homeData, setHomeData] = useState<GetHomeDataResponse>();
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const activeTrack = useActiveTrack();
+  const { isConnected, retryConnection } = useNetworkStatus();
+  const previousConnectionRef = useRef<boolean | null>(null);
 
   const getHomeData = useCallback(async (forceRefresh = false) => {
     // Cancel any ongoing requests
@@ -233,7 +239,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
     ({ item, index }: { item: MeditationType; index: number }) => (
       <View style={{ marginRight: horizontalScale(10) }}>
         <ExploreCard
-          imageUrl={meditationTypes[index].imageUrl}
+          imageUrl={IMAGE_BASE_URL + item.audio.imageUrl}
           title={item.name}
           subTitle={`${item.audioCount} items`}
           onPress={() =>
@@ -265,6 +271,7 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
 
   const keyExtractor = useCallback((item: any) => item._id, []);
 
+  // Initial data loading
   useEffect(() => {
     getHomeData();
 
@@ -275,6 +282,32 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
       }
     };
   }, [getHomeData]);
+
+  // Monitor network status changes and refresh data when connection is restored
+  useEffect(() => {
+    // If connection was previously offline and now it's online, refresh the data
+    if (previousConnectionRef.current === false && isConnected === true) {
+      console.log("Network connection restored, refreshing data...");
+      getHomeData(true); // Force refresh when connection is restored
+    }
+
+    // Update the previous connection state
+    previousConnectionRef.current = isConnected;
+  }, [isConnected, getHomeData]);
+
+  if (!isConnected) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NoInternetCard
+          onRetry={() => {
+            retryConnection();
+            // If retryConnection succeeds, it will trigger the useEffect above
+            // due to the isConnected dependency
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
 
   if (isLoading || !homeData) {
     return (
@@ -292,7 +325,14 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
         </View>
       ) : (
         <Animated.ScrollView
-          contentContainerStyle={styles.scrollContainer}
+          contentContainerStyle={[
+            styles.scrollContainer,
+            {
+              paddingBottom: activeTrack
+                ? verticalScale(100)
+                : verticalScale(20),
+            },
+          ]}
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled
           refreshControl={

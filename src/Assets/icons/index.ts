@@ -29,6 +29,9 @@ import shuffleIcon from "./shuffle.svg";
 import Star from "./star.svg";
 import upArrowIcon from "./upArrow.svg";
 import eyeOnIcon from "./eyeOpenIcon.svg";
+import NoInternetConnectIcon from ".//NoInternetConnect.svg";
+import deleteIcon from "./deleteIcon.svg";
+import WhiteCrossIcon from "./whiteCrossIcon.svg";
 
 const ICONS = {
   Home,
@@ -62,6 +65,9 @@ const ICONS = {
   tickIcon,
   eyeoffIcon,
   eyeOnIcon,
+  NoInternetConnectIcon,
+  deleteIcon,
+  WhiteCrossIcon,
 };
 
 export default ICONS;

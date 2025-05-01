@@ -68,4 +68,7 @@ export const patchData = <T>(endpoint: string, data: any, headers?: any) =>
 export const putData = <T>(endpoint: string, data: any, headers?: any) =>
   api.put<ApiResponse<T>>(endpoint, data, { headers });
 
+export const deleteData = <T>(endpoint: string) =>
+  api.delete<ApiResponse<T>>(endpoint);
+
 export default api;

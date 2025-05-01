@@ -17,11 +17,11 @@ const styles = StyleSheet.create({
     height: hp(35),
   },
   imageContent: {
-    flex: 1,
-    padding: verticalScale(20),
+    height: hp(35),
+    paddingHorizontal: horizontalScale(20),
     justifyContent: "space-between",
-    backgroundColor: "rgba( 0, 0, 0, 0.25 )",
   },
+
   backButton: {
     paddingVertical: verticalScale(8),
     paddingHorizontal: horizontalScale(8),
@@ -31,7 +31,6 @@ const styles = StyleSheet.create({
   },
   imageTextContent: {
     gap: verticalScale(10),
-    flex: 0.7,
     width: "85%",
   },
   mainHeader: {

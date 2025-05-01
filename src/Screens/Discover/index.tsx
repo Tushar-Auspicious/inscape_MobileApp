@@ -1,25 +1,19 @@
 import { IMAGE_BASE_URL } from "@env";
+import { useIsFocused } from "@react-navigation/native";
 import React, { FC, useCallback, useEffect, useRef, useState } from "react";
-import {
-  FlatList,
-  TouchableOpacity,
-  View,
-  RefreshControl,
-  ActivityIndicator,
-} from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { fetchData } from "../../APIService/api";
 import ENDPOINTS from "../../APIService/endPoints";
-import ICONS from "../../Assets/icons";
 import ExploreCard from "../../Components/Cards/ExploreCard";
-import CustomIcon from "../../Components/CustomIcon";
 import CustomInput from "../../Components/CustomInput";
-import { CustomText } from "../../Components/CustomText";
-import Loader from "../../Components/Loader";
+import EmptyDataView from "../../Components/EmptyDataView";
 import FilterModalSheet from "../../Components/Modals/FilterModal";
+import NoInternetCard from "../../Components/NoInternetCard";
 import { useDebounce } from "../../Hooks/useDebounceValue";
-import { DiscoverResults } from "../../Typings/apiTypes";
+import useNetworkStatus from "../../Hooks/useNetworkStatus";
+import { DiscoverResults, GetFilterResponse } from "../../Typings/apiTypes";
 import { DiscoverProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import STORAGE_KEYS from "../../Utilities/Constants";
@@ -36,18 +30,23 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
   const [selectedLevel, setSelectedLevel] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false); // For API fetches
   const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
-  const [isSearchLoading, setIsSearchLoading] = useState(false); // For debounced local search
   const [allResults, setAllResults] = useState<DiscoverResults[]>([]); // Base dataset
   const [filteredResults, setFilteredResults] = useState<DiscoverResults[]>([]); // Locally filtered
   const [isFilterModal, setIsFilterModal] = useState(false);
 
+  const [filtertags, setFiltertags] = useState<{
+    bestFor: string[];
+    level: string[];
+  }>();
+
+  const isFocused = useIsFocused();
+
   // Ref for abort controller to cancel ongoing requests
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Handle navigation back
-  const handleBackPress = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
+  // Network status
+  const { isConnected, retryConnection } = useNetworkStatus();
+  const previousConnectionRef = useRef<boolean | null>(null);
 
   // Handle filter modal open
   const handleFilterPress = useCallback(() => {
@@ -253,7 +252,6 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
   // Local search function
   const searchLocally = useCallback(
     (query: string) => {
-      setIsSearchLoading(false); // Reset loading when search completes
       if (!query) {
         setFilteredResults(allResults);
         return;
@@ -267,9 +265,8 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
     [allResults]
   );
 
-  // Debounced local search with loading
+  // Debounced local search
   const debouncedSearch = useDebounce((query: string) => {
-    setIsSearchLoading(true); // Show loading during debounce delay
     searchLocally(query);
   }, 500);
 
@@ -298,30 +295,53 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
         width={wp(43)}
       />
     ),
-    []
+    [navigation]
   );
+
+  // Handle tag selection from EmptyDataView
+  const handleTagSelect = useCallback(
+    (tag: string) => {
+      console.log("Tag selected:", tag);
+      setSearchQuery(tag);
+      // Directly trigger the search without waiting for the debounce
+      searchLocally(tag);
+    },
+    [setSearchQuery, searchLocally]
+  );
+
+  // Memoize the EmptyDataView to prevent unnecessary re-renders
+  const renderEmptyComponent = useCallback(() => {
+    if (
+      !isLoading &&
+      (searchQuery || selectedFilters.length || selectedLevel)
+    ) {
+      return (
+        <EmptyDataView
+          height={400}
+          searchData={filtertags}
+          selectedLevel={selectedLevel}
+          setSelectedLevel={setSelectedLevel}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+          setSearchQuery={setSearchQuery}
+          fetchFilteredData={fetchFilteredData}
+        />
+      );
+    }
+    return null;
+  }, [
+    isLoading,
+    searchQuery,
+    selectedFilters,
+    selectedLevel,
+    filtertags,
+    handleTagSelect,
+  ]);
 
   // Handle pull-to-refresh
   const onRefresh = useCallback(() => {
     fetchInitialData(true);
   }, [fetchInitialData]);
-
-  // Fetch initial data on mount and cleanup on unmount
-  useEffect(() => {
-    fetchInitialData();
-
-    // Cleanup function to abort any pending requests when component unmounts
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [fetchInitialData]);
-
-  // Trigger local search when query changes
-  useEffect(() => {
-    debouncedSearch(searchQuery);
-  }, [searchQuery, debouncedSearch]);
 
   // Render skeleton loading placeholders
   const renderSkeletonLoading = () => (
@@ -337,6 +357,79 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
     </View>
   );
 
+  const getFilterData = async () => {
+    try {
+      const response = await fetchData<GetFilterResponse>(ENDPOINTS.getFilters);
+      if (response.data.success) {
+        setFiltertags({
+          bestFor: [...response.data.data.bestForList.map((item) => item.name)],
+
+          level: [...response.data.data.levels.map((item) => item.name)],
+        });
+      }
+    } catch (error: any) {
+      console.log(error);
+      Toast.show({
+        type: "error",
+        text1: error.message || "Something went wrong.",
+      });
+    } finally {
+    }
+  };
+
+  // Fetch initial data on mount and cleanup on unmount
+  useEffect(() => {
+    fetchInitialData();
+
+    // Cleanup function to abort any pending requests when component unmounts
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [fetchInitialData]);
+
+  // Monitor network status changes and refresh data when connection is restored
+  useEffect(() => {
+    // If connection was previously offline and now it's online, refresh the data
+    if (previousConnectionRef.current === false && isConnected === true) {
+      console.log("Network connection restored, refreshing discover data...");
+      fetchInitialData(true); // Force refresh when connection is restored
+    }
+
+    // Update the previous connection state
+    previousConnectionRef.current = isConnected;
+  }, [isConnected, fetchInitialData]);
+
+  // Trigger local search when query changes
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
+
+  useEffect(() => {
+    return () => {
+      setSearchQuery("");
+    };
+  }, [isFocused]);
+
+  useEffect(() => {
+    getFilterData();
+  }, []);
+
+  // Show no internet card when offline
+  if (!isConnected) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NoInternetCard
+          onRetry={() => {
+            retryConnection();
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // Show skeleton loading when loading initial data
   if (isLoading && !allResults.length) {
     return (
       <SafeAreaView style={styles.container}>
@@ -349,12 +442,6 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
     <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
       <View style={styles.scrollContainer}>
         <View style={styles.mainHeader}>
-          {filteredResults.length === 0 && !isSearchLoading && (
-            <TouchableOpacity onPress={handleBackPress}>
-              <CustomIcon Icon={ICONS.BackArrow} width={15} height={15} />
-            </TouchableOpacity>
-          )}
-
           <CustomInput
             value={searchQuery}
             onChangeText={(text) =>
@@ -383,14 +470,7 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
               tintColor={COLORS.white}
             />
           }
-          ListEmptyComponent={
-            !isLoading &&
-            (searchQuery || selectedFilters.length || selectedLevel) ? (
-              <View style={styles.emptyContainer}>
-                <CustomText>No results found</CustomText>
-              </View>
-            ) : null
-          }
+          ListEmptyComponent={renderEmptyComponent}
         />
       </View>
 

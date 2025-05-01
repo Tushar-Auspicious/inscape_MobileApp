@@ -209,6 +209,9 @@ export interface MeditationType {
   _id: string;
   name: string;
   audioCount: number;
+  audio: {
+    imageUrl: string;
+  };
 }
 
 // Search AUDIO -------------------------------------
