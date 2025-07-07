@@ -39,7 +39,7 @@ export function KeyboardAvoidingContainer({
           scrollEnabled ? styles.scrollContent : styles.content,
           style,
         ]}
-        keyboardShouldPersistTaps="never">
+        keyboardShouldPersistTaps="handled">
         {children}
       </Content>
     </KeyboardAvoidingView>
