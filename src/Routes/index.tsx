@@ -31,6 +31,7 @@ import {
   MainStackParams,
   RootStackParams,
 } from "../Typings/route";
+import ContactUs from "../Screens/ContactUs";
 
 const RootStack = createNativeStackNavigator<RootStackParams>();
 const Auth = createNativeStackNavigator<AuthStackParams>();
@@ -112,6 +113,7 @@ const Routing = () => {
         <Main.Screen name="searchHome" component={SearchHome} />
         <Main.Screen name="categories" component={Categories} />
         <Main.Screen name="myAccount" component={MyAccount} />
+        <Main.Screen name="contactUs" component={ContactUs} />
         <Main.Screen name="Faq" component={FAQ} />
         <Main.Screen
           name="settingsPrivacyPolicy"

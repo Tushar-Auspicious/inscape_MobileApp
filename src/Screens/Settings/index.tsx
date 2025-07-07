@@ -15,6 +15,13 @@ import STORAGE_KEYS from "../../Utilities/Constants";
 import { verticalScale } from "../../Utilities/Metrics";
 import { deleteLocalStorageData } from "../../Utilities/Storage";
 import styles from "./style";
+import ENDPOINTS from "../../APIService/endPoints";
+import { fetchData } from "../../APIService/api";
+import Toast from "react-native-toast-message";
+import {
+  setPrivacyPolicy,
+  setTermsAndCondition,
+} from "../../Redux/slices/settingsSlice";
 
 const Settings: FC<SettingScreenProps> = ({ navigation }) => {
   const sheetRef = useRef<any>(null);
@@ -60,6 +67,45 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
+
+  const getTerms = async () => {
+    try {
+      const response = await fetchData<string>(ENDPOINTS.getTerms);
+
+      if (response.data) {
+        dispatch(setTermsAndCondition(response.data.data));
+      }
+    } catch (error: any) {
+      console.error("Home data fetch error:", error);
+      Toast.show({
+        type: "error",
+        text1: error.message || "Something went wrong",
+        position: "bottom",
+      });
+    }
+  };
+
+  const getPrivacyPolicy = async () => {
+    try {
+      const response = await fetchData<string>(ENDPOINTS.getPrivacyPolicy);
+
+      if (response.data) {
+        dispatch(setPrivacyPolicy(response.data.data));
+      }
+    } catch (error: any) {
+      console.error("Home data fetch error:", error);
+      Toast.show({
+        type: "error",
+        text1: error.message || "Something went wrong",
+        position: "bottom",
+      });
+    }
+  };
+
+  useEffect(() => {
+    getTerms();
+    getPrivacyPolicy();
+  }, []);
 
   // Monitor network status changes and refresh data when connection is restored
   useEffect(() => {
@@ -116,6 +162,7 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
             {renderBars("Terms & Conditions", () =>
               navigation.navigate("settingsTermsAndConditions")
             )}
+            {renderBars("Contact Us", () => navigation.navigate("contactUs"))}
             <TouchableOpacity
               style={{
                 paddingVertical: verticalScale(10),

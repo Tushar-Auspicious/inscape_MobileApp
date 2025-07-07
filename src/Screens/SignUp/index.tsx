@@ -1,29 +1,34 @@
-import React, { FC, useState } from "react";
+import React, { FC, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ICONS from "../../Assets/icons";
+import Toast from "react-native-toast-message";
+import { fetchData, postData } from "../../APIService/api";
+import ENDPOINTS from "../../APIService/endPoints";
 import CustomButton from "../../Components/Buttons/CustomButton";
-import CustomIcon from "../../Components/CustomIcon";
 import CustomInput from "../../Components/CustomInput";
 import { CustomText } from "../../Components/CustomText";
-import { SignUpProps } from "../../Typings/route";
-import { verticalScale } from "../../Utilities/Metrics";
-import styles from "./style";
-import { convertDate, isValidEmail } from "../../Utilities/Helpers";
-import Toast from "react-native-toast-message";
-import { postData } from "../../APIService/api";
-import ENDPOINTS from "../../APIService/endPoints";
-import { SignUpresponse } from "../../Typings/apiTypes";
-import { storeLocalStorageData } from "../../Utilities/Storage";
-import STORAGE_KEYS from "../../Utilities/Constants";
-import { useAppDispatch } from "../../Redux/store";
 import { setIsRegistered } from "../../Redux/slices/initialSlice";
+import { useAppDispatch } from "../../Redux/store";
+import {
+  GetCompanyNamesApiResponse,
+  SignUpresponse,
+} from "../../Typings/apiTypes";
+import { SignUpProps } from "../../Typings/route";
+import STORAGE_KEYS from "../../Utilities/Constants";
+import { isValidEmail } from "../../Utilities/Helpers";
+import { verticalScale } from "../../Utilities/Metrics";
+import { storeLocalStorageData } from "../../Utilities/Storage";
+import styles from "./style";
+import COLORS from "../../Utilities/Colors";
 
 const SignUp: FC<SignUpProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
@@ -34,55 +39,64 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
     firstName: "",
     lastName: "",
     companyName: "",
+    companyId: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
-  const [birthDate, setBirthDate] = useState("");
-
-  const [selectedGender, setSelectedGender] = useState<
-    "Male" | "Female" | "Other"
-  >("Male");
-
-  const genderTypes: ("Male" | "Female" | "Other")[] = [
-    "Male",
-    "Female",
-    "Other",
-  ];
+  const [isCompaniesLoading, setIsCompaniesLoading] = useState(false);
+  const [companySuggestions, setCompanySuggestions] = useState<
+    GetCompanyNamesApiResponse[]
+  >([]);
+  const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<any>(null); // Ref for the company name input
 
   const handleInputChange = (fieldName: string, value: string) => {
     setInputData((prev) => ({
       ...prev,
       [fieldName]: value,
     }));
+
+    if (fieldName === "companyName") {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+
+      if (value.trim().length > 2) {
+        setIsCompaniesLoading(true);
+        fetchTimeoutRef.current = setTimeout(() => {
+          getCompanyNames(value.trim());
+        }, 500);
+      } else {
+        setCompanySuggestions([]);
+        setIsCompaniesLoading(false);
+      }
+    }
   };
 
   const validateForm = (): boolean => {
     let isValid = true;
 
-    // First Name validation
     if (!inputData.firstName.trim()) {
       Toast.show({ type: "error", text1: "First Name is required" });
       isValid = false;
       return isValid;
     }
 
-    // Last Name validation
     if (!inputData.lastName.trim()) {
       Toast.show({ type: "error", text1: "Last Name is required" });
       isValid = false;
       return isValid;
     }
 
-    // Company Name validation (optional, assuming it’s required here)
     if (!inputData.companyName.trim()) {
       Toast.show({ type: "error", text1: "Company Name is required" });
       isValid = false;
       return isValid;
     }
 
-    // Email validation
     if (!inputData.email.trim()) {
       Toast.show({ type: "error", text1: "Email is required" });
       isValid = false;
@@ -96,7 +110,6 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
       return isValid;
     }
 
-    // Password validation
     if (!inputData.password.trim()) {
       Toast.show({ type: "error", text1: "Password is required" });
       isValid = false;
@@ -110,7 +123,6 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
       return isValid;
     }
 
-    // Confirm Password validation
     if (!inputData.confirmPassword.trim()) {
       Toast.show({ type: "error", text1: "Confirm Password is required" });
       isValid = false;
@@ -120,13 +132,6 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
       isValid = false;
       return isValid;
     }
-
-    // // Birth Date validation
-    // if (!birthDate.trim()) {
-    //   Toast.show({ type: "error", text1: "Birth Date is required" });
-    //   isValid = false;
-    //   return isValid;
-    // }
 
     return isValid;
   };
@@ -143,9 +148,8 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
         email: inputData.email,
         firstName: inputData.firstName,
         lastName: inputData.lastName,
-        // dob: convertDate(birthDate),
-        // gender: selectedGender.toLowerCase(),
         companyName: inputData.companyName.trim(),
+        companyId: inputData.companyId,
         isTermsAccepted: true,
       });
 
@@ -162,7 +166,9 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
           })
         );
 
-        navigation.replace("registerSuccess");
+        navigation.navigate("otpScreen", {
+          isFromForgotPassword: false,
+        });
       } else {
         Toast.show({
           type: "error",
@@ -179,6 +185,34 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
     }
   };
 
+  const getCompanyNames = async (name: string) => {
+    try {
+      const response = await fetchData<GetCompanyNamesApiResponse[]>(
+        `${ENDPOINTS.getCompanyNames}${name}`
+      );
+
+      if (response.data.success && response.data) {
+        setCompanySuggestions(response.data.data);
+      } else {
+        setCompanySuggestions([]);
+      }
+    } catch (error) {
+      console.log("Error fetching company names:", error);
+    } finally {
+      setIsCompaniesLoading(false);
+    }
+  };
+
+  const handleCompanySelect = (data: GetCompanyNamesApiResponse) => {
+    setInputData((prev) => ({
+      ...prev,
+      companyName: data.companyName,
+      companyId: data.id,
+    }));
+    setShowCompanySuggestions(false);
+    Keyboard.dismiss();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -189,6 +223,7 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={false}
+          keyboardShouldPersistTaps="handled" // Prevent keyboard dismissal on suggestion tap
         >
           <View style={styles.formContainer}>
             <CustomText fontFamily="bold" type="title">
@@ -211,13 +246,73 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
                   style={styles.flexInput}
                 />
               </View>
-              <CustomInput
-                value={inputData.companyName}
-                placeholder="Company Name"
-                onChangeText={(value) =>
-                  handleInputChange("companyName", value)
-                }
-              />
+              <View style={styles.companyInputAndSuggestionsWrapper}>
+                <CustomInput
+                  ref={inputRef}
+                  value={inputData.companyName}
+                  placeholder="Company Name"
+                  onChangeText={(value) =>
+                    handleInputChange("companyName", value)
+                  }
+                  onFocus={() => {
+                    console.log("Company input focused");
+                    setShowCompanySuggestions(true);
+                  }}
+                  onBlur={() => {
+                    console.log("Company input blurred");
+                    // Delay hiding suggestions to allow onPress to fire
+                    setTimeout(() => setShowCompanySuggestions(false), 300);
+                  }}
+                />
+                {showCompanySuggestions &&
+                  inputData.companyName.trim().length > 0 && (
+                    <ScrollView
+                      style={styles.companySuggestionsWrapper}
+                      nestedScrollEnabled={true}
+                      keyboardShouldPersistTaps="always" // Ensure taps don't dismiss keyboard
+                      showsVerticalScrollIndicator={false}
+                    >
+                      {isCompaniesLoading ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={COLORS.white}
+                          style={styles.loadingIndicator}
+                        />
+                      ) : (
+                        <>
+                          {companySuggestions.length > 0 ? (
+                            <FlatList
+                              data={companySuggestions}
+                              keyExtractor={(item) => item.id}
+                              renderItem={({ item }) => (
+                                <TouchableWithoutFeedback
+                                  onPress={() => {
+                                    console.log(
+                                      "Tapped suggestion:",
+                                      item.companyName
+                                    );
+                                    handleCompanySelect(item);
+                                  }}
+                                >
+                                  <View style={styles.suggestionItem}>
+                                    <CustomText>{item.companyName}</CustomText>
+                                  </View>
+                                </TouchableWithoutFeedback>
+                              )}
+                              style={styles.suggestionsList}
+                              showsVerticalScrollIndicator={false}
+                              keyboardShouldPersistTaps="always" // Add to FlatList as well
+                            />
+                          ) : (
+                            <CustomText style={styles.noSuggestionsText}>
+                              No companies found.
+                            </CustomText>
+                          )}
+                        </>
+                      )}
+                    </ScrollView>
+                  )}
+              </View>
               <CustomInput
                 value={inputData.email}
                 placeholder="Email"
@@ -237,51 +332,6 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
                   handleInputChange("confirmPassword", value)
                 }
               />
-              {/* <CustomInput
-                value={birthDate}
-                onChangeText={setBirthDate}
-                placeholder="Birthday Date"
-                type="date"
-                heigth={50}
-              /> */}
-              {/* <View style={styles.genderCont}>
-                <CustomText fontFamily="medium">Gender</CustomText>
-                <View style={styles.genderRow}>
-                  {genderTypes.map((gender) => {
-                    const renderGenderIcon = () => {
-                      if (gender === "Male") {
-                        return ICONS.maleIcon;
-                      }
-                      if (gender === "Female") {
-                        return ICONS.femaleIcon;
-                      } else {
-                        return ICONS.otherIcon;
-                      }
-                    };
-
-                    const isSelected = gender === selectedGender;
-
-                    return (
-                      <Pressable
-                        key={gender}
-                        style={[
-                          styles.genderOption,
-                          isSelected && styles.selectedGenderOption,
-                        ]}
-                        onPress={() => setSelectedGender(gender)}
-                      >
-                        <CustomIcon
-                          Icon={renderGenderIcon()}
-                          width={20}
-                          height={20}
-                        />
-                        <CustomText>{gender}</CustomText>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View> */}
-
               <CustomButton
                 title="Create account"
                 onPress={handleContinue}

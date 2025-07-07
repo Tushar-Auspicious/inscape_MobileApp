@@ -15,6 +15,9 @@ const ENDPOINTS = {
   collectionData: "user/collections/",
   discoverData: "user/search/collections/",
   audioHistory: "user/audio-history",
+  getCompanyNames: "company-list?description=",
+  getTerms: "user/settings?type=termsAndConditions",
+  getPrivacyPolicy: "user/settings?type=privacyPolicy",
 };
 
 export default ENDPOINTS;

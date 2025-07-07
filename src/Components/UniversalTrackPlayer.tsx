@@ -1,7 +1,8 @@
-import notifee from "@notifee/react-native"; // Import Notifee
+import notifee, { EventType } from "@notifee/react-native"; // Import Notifee
 import Slider from "@react-native-community/slider";
 import React, { FC, useEffect, useState } from "react";
 import {
+  Linking,
   Platform,
   StyleSheet,
   Text,
@@ -158,33 +159,69 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
       });
 
       try {
-        const filePath = await downloadFile(fileUrl, fileName, (progress) => {
-          setDownloadProgress(Number(progress));
+        const filePathResult = await downloadFile(
+          fileUrl,
+          fileName,
+          (progress) => {
+            setDownloadProgress(Number(progress));
 
-          // Update notification progress
-          notifee.displayNotification({
-            id: notificationId,
-            title: "Downloading Audio",
-            body:
-              Platform.OS === "ios"
-                ? `Downloading ${track?.title} (${progress}%)`
-                : `Downloading ${track?.title}`,
-            android: {
-              channelId,
-              progress: { max: 100, current: Number(progress) },
-            },
-            ios: iosOptions,
-          });
-        });
+            // Update notification progress
+            notifee.displayNotification({
+              id: notificationId,
+              title: "Downloading Audio",
+              body:
+                Platform.OS === "ios"
+                  ? `Downloading ${track?.title} (${progress}%)`
+                  : `Downloading ${track?.title}`,
+              android: {
+                channelId,
+                progress: { max: 100, current: Number(progress) },
+              },
+              ios: iosOptions,
+            });
+          }
+        );
 
-        if (filePath) {
+        if (filePathResult && filePathResult.path) {
+          const normalizedPath =
+            Platform.OS === "android" &&
+            !filePathResult.path.startsWith("file://")
+              ? `file://${filePathResult.path}`
+              : filePathResult.path;
+
+          await saveDownloadedAudio(trackData, normalizedPath);
+
           // Success notification
           await notifee.displayNotification({
             id: notificationId,
             title: "Download Complete",
-            body: `${track?.title} downloaded successfully!`,
-            android: { channelId },
-            ios: iosOptions,
+            body: `${track?.title} downloaded. Find it in your Inscape folder.`,
+            android: {
+              channelId,
+              pressAction: {
+                id: "open-downloaded-file",
+                launchActivity: "default",
+              },
+            },
+            ios: {
+              ...iosOptions,
+            },
+          });
+
+          // Set up a listener for notification press actions
+          notifee.onForegroundEvent(({ type, detail }) => {
+            if (
+              type === EventType.PRESS &&
+              detail.pressAction?.id === "open-downloaded-file"
+            ) {
+              Linking.openURL(normalizedPath)
+                .then(() =>
+                  console.log("Opened downloaded file:", normalizedPath)
+                )
+                .catch((err) =>
+                  console.error("Failed to open downloaded file:", err)
+                );
+            }
           });
 
           if (Platform.OS === "android") {
@@ -194,13 +231,6 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
               text2: `${track?.title} has been downloaded`,
             });
           }
-
-          const normalizedPath =
-            Platform.OS === "android" && !filePath.path.startsWith("file://")
-              ? `file://${filePath.path}`
-              : filePath.path;
-
-          await saveDownloadedAudio(trackData, normalizedPath);
         } else {
           throw new Error("Download failed - no file path returned");
         }

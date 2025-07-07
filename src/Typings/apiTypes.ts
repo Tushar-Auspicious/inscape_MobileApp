@@ -283,3 +283,8 @@ export interface DiscoverResults {
   __v: number;
   audioCount: number;
 }
+
+export interface GetCompanyNamesApiResponse {
+  id: string;
+  companyName: string;
+}

@@ -1,5 +1,11 @@
-import React, { FC, useState } from "react";
-import { Image, ImageBackground, SafeAreaView, View } from "react-native";
+import React, { FC, useState, useEffect } from "react";
+import {
+  Image,
+  ImageBackground,
+  SafeAreaView,
+  View,
+  Switch,
+} from "react-native"; // Import Switch
 import Toast from "react-native-toast-message";
 import { postData } from "../../APIService/api";
 import ENDPOINTS from "../../APIService/endPoints";
@@ -14,7 +20,10 @@ import { SignInProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import STORAGE_KEYS from "../../Utilities/Constants";
 import { isValidEmail } from "../../Utilities/Helpers";
-import { storeLocalStorageData } from "../../Utilities/Storage";
+import {
+  storeLocalStorageData,
+  getLocalStorageData,
+} from "../../Utilities/Storage"; // Import getLocalStorageData
 import styles from "./style";
 
 const SignIn: FC<SignInProps> = ({ navigation }) => {
@@ -23,7 +32,32 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
     password: "",
   });
 
+  const [rememberMe, setRememberMe] = useState(false); // New state for remember me
+
   const { isRegistered } = useAppSelector((state) => state.initial);
+
+  // Load saved email and password when component mounts
+  useEffect(() => {
+    const loadRememberedCredentials = async () => {
+      const savedEmail = await getLocalStorageData(
+        STORAGE_KEYS.rememberedEmail
+      );
+      const savedPassword = await getLocalStorageData(
+        STORAGE_KEYS.rememberedPassword
+      ); // New: Get saved password
+
+      if (savedEmail) {
+        setInputData((prev) => ({ ...prev, email: savedEmail }));
+        setRememberMe(true); // Set rememberMe to true if an email was found
+      }
+      if (savedPassword) {
+        // Only set password if rememberMe is true from email
+        // Or you can set it unconditionally if you always want password to be filled with email
+        setInputData((prev) => ({ ...prev, password: savedPassword }));
+      }
+    };
+    loadRememberedCredentials();
+  }, []);
 
   const handleInputChange = (fieldName: string, value: string) => {
     setInputData((prev) => ({
@@ -87,6 +121,22 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
           STORAGE_KEYS.token,
           response.data.data.token
         );
+
+        // Store or remove email based on rememberMe state
+        if (rememberMe) {
+          await storeLocalStorageData(
+            STORAGE_KEYS.rememberedEmail,
+            inputData.email
+          );
+          await storeLocalStorageData(
+            STORAGE_KEYS.rememberedPassword,
+            inputData.password
+          ); // New: Store password
+        } else {
+          await storeLocalStorageData(STORAGE_KEYS.rememberedEmail, "");
+          await storeLocalStorageData(STORAGE_KEYS.rememberedPassword, ""); // New: Clear password
+        }
+
         navigation.replace("mainStack", {
           screen: "tabs",
           params: { screen: "homeTab" },
@@ -145,6 +195,26 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
               type="password"
               onChangeText={(value) => handleInputChange("password", value)}
             />
+
+            {/* Remember Me Checkbox */}
+            <View style={styles.rememberMeContainer}>
+              <CustomText fontFamily="bold" color={COLORS.white}>
+                Remember Me
+              </CustomText>
+              <Switch
+                trackColor={{ false: COLORS.darkPink, true: COLORS.navyBlue }}
+                thumbColor={rememberMe ? COLORS.white : COLORS.lightNavyBlue}
+                ios_backgroundColor={COLORS.grey}
+                onValueChange={() =>
+                  setRememberMe((previousState) => !previousState)
+                }
+                value={rememberMe}
+                style={{
+                  transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }],
+                }}
+              />
+            </View>
+
             <CustomButton
               title="Sign In"
               onPress={handleLogin}
@@ -172,7 +242,6 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
                   }
                 }}
                 fontFamily="bold"
-                style={styles.signInLink}
               >
                 Sign Up
               </CustomText>

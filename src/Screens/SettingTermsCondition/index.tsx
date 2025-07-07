@@ -7,10 +7,18 @@ import { CustomText } from "../../Components/CustomText";
 import { SettingsTermsAndConditionProps } from "../../Typings/route";
 import styles from "./style";
 import COLORS from "../../Utilities/Colors";
+import { useAppSelector } from "../../Redux/store";
+import RenderHTML from "react-native-render-html";
+import { wp } from "../../Utilities/Metrics";
 
 const SettingTermsCondition: FC<SettingsTermsAndConditionProps> = ({
   navigation,
 }) => {
+  const { termsAndConditions } = useAppSelector((state) => state.setting);
+
+console.log(termsAndConditions);
+
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -29,7 +37,13 @@ const SettingTermsCondition: FC<SettingsTermsAndConditionProps> = ({
       </View>
 
       <ScrollView>
-        <CustomText fontFamily="regular" type="default" color={COLORS.white}>
+        <RenderHTML
+          contentWidth={wp(90)}
+          source={{ html: termsAndConditions! }}
+          baseStyle={{ color: "white" }}
+        />
+
+        {/* <CustomText fontFamily="regular" type="default" color={COLORS.white}>
           We are Meditation House Ltd., dba. Inscape (hereinafter: “we”, “us” or
           “MH”) the developer and operator / provider of a mobile application
           which we have made available guided meditations, music and other
@@ -425,7 +439,7 @@ const SettingTermsCondition: FC<SettingsTermsAndConditionProps> = ({
           correspondence address: 1226 Bogart Rd., Catskill, NY 12463
           {"\n"} {"\n"}
           Version: March 2025
-        </CustomText>
+        </CustomText> */}
       </ScrollView>
     </SafeAreaView>
   );

@@ -6,12 +6,20 @@ import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import { SettingsPrivacyPolicyProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
-import { verticalScale } from "../../Utilities/Metrics";
+import { verticalScale, wp } from "../../Utilities/Metrics";
 import styles from "./style";
+import { useAppSelector } from "../../Redux/store";
+import RenderHTML from "react-native-render-html";
 
 const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
   navigation,
 }) => {
+
+  const { privacyPolicy} = useAppSelector(state => state.setting)
+
+console.log(privacyPolicy);
+
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -29,7 +37,9 @@ const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
         )}
       </View>
       <ScrollView contentContainerStyle={{ paddingBottom: verticalScale(10) }}>
-        <CustomText fontFamily="regular" type="title" color={COLORS.white}>
+        <RenderHTML contentWidth={wp(90)} source={{ html: privacyPolicy! ,}} baseStyle={{color: "white"}} />
+        
+        {/* <CustomText fontFamily="regular" type="title" color={COLORS.white}>
           1. Introduction
         </CustomText>
         <CustomText
@@ -580,7 +590,7 @@ const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
           complaints regarding the collection, use, transfer or disclosure of
           personal data that cannot be amicably resolved between you and
           INSCAPE.
-        </CustomText>
+        </CustomText> */}
       </ScrollView>
     </SafeAreaView>
   );

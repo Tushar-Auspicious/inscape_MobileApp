@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderTopRightRadius: 70,
     paddingTop: verticalScale(20),
-    paddingBottom: verticalScale(20),
+    paddingBottom: verticalScale(40),
     paddingHorizontal: horizontalScale(20),
   },
 
@@ -63,6 +63,16 @@ const styles = StyleSheet.create({
   },
   signInLink: {
     textDecorationLine: "underline",
+  },
+  rememberMeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    marginVertical: verticalScale(10),
+    gap: horizontalScale(10),
+  },
+  rememberMeText: {
+    color: COLORS.black,
   },
 });
 

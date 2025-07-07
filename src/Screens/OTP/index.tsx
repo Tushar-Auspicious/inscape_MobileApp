@@ -107,9 +107,13 @@ const OTP: FC<OTPProps> = ({ navigation, route }) => {
         if (response.data.success) {
           await storeLocalStorageData(STORAGE_KEYS.token, response.data.data);
           await storeLocalStorageData(STORAGE_KEYS.isAuth, true);
-          navigation.replace("mainStack", {
-            screen: "tabs",
-            params: { screen: "homeTab" },
+
+          navigation.replace("signIn");
+          Toast.show({
+            type: "success",
+            text1: "Email verified successfully.",
+            text2:
+              "Please wait for company's approval for login to your account.",
           });
         } else {
           Toast.show({
@@ -119,7 +123,6 @@ const OTP: FC<OTPProps> = ({ navigation, route }) => {
         }
       }
     } catch (error: any) {
-      console.log(error);
       setOtp(["", "", "", ""]);
       inputs.current[0]?.focus();
 

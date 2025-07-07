@@ -78,6 +78,40 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.white,
   },
+
+  companyInputAndSuggestionsWrapper: {
+    position: "relative",
+    zIndex: 1,
+  },
+
+  companySuggestionsWrapper: {
+    position: "absolute",
+    top: "110%",
+    left: 0,
+    right: 0,
+    backgroundColor: COLORS.darkBlue,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.lightNavyBlue,
+    zIndex: 10,
+    padding: 4,
+  },
+  
+  suggestionsList: {
+  },
+  suggestionItem: {
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: horizontalScale(15),
+    borderBottomWidth: 0.4,
+    borderBottomColor: COLORS.grey,
+  },
+  noSuggestionsText: {
+    padding: verticalScale(15),
+    textAlign: "center",
+  },
+  loadingIndicator: {
+    paddingVertical: verticalScale(10),
+  },
 });
 
 export default styles;

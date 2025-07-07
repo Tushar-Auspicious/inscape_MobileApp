@@ -26,6 +26,7 @@ export type MainStackParams = {
   categories: { id: string };
   myAccount: undefined;
   Faq: undefined;
+  contactUs: undefined;
   settingsTermsAndConditions: undefined;
   settingsPrivacyPolicy: undefined;
   playerList: {
@@ -157,4 +158,9 @@ export type PlayerListProps = NativeStackScreenProps<
 export type PlayerProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
   "player"
+>;
+
+export type ContactUsProps = NativeStackScreenProps<
+  MainStackParams & RootStackParams,
+  "contactUs"
 >;
