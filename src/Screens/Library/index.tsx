@@ -156,7 +156,7 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
         description: item.audio_id.description,
         duration: timeStringToSeconds(item.audio_id.duration),
         url: IMAGE_BASE_URL + item.audio_id.audioUrl,
-        level: audios[index].audio_id.levels[0]?.name || "Basic",
+        level: audios[index].audio_id?.levels?.[0]?.name || "Basic",
       })),
       currentTrackIndex: index,
       isFromLibrary: true,

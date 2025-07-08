@@ -96,9 +96,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: 4,
   },
-  
-  suggestionsList: {
-  },
+
+  suggestionsList: {},
   suggestionItem: {
     paddingVertical: verticalScale(10),
     paddingHorizontal: horizontalScale(15),

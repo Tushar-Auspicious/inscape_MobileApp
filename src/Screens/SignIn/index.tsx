@@ -25,6 +25,7 @@ import {
   getLocalStorageData,
 } from "../../Utilities/Storage"; // Import getLocalStorageData
 import styles from "./style";
+import { KeyboardScrollView } from "../../Components/KeyboardScrollView";
 
 const SignIn: FC<SignInProps> = ({ navigation }) => {
   const [inputData, setInputData] = useState({
@@ -166,7 +167,7 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingContainer backgroundColor={COLORS.darkBlue}>
+    <KeyboardScrollView>
       <SafeAreaView style={styles.container}>
         <ImageBackground
           source={IMAGES.signInbackground}
@@ -249,7 +250,7 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
           </View>
         </View>
       </SafeAreaView>
-    </KeyboardAvoidingContainer>
+    </KeyboardScrollView>
   );
 };
 

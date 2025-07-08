@@ -29,6 +29,7 @@ import { verticalScale } from "../../Utilities/Metrics";
 import { storeLocalStorageData } from "../../Utilities/Storage";
 import styles from "./style";
 import COLORS from "../../Utilities/Colors";
+import { KeyboardScrollView } from "../../Components/KeyboardScrollView";
 
 const SignUp: FC<SignUpProps> = ({ navigation }) => {
   const dispatch = useAppDispatch();
@@ -215,10 +216,7 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
-      >
+      <KeyboardScrollView>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -351,7 +349,7 @@ const SignUp: FC<SignUpProps> = ({ navigation }) => {
             </CustomText>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardScrollView>
     </SafeAreaView>
   );
 };
