@@ -148,10 +148,14 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
         });
       }
     } catch (error: any) {
-      Toast.show({
-        type: "error",
-        text1: error.message || "Login failed",
-      });
+      if (error.message === "Please wait for the company's approval") {
+        navigation.navigate("registerSuccess");
+      } else {
+        Toast.show({
+          type: "error",
+          text1: error.message || "Login failed",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -235,11 +239,7 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
               Don't have an account?{" "}
               <CustomText
                 onPress={() => {
-                  if (isRegistered?.registered) {
-                    navigation.navigate("registerSuccess");
-                  } else {
-                    navigation.navigate("signUp");
-                  }
+                  navigation.navigate("signUp");
                 }}
                 fontFamily="bold"
               >
