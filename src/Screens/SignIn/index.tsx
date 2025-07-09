@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   View,
   Switch,
+  TouchableOpacity,
 } from "react-native"; // Import Switch
 import Toast from "react-native-toast-message";
 import { postData } from "../../APIService/api";
@@ -26,6 +27,9 @@ import {
 } from "../../Utilities/Storage"; // Import getLocalStorageData
 import styles from "./style";
 import { KeyboardScrollView } from "../../Components/KeyboardScrollView";
+import CustomIcon from "../../Components/CustomIcon";
+import ICONS from "../../Assets/icons";
+import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
 
 const SignIn: FC<SignInProps> = ({ navigation }) => {
   const [inputData, setInputData] = useState({
@@ -202,7 +206,7 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
             />
 
             {/* Remember Me Checkbox */}
-            <View style={styles.rememberMeContainer}>
+            {/* <View style={styles.rememberMeContainer}>
               <CustomText fontFamily="bold" color={COLORS.white}>
                 Remember Me
               </CustomText>
@@ -218,7 +222,34 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
                   transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }],
                 }}
               />
-            </View>
+            </View> */}
+
+            {
+              <TouchableOpacity
+                style={styles.rememberMeContainer}
+                activeOpacity={0.8}
+                onPress={() => setRememberMe((prev) => !prev)}
+              >
+                <View
+                  style={[
+                    styles.checkboxContainer,
+                    {
+                      backgroundColor: rememberMe
+                        ? COLORS.white
+                        : COLORS.darkBlue,
+                      borderColor: rememberMe ? COLORS.darkBlue : COLORS.white,
+                      borderRadius: rememberMe ? 3 : 3,
+                      borderWidth: rememberMe ? 0.6 : 0.6,
+                    },
+                  ]}
+                >
+                  <CustomIcon Icon={ICONS.checkIcon} height={13} width={13} />
+                </View>
+                <CustomText fontFamily="bold" color={COLORS.white}>
+                  Remember Me
+                </CustomText>
+              </TouchableOpacity>
+            }
 
             <CustomButton
               title="Sign In"

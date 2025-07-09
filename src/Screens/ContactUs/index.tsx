@@ -39,7 +39,7 @@ const ContactUs: FC<ContactUsProps> = ({ navigation }) => {
   const handleSubmit = () => {
     const { firstName, lastName, email, phone, companyName, reason } = form;
 
-    const to = "support@yourcompany.com"; // Replace with your support email
+    const to = "dan@inscape.life"; // Replace with your support email
     const subject = `Contact Request from ${firstName} ${lastName}`;
     const body = `
   Name: ${firstName} ${lastName}

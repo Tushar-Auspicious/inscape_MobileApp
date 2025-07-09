@@ -59,6 +59,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: hp(50),
   },
+  emptyListContent: {
+    flexGrow: 1, // This is crucial for centering content in a FlatList
+    justifyContent: "center", // Centers children vertically
+    alignItems: "center", // Centers children horizontally
+    paddingHorizontal: 30, // Add some padding around the content
+  },
 });
 
 export default styles;

@@ -22,6 +22,7 @@ import {
   setPrivacyPolicy,
   setTermsAndCondition,
 } from "../../Redux/slices/settingsSlice";
+import { usePlayerContext } from "../../Context/PlayerContext";
 
 const Settings: FC<SettingScreenProps> = ({ navigation }) => {
   const sheetRef = useRef<any>(null);
@@ -35,11 +36,15 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
   const { isConnected, retryConnection } = useNetworkStatus();
   const previousConnectionRef = useRef<boolean | null>(null);
 
+  const { loadTrack } = usePlayerContext();
+
   const handleLogout = async () => {
     await deleteLocalStorageData(STORAGE_KEYS.isAuth);
     await deleteLocalStorageData(STORAGE_KEYS.token);
     await deleteLocalStorageData(STORAGE_KEYS.isRegistered);
     await deleteLocalStorageData(STORAGE_KEYS.downloadedAudios);
+
+    await loadTrack([], 0);
 
     dispatch(setToken(null));
     dispatch(setIsRegistered(null));

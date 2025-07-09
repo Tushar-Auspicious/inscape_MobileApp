@@ -67,12 +67,20 @@ const styles = StyleSheet.create({
   rememberMeContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
+    // justifyContent: "flex-end",
     marginVertical: verticalScale(10),
     gap: horizontalScale(10),
   },
   rememberMeText: {
     color: COLORS.black,
+  },
+  checkboxContainer: {
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.darkBlue,
+    borderRadius: 3,
+    paddingVertical: verticalScale(1),
+    paddingHorizontal: horizontalScale(1),
   },
 });
 

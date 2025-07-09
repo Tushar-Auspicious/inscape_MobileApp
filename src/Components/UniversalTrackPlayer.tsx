@@ -195,7 +195,10 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
           await notifee.displayNotification({
             id: notificationId,
             title: "Download Complete",
-            body: `${track?.title} downloaded. Find it in your Inscape folder.`,
+            body:
+              Platform.OS === "ios"
+                ? `${track?.title} downloaded. Find it in your Inscape folder.`
+                : `${track?.title} downloaded. Find it in your Downloads.`,
             android: {
               channelId,
               pressAction: {
@@ -253,7 +256,7 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
 
         console.error("Download error:", error);
       } finally {
-        setTimeout(() => notifee.cancelNotification(notificationId), 3000);
+        // setTimeout(() => notifee.cancelNotification(notificationId), 3000);
       }
     } catch (error) {
       console.error("Notification error:", error);

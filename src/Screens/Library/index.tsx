@@ -1,13 +1,7 @@
-// import { useIsFocused } from "@react-navigation/native";
 import { IMAGE_BASE_URL } from "@env";
 import { useIsFocused } from "@react-navigation/native";
-import React, { FC, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FlatList, TouchableOpacity, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { deleteData, fetchData } from "../../APIService/api";
@@ -74,110 +68,130 @@ export interface CollectionType {
 
 const Library: FC<LibraryProps> = ({ navigation }) => {
   const [audios, setAudios] = useState<getDownloadedAudios[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+  const [isFetchingData, setIsFetchingData] = useState(false);
   const isFocused = useIsFocused();
 
   const { isConnected, retryConnection } = useNetworkStatus();
-  const previousConnectionRef = React.useRef<boolean | null>(null);
-  const [refreshing, setRefreshing] = useState(false); // For pull-to-refresh
+  const previousConnectionRef = useRef<boolean | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedAudioForDelete, setSelectedAudioForDelete] = useState<
     string | null
   >(null);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const [isdeleteModalVisible, setIsdeleteModalVisible] = useState(false);
-
-  const getDownloadedAudio = async (forceRefresh = false) => {
-    try {
-      if (!forceRefresh) {
-        setIsLoading(true);
-      } else {
+  const getDownloadedAudio = useCallback(
+    async (forceRefresh = false) => {
+      // Set fetching state
+      setIsFetchingData(true);
+      if (forceRefresh) {
         setRefreshing(true);
       }
 
-      // Load from local storage first
-      const cachedData = await getLocalStorageData(
-        STORAGE_KEYS.downloadedAudios
-      );
-      if (cachedData && !isConnected) {
-        setAudios(cachedData); // Use cached data if offline
-      }
+      try {
+        const cachedData = await getLocalStorageData(
+          STORAGE_KEYS.downloadedAudios
+        );
 
-      // Fetch from server if online
-      if (isConnected) {
-        const result = await fetchData<getDownloadedAudios[]>(
-          ENDPOINTS.audioHistory
-        );
-        setAudios(result.data.data);
-        await storeLocalStorageData(
-          STORAGE_KEYS.downloadedAudios,
-          result.data.data
-        );
+        // if (cachedData && cachedData.length > 0) {
+        //   setAudios(cachedData);
+        //   // If cached data is found, ensure initial load is considered complete for displaying existing data
+        //   if (!isInitialLoadComplete) {
+        //     setIsInitialLoadComplete(true);
+        //   }
+        // }
+
+        // Fetch from server if online, or if forceRefresh is true AND online
+        if (isConnected) {
+          const result = await fetchData<getDownloadedAudios[]>(
+            ENDPOINTS.audioHistory
+          );
+          if (result.data && Array.isArray(result.data.data)) {
+            setAudios(result.data.data);
+            await storeLocalStorageData(
+              STORAGE_KEYS.downloadedAudios,
+              result.data.data
+            );
+          }
+        } else if (!cachedData || cachedData.length === 0) {
+          // If offline AND no cached data, we mark initial load complete
+          // to show NoInternetCard or EmptyState directly, without waiting
+          setIsInitialLoadComplete(true);
+        }
+      } catch (error) {
+        console.error("Error fetching downloaded audios:", error);
+        // Ensure initial load completes even on error
+        if (!isInitialLoadComplete) {
+          setIsInitialLoadComplete(true);
+        }
+      } finally {
+        setIsFetchingData(false);
+        setRefreshing(false);
+        // Crucial: Ensure initial load is marked complete ONLY after all attempts (cache + network) are done
+        setIsInitialLoadComplete(true);
       }
-    } catch (error) {
-      console.error("Error fetching downloaded audios:", error);
-      if (!audios.length) {
-        setAudios([]); // Fallback to empty array only if no data exists
-      }
-    } finally {
-      setIsLoading(false);
-      setRefreshing(false);
-    }
-  };
+    },
+    [isConnected, isInitialLoadComplete]
+  );
 
   useEffect(() => {
     if (isFocused) {
       getDownloadedAudio();
     }
-  }, [isFocused]);
+  }, [isFocused, getDownloadedAudio]);
 
-  // Monitor network status changes and refresh data when connection is restored
   useEffect(() => {
-    // If connection was previously offline and now it's online, refresh the data
     if (previousConnectionRef.current === false && isConnected === true) {
       console.log("Network connection restored, refreshing library data...");
-      getDownloadedAudio(true); // Force refresh when connection is restored
+      getDownloadedAudio(true);
     }
-
-    // Update the previous connection state
     previousConnectionRef.current = isConnected;
   }, [isConnected, getDownloadedAudio]);
 
-  const onRefresh = () => {
+  const onRefresh = useCallback(() => {
     getDownloadedAudio(true);
-  };
+  }, [getDownloadedAudio]);
 
-  const handleAudioPress = (index: number) => {
-    navigation.navigate("player", {
-      trackList: audios.map((item) => ({
-        id: item._id,
-        artwork: IMAGE_BASE_URL + item.audio_id.imageUrl,
-        collectionName: item.audio_id.collectionType.name,
-        title: item.audio_id.songName,
-        description: item.audio_id.description,
-        duration: timeStringToSeconds(item.audio_id.duration),
-        url: IMAGE_BASE_URL + item.audio_id.audioUrl,
-        level: audios[index].audio_id?.levels?.[0]?.name || "Basic",
-      })),
-      currentTrackIndex: index,
-      isFromLibrary: true,
-    });
-  };
+  const handleAudioPress = useCallback(
+    (index: number) => {
+      navigation.navigate("player", {
+        trackList: audios?.map((item) => ({
+          id: item._id,
+          artwork: IMAGE_BASE_URL + item.audio_id.imageUrl,
+          collectionName: item.audio_id?.collectionType?.name,
+          title: item.audio_id?.songName,
+          description: item.audio_id?.description,
+          duration: timeStringToSeconds(item.audio_id.duration),
+          url: IMAGE_BASE_URL + item.audio_id?.audioUrl,
+          level: audios[index].audio_id?.levels?.[0]?.name || "Basic",
+        })),
+        currentTrackIndex: index,
+        isFromLibrary: true,
+      });
+    },
+    [audios, navigation]
+  );
 
-  // Show no internet card when offline
-  if (!isConnected) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <NoInternetCard
-          onRetry={() => {
-            retryConnection();
-          }}
-        />
-      </SafeAreaView>
-    );
-  }
+  const handleDeleteAudio = useCallback(async () => {
+    if (!selectedAudioForDelete) return;
 
-  // Show loading indicator when initially loading
-  if (isLoading && !refreshing && !audios.length) {
+    const originalAudios = audios;
+    try {
+      const updatedAudios = audios.filter(
+        (audio) => audio._id !== selectedAudioForDelete
+      );
+      setAudios(updatedAudios);
+      setIsDeleteModalVisible(false);
+
+      await deleteData(`${ENDPOINTS.audioHistory}/${selectedAudioForDelete}`);
+      await storeLocalStorageData(STORAGE_KEYS.downloadedAudios, updatedAudios);
+    } catch (error) {
+      console.error("Error deleting audio:", error);
+      setAudios(originalAudios);
+    }
+  }, [audios, selectedAudioForDelete]);
+
+  if (!isInitialLoadComplete) {
     return (
       <SafeAreaView style={styles.container}>
         <Loader />
@@ -185,96 +199,92 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
     );
   }
 
+  // 2. Show No Internet Card if initial load is complete, we are offline, and there are no audios.
+  if (!isConnected && audios.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NoInternetCard
+          onRetry={() => {
+            retryConnection();
+            getDownloadedAudio();
+          }}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // 3. Main content (FlatList)
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
       <View style={styles.scrollContainer}>
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.white} />
-          </View>
-        ) : (
-          <FlatList
-            data={audios}
-            contentContainerStyle={[styles.flatListCont]}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[COLORS.darkNavyBlue]}
-                tintColor={COLORS.white}
-              />
-            }
-            keyExtractor={(item) => item._id}
-            renderItem={({ item, index }) => {
-              return (
-                <SessionCard
-                  onPressDelete={() => {
-                    setIsdeleteModalVisible(true);
-                    setSelectedAudioForDelete(item?._id);
-                  }}
-                  imageUrl={IMAGE_BASE_URL + item?.audio_id?.imageUrl}
-                  title={item?.audio_id?.songName}
-                  duration={item?.audio_id?.duration}
-                  level={item?.audio_id?.levels[0]?.name || "Basic"}
-                  onPress={() => handleAudioPress(index)}
+        <FlatList
+          data={audios}
+          contentContainerStyle={[
+            styles.flatListCont,
+            audios.length === 0 && styles.emptyListContent,
+          ]}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[COLORS.darkNavyBlue]}
+              tintColor={COLORS.white}
+            />
+          }
+          keyExtractor={(item) => item._id}
+          renderItem={({ item, index }) => (
+            <SessionCard
+              onPressDelete={() => {
+                setIsDeleteModalVisible(true);
+                setSelectedAudioForDelete(item?._id);
+              }}
+              imageUrl={IMAGE_BASE_URL + item?.audio_id?.imageUrl}
+              title={item?.audio_id?.songName}
+              duration={item?.audio_id?.duration}
+              level={item?.audio_id?.levels[0]?.name || "Basic"}
+              onPress={() => handleAudioPress(index)}
+            />
+          )}
+          ListEmptyComponent={
+            isInitialLoadComplete &&
+            !isFetchingData &&
+            audios.length === 0 &&
+            !refreshing ? (
+              <View style={styles.emptyStateContainer}>
+                <CustomIcon
+                  Icon={ICONS.emptyDataImage}
+                  width={150}
+                  height={150}
+                  style={styles.emptyStateIcon}
                 />
-              );
-            }}
-            ListEmptyComponent={
-              !isLoading && !refreshing ? (
-                <View style={styles.emptyStateContainer}>
-                  <CustomIcon
-                    Icon={ICONS.emptyDataImage}
-                    width={150}
-                    height={150}
-                    style={styles.emptyStateIcon}
-                  />
-                  <CustomText
-                    type="subHeading"
-                    fontFamily="bold"
-                    style={styles.emptyStateText}
-                  >
-                    Your Library is Empty
+                <CustomText
+                  type="subHeading"
+                  fontFamily="bold"
+                  style={styles.emptyStateText}
+                >
+                  Your Library is Empty
+                </CustomText>
+                <CustomText style={styles.emptyStateSubText}>
+                  Download meditations to listen offline or save your favorites
+                  here
+                </CustomText>
+                <TouchableOpacity
+                  style={styles.discoverButton}
+                  onPress={() => navigation.navigate("discoverTab")}
+                >
+                  <CustomText style={styles.discoverButtonText}>
+                    Explore Meditations
                   </CustomText>
-                  <CustomText style={styles.emptyStateSubText}>
-                    Download meditations to listen offline or save your
-                    favorites here
-                  </CustomText>
-                  <TouchableOpacity
-                    style={styles.discoverButton}
-                    onPress={() => navigation.navigate("discoverTab")}
-                  >
-                    <CustomText style={styles.discoverButtonText}>
-                      Explore Meditations
-                    </CustomText>
-                  </TouchableOpacity>
-                </View>
-              ) : null
-            }
-          />
-        )}
+                </TouchableOpacity>
+              </View>
+            ) : null
+          }
+        />
       </View>
       <DeleteModal
-        isModalVisible={isdeleteModalVisible}
-        onClose={() => setIsdeleteModalVisible(false)}
-        onPressDelete={async () => {
-          try {
-            await deleteData(
-              `${ENDPOINTS.audioHistory}/${selectedAudioForDelete}`
-            );
-            const updatedAudios = audios.filter(
-              (audio) => audio._id !== selectedAudioForDelete
-            );
-            setAudios(updatedAudios); // Update state immediately
-            await storeLocalStorageData(
-              STORAGE_KEYS.downloadedAudios,
-              updatedAudios
-            ); // Sync local storage
-            setIsdeleteModalVisible(false);
-          } catch (error) {
-            console.error("Error deleting audio:", error);
-          }
-        }}
+        isModalVisible={isDeleteModalVisible}
+        onClose={() => setIsDeleteModalVisible(false)}
+        onPressDelete={handleDeleteAudio}
       />
     </SafeAreaView>
   );

@@ -32,6 +32,7 @@ import eyeOnIcon from "./eyeOpenIcon.svg";
 import NoInternetConnectIcon from ".//NoInternetConnect.svg";
 import deleteIcon from "./deleteIcon.svg";
 import WhiteCrossIcon from "./whiteCrossIcon.svg";
+import checkIcon from "./CheckIcon.svg";
 
 const ICONS = {
   Home,
@@ -68,6 +69,7 @@ const ICONS = {
   NoInternetConnectIcon,
   deleteIcon,
   WhiteCrossIcon,
+  checkIcon,
 };
 
 export default ICONS;
