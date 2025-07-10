@@ -272,11 +272,68 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
 
   // Handle play/pause with history tracking
   const handlePlayPauseWithHistory = async () => {
+    try {
+      if (!isPlaying) {
+        // Track play history when user manually plays
+        trackPlayHistory();
+      }
+      await playPause();
+    } catch (error) {
+      console.error('Error in play/pause:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Playback Error',
+        text2: 'Failed to play/pause track',
+      });
+    }
+  };
+
+  // Enhanced seek function with error handling
+  const handleSeek = async (position: number) => {
+    try {
+      await seekTo(position);
+    } catch (error) {
+      console.error('Error seeking:', error);
+    }
+  };
+
+  // Enhanced skip functions with error handling
+  const handleSkipToNext = async () => {
+    try {
+      await skipToNext();
+    } catch (error) {
+      console.error('Error skipping to next:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Skip Error',
+        text2: 'Failed to skip to next track',
+      });
+    }
+  };
+
+  const handleSkipToPrevious = async () => {
+    try {
+      await skipToPrevious();
+    } catch (error) {
+      console.error('Error skipping to previous:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Skip Error',
+        text2: 'Failed to skip to previous track',
+      });
+    }
+  };
+
+  const handleToggleShuffle = async () => {
     if (!isPlaying) {
       // Track play history when user manually plays
       trackPlayHistory();
     }
-    await playPause();
+    try {
+      await toggleShuffle();
+    } catch (error) {
+      console.error('Error toggling shuffle:', error);
+    }
   };
 
   useEffect(() => {
@@ -307,7 +364,7 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
         minimumTrackTintColor={COLORS.navyBlue}
         maximumTrackTintColor={COLORS.darkGrey}
         thumbTintColor={COLORS.navyBlue}
-        onSlidingComplete={seekTo}
+        onSlidingComplete={handleSeek}
       />
 
       <View style={styles.timeContainer}>
@@ -317,7 +374,7 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
 
       <View style={styles.controlsContainer}>
         <TouchableOpacity
-          onPress={toggleShuffle}
+          onPress={handleToggleShuffle}
           style={{
             padding: 5,
             backgroundColor: isShuffleEnabled
@@ -335,7 +392,7 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
         </TouchableOpacity>
 
         <CustomIcon
-          onPress={skipToPrevious}
+          onPress={handleSkipToPrevious}
           Icon={ICONS.playPreviousIcon}
           height={24}
           width={24}
@@ -357,7 +414,7 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
         </TouchableOpacity>
 
         <CustomIcon
-          onPress={skipToNext}
+          onPress={handleSkipToNext}
           Icon={ICONS.playNextIcon}
           height={24}
           width={24}

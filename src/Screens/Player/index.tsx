@@ -96,22 +96,20 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
         if (!newTrack.url || typeof newTrack.url !== "string") {
           throw new Error("Invalid or missing track URL");
         }
-        if (!newTrack.id && !newTrack._id) {
-          // Assign a temporary ID if not present
-          newTrack.id = `track_${index}`;
-        }
 
         // Create a sanitized track object
         const sanitizedTrack = {
-          id: newTrack.id,
+          id: newTrack.id || newTrack._id || `track_${index}`,
           url: newTrack.url,
           title: newTrack.title || "Unknown Track",
+          artist: newTrack.collectionName || "Unknown Artist",
           artwork: newTrack.artwork || undefined,
           duration: newTrack.duration || 0,
+          description: newTrack.description || "",
         };
 
-        await PlayerInstance.reset();
-        await PlayerInstance.add([sanitizedTrack]); // Add the sanitized track
+        // Use context's loadTrack instead of direct TrackPlayer manipulation
+        await contextLoadTrack([sanitizedTrack], 0);
         setIsTrackLoaded(true);
       } catch (error: any) {
         console.error("Error loading track:", error);
@@ -130,17 +128,28 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
 
   // Preload the initial track when player is ready
   useEffect(() => {
-    if (isPlayerReady && trackList.length > 0 && !isTrackLoaded) {
-      // Use the context's loadTrack function to ensure state is maintained across the app
-      contextLoadTrack(trackList, currentTrackIndex);
-      loadTrack(currentTrackIndex); // Also call local loadTrack for UI state updates
+    if (isPlayerReady && trackList.length > 0) {
+      // Sanitize the entire track list
+      const sanitizedTrackList = trackList.map((track, idx) => ({
+        id: track.id || `track_${idx}`,
+        url: track.url,
+        title: track.title || "Unknown Track",
+        artist: track.collectionName || "Unknown Artist",
+        artwork: track.artwork,
+        duration: track.duration || 0,
+        description: track.description || "",
+        // Preserve original data
+        ...track
+      }));
+      
+      // Use the context's loadTrack function
+      contextLoadTrack(sanitizedTrackList, currentTrackIndex);
+      setIsTrackLoaded(true);
     }
   }, [
     isPlayerReady,
     currentTrackIndex,
     trackList,
-    isTrackLoaded,
-    loadTrack,
     contextLoadTrack,
   ]);
 

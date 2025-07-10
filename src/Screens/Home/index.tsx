@@ -151,17 +151,19 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
     (index: number) => {
       if (!homeData?.breathing) return;
 
+      // Ensure all tracks have required fields
+      const sanitizedTracks = homeData.breathing.map((item, idx) => ({
+        id: item._id || `breathing_${idx}`,
+        artwork: IMAGE_BASE_URL + item.imageUrl,
+        collectionName: item.collectionType?.name ?? "Breathing Session",
+        title: item.songName,
+        duration: timeStringToSeconds(item.duration),
+        description: item.description,
+        url: IMAGE_BASE_URL + item.audioUrl,
+        level: item.levels[0]?.name || "Basic",
+      }));
       navigation.navigate("player", {
-        trackList: homeData.breathing.map((item) => ({
-          id: item._id,
-          artwork: IMAGE_BASE_URL + item.imageUrl,
-          collectionName: item.collectionType?.name ?? "",
-          title: item.songName,
-          duration: timeStringToSeconds(item.duration),
-          description: item.description,
-          url: IMAGE_BASE_URL + item.audioUrl,
-          level: item.levels[0]?.name,
-        })),
+        trackList: sanitizedTracks,
         currentTrackIndex: index,
       });
     },

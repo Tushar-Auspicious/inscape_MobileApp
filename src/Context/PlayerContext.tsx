@@ -85,28 +85,45 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     try {
       setPlaybackError(null);
       
-      // Check if we're trying to load the same track that's already playing
-      const currentTrack = await TrackPlayer.getActiveTrack();
-      const targetTrack = tracks[index];
-      
-      if (currentTrack && targetTrack && currentTrack.id === targetTrack.id) {
-        console.log('Same track already loaded, not reloading');
-        // Just update the context state
-        setCurrentTrackList(tracks);
-        setCurrentTrackIndex(index);
+      // Validate inputs
+      if (!tracks || tracks.length === 0) {
+        console.log('No tracks provided, resetting player');
+        await TrackPlayer.reset();
+        setCurrentTrackList([]);
+        setCurrentTrackIndex(0);
         return;
       }
       
+      if (index < 0 || index >= tracks.length) {
+        console.error('Invalid track index:', index);
+        return;
+      }
+      
+      // Sanitize tracks to ensure they have required fields
+      const sanitizedTracks = tracks.map((track, idx) => ({
+        id: track.id || `track_${idx}`,
+        url: track.url,
+        title: track.title || 'Unknown Track',
+        artist: track.artist || 'Unknown Artist',
+        artwork: track.artwork,
+        duration: track.duration || 0,
+        description: track.description || '',
+        // Preserve any additional metadata
+        ...track
+      }));
+      
       // Reset the queue and add the new tracks
       await TrackPlayer.reset();
-      await TrackPlayer.add(tracks);
+      await TrackPlayer.add(sanitizedTracks);
       await TrackPlayer.skip(index);
-      await TrackPlayer.play();
       
       // Update state
-      setCurrentTrackList(tracks);
+      setCurrentTrackList(sanitizedTracks);
       setCurrentTrackIndex(index);
       setPlayHistoryTracked(false);
+      
+      // Start playing
+      await TrackPlayer.play();
       
     } catch (error) {
       console.error('Error loading track:', error);
