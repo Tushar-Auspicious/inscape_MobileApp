@@ -37,6 +37,14 @@ const MiniPlayer = () => {
   // Calculate progress percentage
   const progressPercentage = duration > 0 ? (position / duration) * 100 : 0;
 
+  // Get current track data from context for more complete information
+  const currentTrackData = currentTrackList[currentTrackIndex];
+  
+  // Use description from context track data if available, fallback to activeTrack
+  const trackDescription = currentTrackData?.description || activeTrack?.description || "Unknown Artist";
+  const trackTitle = activeTrack.title || currentTrackData?.title || "Unknown Track";
+  const trackArtwork = activeTrack.artwork || currentTrackData?.artwork;
+
   // Navigate to full player screen
   const navigateToPlayer = () => {
     if (currentTrackList.length > 0) {
@@ -68,18 +76,18 @@ const MiniPlayer = () => {
       <View style={styles.content}>
         {/* Track artwork and info */}
         <View style={styles.trackInfo}>
-          {activeTrack.artwork && (
+          {trackArtwork && (
             <Image
-              source={{ uri: activeTrack.artwork }}
+              source={{ uri: trackArtwork }}
               style={styles.artwork}
             />
           )}
           <View style={styles.textContainer}>
             <CustomText numberOfLines={1} style={styles.title}>
-              {activeTrack.title}
+              {trackTitle}
             </CustomText>
             <CustomText numberOfLines={1} style={styles.artist}>
-              {activeTrack?.description || "Unknown Artist"}
+              {trackDescription}
             </CustomText>
           </View>
         </View>
