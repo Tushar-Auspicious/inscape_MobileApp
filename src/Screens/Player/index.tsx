@@ -223,9 +223,6 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
     };
   }, []);
 
-  console.log(
-    `Player Render: isTrackLoading=${isTrackLoading}, isPlayerReady=${isPlayerReady}, hasTrack=${!!track}, playbackState=${playbackState}, contextPlaybackError=${contextPlaybackError}, showForcedLoader=${showForcedLoader}`
-  );
 
   // Show global loader if player isn't ready OR
   // if a track is actively loading/buffering AND no active track is yet available OR
