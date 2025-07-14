@@ -265,19 +265,22 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
                   Your Library is Empty
                 </CustomText>
                 <CustomText style={styles.emptyStateSubText}>
+                  No downloaded files found.
+                </CustomText>
+                {/* <CustomText style={styles.emptyStateSubText}>
                   Download meditations to listen offline or save your favorites
                   here
-                </CustomText>
-                <TouchableOpacity
+                </CustomText> */}
+                {/* <TouchableOpacity
                   style={styles.discoverButton}
                   onPress={() => navigation.navigate("discoverTab")}
                 >
                   <CustomText style={styles.discoverButtonText}>
                     Explore Meditations
                   </CustomText>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
-            ) : null
+            ) : <Loader/>
           }
         />
       </View>

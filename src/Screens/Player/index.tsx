@@ -1,4 +1,6 @@
-import React, { FC, useCallback, useEffect, useState } from "react";
+// Player.tsx
+
+import React, { FC, useEffect, useRef, useState } from "react"; // Import useRef
 import {
   ActivityIndicator,
   Image,
@@ -10,9 +12,9 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
-import PlayerInstance, {
+import {
   Event,
+  State,
   useActiveTrack,
   useTrackPlayerEvents,
 } from "react-native-track-player";
@@ -20,9 +22,9 @@ import ICONS from "../../Assets/icons";
 import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
-import { usePlayerContext } from "../../Context/PlayerContext";
 import Loader from "../../Components/Loader";
 import UniversalTrackPlayer from "../../Components/UniversalTrackPlayer";
+import { usePlayerContext } from "../../Context/PlayerContext";
 import { SetupService } from "../../PlayerServices/SetupService";
 import { PlayerProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
@@ -40,9 +42,10 @@ export function useSetupPlayer() {
         await SetupService();
         if (isMounted) {
           setPlayerReady(true);
+          console.log("PlayerSetup: Player ready.");
         }
       } catch (error) {
-        console.error("Player setup failed:", error);
+        console.error("PlayerSetup: Player setup failed:", error);
       }
     })();
 
@@ -54,155 +57,180 @@ export function useSetupPlayer() {
   return playerReady;
 }
 
+const MIN_LOADING_DURATION = 1000; // milliseconds
+
+
 const Player: FC<PlayerProps> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const isPlayerReady = useSetupPlayer();
+
+  const {
+    loadTrack: contextLoadTrack,
+    currentTrackList,
+    currentTrackIndex,
+    playbackState,
+    playbackError: contextPlaybackError,
+  } = usePlayerContext();
+
+  const isFromLibrary = route.params?.isFromLibrary || false;
   const track = useActiveTrack();
 
-  // Get player context
-  const { loadTrack: contextLoadTrack } = usePlayerContext();
+  const [isTrackLoading, setIsTrackLoading] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [showForcedLoader, setShowForcedLoader] = useState(false); // New state for forced loader
 
-  const { isFromLibrary } = route.params;
+  // Refs to manage loader timeout
+  const loaderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingStartTimeRef = useRef<number | null>(null);
 
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(
-    route.params?.currentTrackIndex || 0
-  );
+  const routeTrackList = route.params?.trackList || [];
+  const routeInitialIndex = route.params?.currentTrackIndex || 0;
 
-  const [isTrackLoading, setIsTrackLoading] = useState(false); // Renamed for clarity
-  const [isTrackLoaded, setIsTrackLoaded] = useState(false); // Track fully loaded and playable
-  const [isImageLoading, setIsImageLoading] = useState(true); // Track background image loading state
-  const [playbackError, setPlaybackError] = useState<string | null>(null); // Track playback errors
-  const trackList: any = route.params?.trackList || [];
+  const hasLoadedFromRoute = useRef(false);
 
-  // Load a track without playing it
-  const loadTrack = useCallback(
-    async (index: number) => {
-      if (!isPlayerReady || index < 0 || index >= trackList.length) return;
+  // Function to activate the loader with a minimum display time
+  const activateForcedLoader = () => {
+    setShowForcedLoader(true);
+    loadingStartTimeRef.current = Date.now();
+    // Clear any existing timeout
+    if (loaderTimeoutRef.current) {
+      clearTimeout(loaderTimeoutRef.current);
+    }
+  };
 
-      try {
+  // Function to deactivate the loader, respecting the minimum display time
+  const deactivateForcedLoader = () => {
+    if (loadingStartTimeRef.current === null) {
+      // If no start time, just deactivate immediately
+      setShowForcedLoader(false);
+      return;
+    }
+
+    const elapsed = Date.now() - loadingStartTimeRef.current;
+    if (elapsed < MIN_LOADING_DURATION) {
+      // If not enough time has passed, set a timeout
+      loaderTimeoutRef.current = setTimeout(() => {
+        setShowForcedLoader(false);
+        loadingStartTimeRef.current = null;
+      }, MIN_LOADING_DURATION - elapsed);
+    } else {
+      // Enough time has passed, deactivate immediately
+      setShowForcedLoader(false);
+      loadingStartTimeRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!isPlayerReady || routeTrackList.length === 0) {
+      return;
+    }
+
+    const isRouteListDifferent =
+      !currentTrackList ||
+      currentTrackList.length === 0 ||
+      JSON.stringify(currentTrackList.map((t) => t.id)) !==
+        JSON.stringify(routeTrackList.map((t) => t.id));
+
+    console.log(
+      "Player.tsx useEffect: isRouteListDifferent =",
+      isRouteListDifferent
+    );
+    console.log(
+      "Player.tsx useEffect: hasLoadedFromRoute.current =",
+      hasLoadedFromRoute.current
+    );
+
+    if (!hasLoadedFromRoute.current || isRouteListDifferent) {
+      console.log(
+        "Player.tsx useEffect: Triggering contextLoadTrack for initial/new route data"
+      );
+      setIsTrackLoading(true); // Always set true immediately
+      setIsImageLoading(true);
+      activateForcedLoader(); // Activate the forced loader
+      contextLoadTrack(routeTrackList, routeInitialIndex);
+      hasLoadedFromRoute.current = true;
+    } else {
+      // Align `isTrackLoading` with actual playback state if no new list is loaded
+      if (
+        playbackState === State.Buffering ||
+        playbackState === State.Connecting
+      ) {
         setIsTrackLoading(true);
-        setIsTrackLoaded(false);
-        setIsImageLoading(true); // Reset image loading state for new track
-        setPlaybackError(null); // Reset any previous playback errors
-        setCurrentTrackIndex(index);
-
-        const newTrack = trackList[index];
-
-        if (!newTrack || typeof newTrack !== "object") {
-          throw new Error("Invalid track object");
-        }
-
-        // Validate required fields
-        if (!newTrack.url || typeof newTrack.url !== "string") {
-          throw new Error("Invalid or missing track URL");
-        }
-        if (!newTrack.id && !newTrack._id) {
-          // Assign a temporary ID if not present
-          newTrack.id = `track_${index}`;
-        }
-
-        // Create a sanitized track object
-        const sanitizedTrack = {
-          id: newTrack.id,
-          url: newTrack.url,
-          title: newTrack.title || "Unknown Track",
-          artwork: newTrack.artwork || undefined,
-          duration: newTrack.duration || 0,
-        };
-
-        await PlayerInstance.reset();
-        await PlayerInstance.add([sanitizedTrack]); // Add the sanitized track
-        setIsTrackLoaded(true);
-      } catch (error: any) {
-        console.error("Error loading track:", error);
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: `Failed to load track: ${error.message}`,
-        });
-        setIsTrackLoaded(false);
-      } finally {
+      } else {
         setIsTrackLoading(false);
       }
-    },
-    [isPlayerReady, trackList, setIsImageLoading]
-  );
-
-  // Preload the initial track when player is ready
-  useEffect(() => {
-    if (isPlayerReady && trackList.length > 0 && !isTrackLoaded) {
-      // Use the context's loadTrack function to ensure state is maintained across the app
-      contextLoadTrack(trackList, currentTrackIndex);
-      loadTrack(currentTrackIndex); // Also call local loadTrack for UI state updates
+      if (track?.artwork) {
+        setIsImageLoading(false);
+      }
+      deactivateForcedLoader(); // Ensure forced loader is off if not a new list
     }
   }, [
     isPlayerReady,
-    currentTrackIndex,
-    trackList,
-    isTrackLoaded,
-    loadTrack,
+    routeTrackList,
+    routeInitialIndex,
     contextLoadTrack,
+    currentTrackList,
+    playbackState,
+    track,
   ]);
 
-  // // Handle track end and queue management
   useTrackPlayerEvents(
-    [Event.PlaybackActiveTrackChanged, Event.PlaybackQueueEnded],
-    async (event) => {
+    [Event.PlaybackState, Event.PlaybackActiveTrackChanged],
+    (event) => {
+      if (event.type === Event.PlaybackState) {
+        console.log("Player: PlaybackState changed to", event.state);
+        switch (event.state) {
+          case State.Playing:
+          case State.Paused:
+          case State.Ready:
+            setIsTrackLoading(false);
+            deactivateForcedLoader(); // Deactivate forced loader when stable
+            break;
+          case State.Buffering:
+          case State.Connecting:
+            setIsTrackLoading(true);
+            // Don't activate forced loader here, as it's handled by new list load
+            break;
+          case State.None:
+          case State.Stopped:
+          case State.Error:
+            setIsTrackLoading(false);
+            deactivateForcedLoader(); // Deactivate forced loader on stop/error
+            break;
+        }
+      }
       if (
         event.type === Event.PlaybackActiveTrackChanged &&
         event.track !== null
       ) {
-        setIsTrackLoaded(true);
-      } else if (event.type === Event.PlaybackQueueEnded) {
-        console.log("Playback queue ended");
-        const queue = await PlayerInstance.getQueue();
-        const activeTrackIndex = await PlayerInstance.getActiveTrackIndex();
-
+        setIsImageLoading(true); // Always trigger image loading for new track
         if (
-          activeTrackIndex !== undefined &&
-          activeTrackIndex < queue.length - 1
+          playbackState !== State.Buffering &&
+          playbackState !== State.Connecting
         ) {
-          // Next track exists in queue, play it
-          setCurrentTrackIndex(activeTrackIndex + 1);
-          await PlayerInstance.skip(activeTrackIndex + 1);
-          await PlayerInstance.play();
-          console.log("Playing next track in queue");
-        } else {
-          // No next track, seek to 0 and pause
-          await PlayerInstance.pause();
-          await PlayerInstance.seekTo(0);
-          console.log("No next track, paused at start");
+          setIsTrackLoading(false);
         }
       }
     }
   );
 
-  // Listen for playback errors
-  useTrackPlayerEvents([Event.PlaybackError], (event) => {
-    console.error("Playback error:", event);
-    setPlaybackError(
-      "Failed to play this track. The audio file might be corrupted or unavailable."
-    );
-  });
-
-  // Ensure playback state is correct
+  // Clean up timeout on unmount
   useEffect(() => {
-    const checkPlaybackState = async () => {
-      try {
-        // Use a safer way to check if we need to load a track
-        if (isPlayerReady && trackList.length > 0 && !isTrackLoaded) {
-          loadTrack(currentTrackIndex);
-        }
-      } catch (error) {
-        console.error("Error checking playback state:", error);
-        setPlaybackError("Failed to load track. Please try again.");
+    return () => {
+      if (loaderTimeoutRef.current) {
+        clearTimeout(loaderTimeoutRef.current);
       }
     };
-    checkPlaybackState();
-  }, [isPlayerReady, currentTrackIndex, trackList, isTrackLoaded]);
+  }, []);
 
-  // Show loader only while track is loading
-  if (isTrackLoading || !isPlayerReady || !track) {
+  console.log(
+    `Player Render: isTrackLoading=${isTrackLoading}, isPlayerReady=${isPlayerReady}, hasTrack=${!!track}, playbackState=${playbackState}, contextPlaybackError=${contextPlaybackError}, showForcedLoader=${showForcedLoader}`
+  );
+
+  // Show global loader if player isn't ready OR
+  // if a track is actively loading/buffering AND no active track is yet available OR
+  // if showForcedLoader is true (for new list loading)
+  if (!isPlayerReady || (isTrackLoading && !track) || showForcedLoader) {
     return (
       <SafeAreaView
         style={{
@@ -218,8 +246,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
     );
   }
 
-  // Show error message when playback fails
-  if (playbackError) {
+  if (contextPlaybackError) {
     return (
       <SafeAreaView
         style={[styles.container, { paddingBottom: insets.bottom }]}
@@ -228,12 +255,18 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
           <CustomText type="heading" style={styles.errorTitle}>
             Something Went Wrong
           </CustomText>
-          <CustomText style={styles.errorMessage}>{playbackError}</CustomText>
+          <CustomText style={styles.errorMessage}>
+            {contextPlaybackError}
+          </CustomText>
           <TouchableOpacity
             style={styles.retryButton}
             onPress={() => {
-              setPlaybackError(null);
-              loadTrack(currentTrackIndex);
+              if (currentTrackList.length > 0) {
+                setIsTrackLoading(true);
+                contextLoadTrack(currentTrackList, currentTrackIndex);
+              } else {
+                navigation.goBack();
+              }
             }}
           >
             <CustomText style={styles.retryButtonText}>Try Again</CustomText>
@@ -245,6 +278,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
               borderRadius: 25,
               borderWidth: 1,
               borderColor: COLORS.white,
+              marginTop: verticalScale(10),
             }}
             onPress={() => navigation.goBack()}
           >
@@ -255,15 +289,47 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
     );
   }
 
+  if (!track) {
+    console.warn(
+      "Player: No active track available, fallback loader. This should be rare if loading logic is correct."
+    );
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: COLORS.darkBlue,
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: hp(100),
+        }}
+      >
+        <Loader />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom }]}>
       <ImageBackground
         source={{ uri: track?.artwork }}
         imageStyle={styles.imageStyle}
         style={[styles.backgroundImage, { opacity: isImageLoading ? 0 : 1 }]}
-        onLoadStart={() => setIsImageLoading(true)}
-        onLoad={() => setIsImageLoading(false)}
-        onError={() => setIsImageLoading(false)}
+        onLoadStart={() => {
+          if (track?.artwork) {
+            setIsImageLoading(true);
+          }
+        }}
+        onLoad={() => {
+          setIsImageLoading(false);
+        }}
+        onError={(e) => {
+          setIsImageLoading(false);
+          console.warn(
+            "ImageBackground: Error loading artwork for track:",
+            track?.title,
+            e.nativeEvent.error
+          );
+        }}
       >
         <View
           style={{
@@ -289,37 +355,41 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
           style={{ gap: verticalScale(4), marginBottom: verticalScale(15) }}
         >
           <CustomText color={COLORS.grey}>
-            {trackList[currentTrackIndex]?.collectionName}
+            {track?.collectionName || "Unknown Collection"}
           </CustomText>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <CustomText fontFamily="regular" type="title" color={COLORS.white}>
-              {track.title}
+              {track?.title || "Unknown Title"}
             </CustomText>
-            {!isTrackLoaded && (
-              <View style={{ marginLeft: 10 }}>
-                <ActivityIndicator size="small" color={COLORS.white} />
-              </View>
-            )}
+            {/* Show activity indicator only if actively buffering/connecting */}
+            {isTrackLoading &&
+              (playbackState === State.Buffering ||
+                playbackState === State.Connecting) && (
+                <View style={{ marginLeft: 10 }}>
+                  <ActivityIndicator size="small" color={COLORS.white} />
+                </View>
+              )}
           </View>
         </View>
         <CustomText type="default" color={COLORS.darkGrey}>
-          {trackList[currentTrackIndex]?.description}
+          {track?.description || "No description available."}
         </CustomText>
         <UniversalTrackPlayer
           trackData={{
-            id: track.id,
-            artwork: track.artwork!,
-            collectionName: trackList[currentTrackIndex]?.collectionName,
-            title: track.title!,
-            duration: trackList[currentTrackIndex]?.duration.toString(),
-            description: trackList[currentTrackIndex]?.description,
-            url: track.url,
-            level:
-              typeof trackList[currentTrackIndex]?.level === "object"
-                ? trackList[currentTrackIndex]?.level.name
-                : trackList[currentTrackIndex]?.level,
+            id: track?.id,
+            artwork: track?.artwork!,
+            collectionName: track?.collectionName,
+            title: track?.title!,
+            duration: track?.duration?.toString()!,
+            description: track?.description!,
+            url: track?.url,
+            level: track?.level,
           }}
-          isTrackLoaded={isTrackLoaded}
+          isTrackLoaded={
+            !!track &&
+            playbackState !== State.Buffering &&
+            playbackState !== State.Connecting
+          }
           isDownload={!isFromLibrary}
         />
       </View>
