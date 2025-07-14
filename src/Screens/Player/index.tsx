@@ -57,7 +57,8 @@ export function useSetupPlayer() {
   return playerReady;
 }
 
-const MIN_LOADING_DURATION = 1000; // milliseconds
+const MIN_LOADING_DURATION = 2000; // milliseconds
+
 
 const Player: FC<PlayerProps> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
@@ -221,6 +222,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
       }
     };
   }, []);
+
 
   // Show global loader if player isn't ready OR
   // if a track is actively loading/buffering AND no active track is yet available OR
