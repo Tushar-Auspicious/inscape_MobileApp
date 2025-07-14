@@ -45,7 +45,7 @@ const MiniPlayer = () => {
     currentTrackData?.description ||
     activeTrack?.description ||
     "Unknown Artist";
-    
+
   const trackTitle =
     activeTrack.title || currentTrackData?.title || "Unknown Track";
   const trackArtwork = activeTrack.artwork || currentTrackData?.artwork;
