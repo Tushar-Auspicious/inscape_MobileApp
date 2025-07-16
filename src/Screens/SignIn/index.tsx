@@ -121,7 +121,16 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
         }
       );
 
+    
+
       if (response.data.success) {
+        if(response.data.data.user.role !== 'user'){
+          Toast.show({
+            type: "error",
+            text1: "You are not authorized to access this app.",
+          })
+          return;
+        }
         await storeLocalStorageData(
           STORAGE_KEYS.token,
           response.data.data.token
