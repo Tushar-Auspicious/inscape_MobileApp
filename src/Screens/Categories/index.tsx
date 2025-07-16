@@ -2,12 +2,11 @@ import { IMAGE_BASE_URL } from "@env";
 import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
-  ImageBackground,
-  ScrollView,
-  TouchableOpacity,
-  View,
   RefreshControl,
+  ScrollView,
   StyleSheet,
+  TouchableOpacity,
+  View
 } from "react-native";
 import {
   SafeAreaView,
@@ -21,22 +20,20 @@ import ContentCard from "../../Components/Cards/ContentCard";
 import CustomIcon from "../../Components/CustomIcon";
 import CustomInput from "../../Components/CustomInput";
 import { CustomText } from "../../Components/CustomText";
-// import Loader from "../../Components/Loader";
+import FastImage from "react-native-fast-image";
+import { useActiveTrack } from "react-native-track-player";
+import NoInternetCard from "../../Components/NoInternetCard";
+import useNetworkStatus from "../../Hooks/useNetworkStatus";
 import { GetCollectionResponse } from "../../Typings/apiTypes";
 import { CategoryProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
+import { timeStringToSeconds } from "../../Utilities/Helpers";
 import {
   horizontalScale,
   hp,
-  verticalScale,
-  wp,
+  verticalScale
 } from "../../Utilities/Metrics";
 import styles from "./style";
-import useNetworkStatus from "../../Hooks/useNetworkStatus";
-import NoInternetCard from "../../Components/NoInternetCard";
-import FastImage from "react-native-fast-image";
-import { useActiveTrack } from "react-native-track-player";
-import MiniPlayer from "../../Components/MiniPlayer";
 
 const Categories: FC<CategoryProps> = ({ navigation, route }) => {
   const { id } = route.params;
@@ -57,12 +54,32 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
   const { isConnected, retryConnection } = useNetworkStatus();
   const previousConnectionRef = useRef<boolean | null>(null);
 
-  const handleCardPress = () => {
-    if (collectionData && collectionData.collection._id) {
-      navigation.navigate("playerList", {
-        id: collectionData?.collection._id,
+  const handleCardPress = (audio: any, index: number) => {
+    if (
+      collectionData &&
+      collectionData.audioFiles &&
+      collectionData.audioFiles.length > 0 
+    ) {
+      navigation.navigate("player", {
+        currentTrackIndex: index,
+        trackList: filteredAudioFiles.map((item) => ({
+          id: item._id,
+          artwork: IMAGE_BASE_URL + item.imageUrl,
+          collectionName: collectionData.collection.name ?? "",
+          title: item.songName,
+          description: item.description,
+          url: IMAGE_BASE_URL + item.audioUrl,
+          duration: timeStringToSeconds(item.duration),
+          level: item.levels[0] ?? "Basic",
+        })),
       });
     }
+
+    // if (collectionData && collectionData.collection._id) {
+    //   navigation.navigate("playerList", {
+    //     id: collectionData?.collection._id,
+    //   });
+    // }
   };
 
   const getCollectionData = useCallback(
@@ -206,62 +223,9 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
   }
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
-      <FastImage
-        source={{
-          uri: IMAGE_BASE_URL + collectionData?.collection.imageUrl,
-        }}
-        style={[StyleSheet.absoluteFill, styles.imageBackground]}
-        resizeMode={FastImage.resizeMode.cover}
-      />
-
-      <View
-        style={[
-          styles.imageContent,
-          {
-            height: insets.top ? hp(35) - insets.top : hp(35),
-            paddingTop: insets.top
-              ? verticalScale(20) - insets.top
-              : verticalScale(20),
-            paddingBottom: verticalScale(20),
-          },
-        ]}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <CustomIcon Icon={ICONS.BackArrow} height={12} width={12} />
-        </TouchableOpacity>
-
-        <View style={styles.imageTextContent}>
-          <CustomText type="heading" fontFamily="bold">
-            {collectionData?.collection.name}
-          </CustomText>
-
-          <CustomText>{`${collectionData?.audioFiles.length} practices`}</CustomText>
-          <ScrollView>
-            <CustomText>{collectionData?.collection.description}</CustomText>
-          </ScrollView>
-        </View>
-      </View>
-
-      <View style={styles.mainHeader}>
-        <CustomInput
-          value={searchQuery}
-          onChangeText={(text) =>
-            setSearchQuery(text.trim().length === 0 ? text.trim() : text)
-          }
-          type="search"
-          placeholder="Search..."
-          style={styles.searchInput}
-          heigth={44}
-        />
-      </View>
-
+    <SafeAreaView edges={["left", "right"]} style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        nestedScrollEnabled={true}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -270,9 +234,59 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
             tintColor={COLORS.white}
           />
         }
+        // Apply padding bottom based on insets and potential MiniPlayer height
+        contentContainerStyle={{
+          paddingBottom: activeTrack ? hp(10) + insets.bottom : insets.bottom,
+        }}
       >
+        <FastImage
+          source={{
+            uri: IMAGE_BASE_URL + collectionData?.collection.imageUrl,
+          }}
+          style={[StyleSheet.absoluteFill, styles.imageBackground]}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+        <View
+          style={[
+            styles.imageContent,
+            {
+              paddingTop: insets.top + verticalScale(10), // Always add insets.top for content below safe area
+              paddingBottom: verticalScale(20),
+            },
+          ]}
+        >
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={[styles.backButton]} // Adjust position based on insets
+          >
+            <CustomIcon Icon={ICONS.BackArrow} height={12} width={12} />
+          </TouchableOpacity>
+
+          <View style={styles.imageTextContent}>
+            <CustomText type="heading" fontFamily="bold">
+              {collectionData?.collection.name}
+            </CustomText>
+
+            <CustomText>{`${collectionData?.audioFiles.length} practices`}</CustomText>
+            <CustomText>{collectionData?.collection.description}</CustomText>
+          </View>
+        </View>
+
+        <View style={styles.mainHeader}>
+          <CustomInput
+            value={searchQuery}
+            onChangeText={(text) =>
+              setSearchQuery(text.trim().length === 0 ? text.trim() : text)
+            }
+            type="search"
+            placeholder="Search..."
+            style={styles.searchInput}
+          />
+        </View>
+
+        {/* FlatList is now inside the main ScrollView and disabled its own scrolling */}
         <FlatList
-          data={filteredAudioFiles} // Use filteredAudioFiles instead of collectionData.audioFiles
+          data={filteredAudioFiles}
           contentContainerStyle={styles.horizontalList}
           keyExtractor={(item) => item._id}
           numColumns={2}
@@ -280,36 +294,29 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
             justifyContent: "space-between",
             paddingHorizontal: horizontalScale(30),
           }}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <ContentCard
               duration={item.duration}
               imageUrl={IMAGE_BASE_URL + item.imageUrl}
               title={item.songName}
               type={"potrait"}
               isSmall
-              onPress={handleCardPress}
+              onPress={() => handleCardPress(item, index)} // Pass the item to the handler
             />
           )}
           ListEmptyComponent={() => {
             return (
-              <CustomText style={{ textAlign: "center" }}>
+              <CustomText
+                style={{ textAlign: "center", marginTop: verticalScale(20) }}
+              >
                 No results found
               </CustomText>
             );
           }}
+          scrollEnabled={false} // <--- Crucial: Disable FlatList's own scrolling
         />
       </ScrollView>
-      {activeTrack && (
-        <View
-          style={{
-            position: "absolute",
-            bottom: insets.bottom + 0,
-            width: wp(100),
-          }}
-        >
-          <MiniPlayer />
-        </View>
-      )}
+
     </SafeAreaView>
   );
 };

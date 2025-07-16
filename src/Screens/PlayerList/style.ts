@@ -51,14 +51,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: horizontalScale(20),
-    paddingTop: verticalScale(20),
     paddingHorizontal: horizontalScale(20),
   },
 
   headerTextCont: {
     gap: verticalScale(5),
     flex: 1,
-    marginBottom: verticalScale(30),
+    marginBottom: verticalScale(10),
   },
 
   listCard: {

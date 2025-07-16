@@ -28,14 +28,20 @@ import TermsAndConditions from "../Screens/TermsAndConditions";
 import {
   AuthStackParams,
   BottomTabParams,
+  DiscoverStackParam,
+  HomeStackParam,
   MainStackParams,
   RootStackParams,
+  SettingsStackParams,
 } from "../Typings/route";
 import ContactUs from "../Screens/ContactUs";
 
 const RootStack = createNativeStackNavigator<RootStackParams>();
 const Auth = createNativeStackNavigator<AuthStackParams>();
 const Main = createNativeStackNavigator<MainStackParams>();
+const Setting = createNativeStackNavigator<SettingsStackParams>();
+const HomeScreens = createNativeStackNavigator<HomeStackParam>();
+const DiscoverScreens = createNativeStackNavigator<DiscoverStackParam>();
 const Tabs = createBottomTabNavigator<BottomTabParams>();
 
 const Routing = () => {
@@ -74,14 +80,14 @@ const Routing = () => {
             title: "Home",
           }}
           name="homeTab"
-          component={Home}
+          component={HomeStack}
         />
         <Tabs.Screen
           options={{
             title: "Discover",
           }}
           name="discoverTab"
-          component={Discover}
+          component={DiscoverStack}
         />
         <Tabs.Screen
           options={{
@@ -95,9 +101,63 @@ const Routing = () => {
             title: "Settings",
           }}
           name="settingsTab"
-          component={Settings}
+          component={SettingStack}
         />
       </Tabs.Navigator>
+    );
+  }
+
+  function HomeStack() {
+    return (
+      <HomeScreens.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: Platform.OS === "ios" ? "default" : "none",
+        }}
+      >
+        <HomeScreens.Screen name="home" component={Home} />
+        <HomeScreens.Screen name="searchHome" component={SearchHome} />
+        <HomeScreens.Screen name="categories" component={Categories} />
+        <HomeScreens.Screen name="playerList" component={PlayerList} />
+      </HomeScreens.Navigator>
+    );
+  }
+
+  function DiscoverStack() {
+    return (
+      <DiscoverScreens.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: Platform.OS === "ios" ? "default" : "none",
+        }}
+      >
+        <DiscoverScreens.Screen name="discover" component={Discover} />
+        <DiscoverScreens.Screen name="categories" component={Categories} />
+      </DiscoverScreens.Navigator>
+    );
+  }
+
+  function SettingStack() {
+    return (
+      <Setting.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: Platform.OS === "ios" ? "default" : "none",
+        }}
+      >
+        <Setting.Screen name="settings" component={Settings} />
+        <Setting.Screen name="myAccount" component={MyAccount} />
+        <Setting.Screen name="Faq" component={FAQ} />
+        <Setting.Screen name="contactUs" component={ContactUs} />
+        <Setting.Screen
+          name="settingsPrivacyPolicy"
+          component={SettingsPrivacyPolicy}
+        />
+        <Setting.Screen
+          name="settingsTermsAndConditions"
+          component={SettingTermsCondition}
+        />
+      </Setting.Navigator>
     );
   }
 
@@ -110,20 +170,6 @@ const Routing = () => {
         }}
       >
         <Main.Screen name="tabs" component={TabStack} />
-        <Main.Screen name="searchHome" component={SearchHome} />
-        <Main.Screen name="categories" component={Categories} />
-        <Main.Screen name="myAccount" component={MyAccount} />
-        <Main.Screen name="contactUs" component={ContactUs} />
-        <Main.Screen name="Faq" component={FAQ} />
-        <Main.Screen
-          name="settingsPrivacyPolicy"
-          component={SettingsPrivacyPolicy}
-        />
-        <Main.Screen
-          name="settingsTermsAndConditions"
-          component={SettingTermsCondition}
-        />
-        <Main.Screen name="playerList" component={PlayerList} />
         <Main.Screen name="player" component={Player} />
       </Main.Navigator>
     );

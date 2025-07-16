@@ -536,7 +536,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
         </View>
       </ScrollView>
 
-      {track ? (
+      {/* {track ? (
         <View style={styles.footerCont}>
           <View style={styles.footerContent}>
             <View style={styles.footerLeftCont}>
@@ -588,7 +588,7 @@ const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
         </View>
       ) : (
         <View style={styles.footerCont}></View>
-      )}
+      )} */}
     </SafeAreaView>
   );
 };

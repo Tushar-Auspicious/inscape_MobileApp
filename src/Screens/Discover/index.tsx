@@ -1,7 +1,7 @@
 import { IMAGE_BASE_URL } from "@env";
 import { useIsFocused } from "@react-navigation/native";
 import React, { FC, useCallback, useEffect, useRef, useState } from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import { FlatList, RefreshControl, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { fetchData } from "../../APIService/api";
@@ -474,21 +474,23 @@ const Discover: FC<DiscoverProps> = ({ navigation }) => {
         />
       </View>
 
-      <FilterModalSheet
-        isModalVisible={isFilterModal}
-        onClose={onCloseFilterSheet}
-        clearFilter={() => {
-          setSelectedFilters([]);
-          setSelectedLevel("");
-          fetchInitialData(); // Reset to initial data
-          onCloseFilterSheet();
-        }}
-        onPressApply={onApplyFilters}
-        selectedLevel={selectedLevel}
-        setSelectedLevel={setSelectedLevel}
-        selectedFilters={selectedFilters}
-        setSelectedFilters={setSelectedFilters}
-      />
+      {isFilterModal && (
+        <FilterModalSheet
+          isModalVisible={isFilterModal}
+          onClose={onCloseFilterSheet}
+          clearFilter={() => {
+            setSelectedFilters([]);
+            setSelectedLevel("");
+            fetchInitialData(); // Reset to initial data
+            onCloseFilterSheet();
+          }}
+          onPressApply={onApplyFilters}
+          selectedLevel={selectedLevel}
+          setSelectedLevel={setSelectedLevel}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+        />
+      )}
     </SafeAreaView>
   );
 };

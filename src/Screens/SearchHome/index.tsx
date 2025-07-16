@@ -264,21 +264,23 @@ const SearchHome: FC<SearchHomeProps> = ({ navigation }) => {
         estimatedItemSize={100}
       />
 
-      <FilterModalSheet
-        isModalVisible={isFilterModal}
-        onClose={onCloseFilterSheet}
-        clearFilter={() => {
-          setSelectedFilters([]);
-          setSelectedLevel("");
-          fetchInitialData(); // Reset to initial data
-          onCloseFilterSheet();
-        }}
-        onPressApply={onApplyFilters}
-        selectedLevel={selectedLevel}
-        setSelectedLevel={setSelectedLevel}
-        selectedFilters={selectedFilters}
-        setSelectedFilters={setSelectedFilters}
-      />
+      {isFilterModal && (
+        <FilterModalSheet
+          isModalVisible={isFilterModal}
+          onClose={onCloseFilterSheet}
+          clearFilter={() => {
+            setSelectedFilters([]);
+            setSelectedLevel("");
+            fetchInitialData(); // Reset to initial data
+            onCloseFilterSheet();
+          }}
+          onPressApply={onApplyFilters}
+          selectedLevel={selectedLevel}
+          setSelectedLevel={setSelectedLevel}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+        />
+      )}
     </SafeAreaView>
   );
 };

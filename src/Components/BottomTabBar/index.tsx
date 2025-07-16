@@ -9,6 +9,7 @@ import { horizontalScale, verticalScale, wp } from "../../Utilities/Metrics";
 import CustomIcon from "../CustomIcon";
 import { CustomText } from "../CustomText";
 import MiniPlayer from "../MiniPlayer";
+import { CommonActions } from "@react-navigation/native";
 
 const BottomTabBar: FC<BottomTabBarProps> = ({
   state,
@@ -43,6 +44,22 @@ const BottomTabBar: FC<BottomTabBarProps> = ({
   };
 
   // Handle tab press events, including navigation and preventing default behavior if necessary
+  // const handlePress = (
+  //   routeKey: string,
+  //   routeName: string,
+  //   isFocused: boolean
+  // ) => {
+  //   const event = navigation.emit({
+  //     type: "tabPress",
+  //     target: routeKey,
+  //     canPreventDefault: true, // Allow preventing navigation on tab press
+  //   });
+
+  //   if (!isFocused && !event.defaultPrevented) {
+  //     navigation.navigate(routeName); // Navigate to the selected tab
+  //   }
+  // };
+
   const handlePress = (
     routeKey: string,
     routeName: string,
@@ -51,11 +68,40 @@ const BottomTabBar: FC<BottomTabBarProps> = ({
     const event = navigation.emit({
       type: "tabPress",
       target: routeKey,
-      canPreventDefault: true, // Allow preventing navigation on tab press
+      canPreventDefault: true,
     });
 
-    if (!isFocused && !event.defaultPrevented) {
-      navigation.navigate(routeName); // Navigate to the selected tab
+    if (routeName === "homeTab") {
+      navigation.dispatch({
+        ...CommonActions.reset({
+          index: 0,
+          routes: [{ name: "homeTab", state: { routes: [{ name: "home" }] } }],
+        }),
+      });
+    }
+    if (routeName === "discoverTab") {
+      navigation.dispatch({
+        ...CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: "discoverTab", state: { routes: [{ name: "discover" }] } },
+          ],
+        }),
+      });
+    }
+    if (routeName === "settingsTab") {
+      navigation.dispatch({
+        ...CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: "settingsTab", state: { routes: [{ name: "settings" }] } },
+          ],
+        }),
+      });
+    }
+    // }
+    else {
+      navigation.navigate(routeName); // Normal tab navigation
     }
   };
 

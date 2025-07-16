@@ -22,6 +22,7 @@
     "@shopify/flash-list": "^1.8.0",
     "axios": "^1.8.3",
     "dayjs": "^1.11.13",
+    "htmlparser2": "^10.0.0",
     "react": "19.0.0",
     "react-native": "0.78.0",
     "react-native-date-picker": "^5.0.10",
