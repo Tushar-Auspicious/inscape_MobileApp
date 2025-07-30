@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
 
   slideImage: {
-    height: hp(52),
+    height: hp(45),
     resizeMode: "cover",
     width: wp(90),
     borderRadius: verticalScale(10),
@@ -37,7 +37,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: responsiveFontSize(14),
     textAlign: "center",
-    lineHeight: responsiveFontSize(19.6),
     maxWidth: wp(60),
   },
 

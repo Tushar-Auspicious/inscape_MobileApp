@@ -5,6 +5,8 @@ import IMAGES from "../../Assets/images";
 import { useAppSelector } from "../../Redux/store";
 import { SplashProps } from "../../Typings/route";
 import styles from "./style";
+import { deleteLocalStorageData } from "../../Utilities/Storage";
+import STORAGE_KEYS from "../../Utilities/Constants";
 
 const Splash: FC<SplashProps> = ({ navigation }) => {
   const { isOnBoarded, isTermsAccepted, token, isRegistered } = useAppSelector(
@@ -18,6 +20,9 @@ const Splash: FC<SplashProps> = ({ navigation }) => {
           screen: "tabs",
           params: {
             screen: "homeTab",
+            params: {
+              screen: "home",
+            },
           },
         });
       } else {
@@ -32,6 +37,13 @@ const Splash: FC<SplashProps> = ({ navigation }) => {
         }
       }
     }, 2000);
+
+
+    const clear = async () => {
+      await deleteLocalStorageData(STORAGE_KEYS.isOnBoarded)
+    }
+    clear()
+
     return () => clearTimeout(timeout);
   }, [token, isOnBoarded, isTermsAccepted]);
 

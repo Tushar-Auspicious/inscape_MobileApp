@@ -21,6 +21,7 @@ LogBox.ignoreAllLogs();
 Appearance.setColorScheme("light");
 
 const App = () => {
+
   const dispatch = useAppDispatch();
   useEffect(() => {
     const fetchLocalData = async () => {
@@ -57,12 +58,10 @@ const App = () => {
     <>
       <PlayerProvider>
         <SafeAreaProvider>
-          <StatusBar backgroundColor={COLORS.darkBlue} />
+          <StatusBar backgroundColor={COLORS.darkBlue}  />
           <NavigationContainer>
             <Routing />
           </NavigationContainer>
-          {/* MiniPlayer is placed outside NavigationContainer to avoid navigation context issues */}
-          {/* <MiniPlayer /> */}
         </SafeAreaProvider>
         <Toast />
       </PlayerProvider>
