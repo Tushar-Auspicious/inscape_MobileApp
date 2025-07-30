@@ -1,5 +1,11 @@
 import React, { FC, useEffect, useState } from "react";
-import { Linking, ScrollView, TouchableOpacity, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Linking,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { fetchData } from "../../APIService/api";
@@ -15,6 +21,9 @@ import STORAGE_KEYS from "../../Utilities/Constants";
 import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
 import { deleteLocalStorageData } from "../../Utilities/Storage";
 import styles from "./style";
+import { KeyboardScrollView } from "../../Components/KeyboardScrollView";
+import { KeyboardAvoidingContainer } from "../../Components/KeyboardAvoidingComponent";
+import COLORS from "../../Utilities/Colors";
 
 const ContactUs: FC<ContactUsProps> = ({ navigation }) => {
   const [form, setForm] = useState({
@@ -109,85 +118,87 @@ const ContactUs: FC<ContactUsProps> = ({ navigation }) => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <CustomText type="title" fontFamily="bold">
-          Contact Us
-        </CustomText>
-        {navigation.canGoBack() && (
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.goBack()}
-            style={styles.backArrowCont}
-          >
-            <CustomIcon Icon={ICONS.BackArrow} height={15} width={15} />
-          </TouchableOpacity>
-        )}
-      </View>
-      <ScrollView
-        style={{
-          flexGrow: 1,
-        }}
-        contentContainerStyle={{
-          gap: verticalScale(10),
-        }}
-      >
-        <View style={{ flexDirection: "row", gap: horizontalScale(10) }}>
-          <CustomInput
-            label="First Name"
-            value={form.firstName}
-            onChangeText={(text) => handleChange("firstName", text)}
-            placeholder="First name"
-            style={{ flex: 1 }}
-          />
-          <CustomInput
-            label="Last Name"
-            value={form.lastName}
-            onChangeText={(text) => handleChange("lastName", text)}
-            placeholder="Last name"
-            style={{ flex: 1 }}
-          />
+    <KeyboardScrollView bounce backgroundColor={COLORS.darkBlue}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <CustomText type="title" fontFamily="bold">
+            Contact Us
+          </CustomText>
+          {navigation.canGoBack() && (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => navigation.goBack()}
+              style={styles.backArrowCont}
+            >
+              <CustomIcon Icon={ICONS.BackArrow} height={15} width={15} />
+            </TouchableOpacity>
+          )}
         </View>
-        <CustomInput
-          label="Company Name"
-          value={form.companyName}
-          onChangeText={(text) => handleChange("companyName", text)}
-          placeholder="Enter your company name"
-        />
-        <CustomInput
-          label="Email Address"
-          value={form.email}
-          onChangeText={(text) => handleChange("email", text)}
-          placeholder="Enter your email address"
-        />
-        <CustomInput
-          label="Phone Number (optional)"
-          value={form.phone}
-          onChangeText={(text) => handleChange("phone", text)}
-          placeholder="Enter your phone number"
-          type="text"
-        />
-        <CustomInput
-          label="Reason for contacting Inscape"
-          value={form.reason}
-          onChangeText={(text) => handleChange("reason", text)}
-          placeholder="Explain your issue(s)"
+        <ScrollView
           style={{
-            minHeight: 100,
-            textAlignVertical: "top",
-            paddingBottom: verticalScale(20),
+            flexGrow: 1,
           }}
-          multiline={true}
-          numberOfLines={4}
-          height={120}
+          contentContainerStyle={{
+            gap: verticalScale(10),
+          }}
+        >
+          <View style={{ flexDirection: "row", gap: horizontalScale(10) }}>
+            <CustomInput
+              label="First Name"
+              value={form.firstName}
+              onChangeText={(text) => handleChange("firstName", text)}
+              placeholder="First name"
+              style={{ flex: 1 }}
+            />
+            <CustomInput
+              label="Last Name"
+              value={form.lastName}
+              onChangeText={(text) => handleChange("lastName", text)}
+              placeholder="Last name"
+              style={{ flex: 1 }}
+            />
+          </View>
+          <CustomInput
+            label="Company Name"
+            value={form.companyName}
+            onChangeText={(text) => handleChange("companyName", text)}
+            placeholder="Enter your company name"
+          />
+          <CustomInput
+            label="Email Address"
+            value={form.email}
+            onChangeText={(text) => handleChange("email", text)}
+            placeholder="Enter your email address"
+          />
+          <CustomInput
+            label="Phone Number (optional)"
+            value={form.phone}
+            onChangeText={(text) => handleChange("phone", text)}
+            placeholder="Enter your phone number"
+            type="text"
+          />
+          <CustomInput
+            label="Reason for contacting Inscape"
+            value={form.reason}
+            onChangeText={(text) => handleChange("reason", text)}
+            placeholder="Explain your issue(s)"
+            style={{
+              minHeight: 100,
+              textAlignVertical: "top",
+              paddingBottom: verticalScale(20),
+            }}
+            multiline={true}
+            numberOfLines={4}
+            height={120}
+          />
+        </ScrollView>
+        <CustomButton
+          title="Submit"
+          onPress={handleSubmit}
+          style={{ marginTop: 24 }}
         />
-      </ScrollView>
-      <CustomButton
-        title="Submit"
-        onPress={handleSubmit}
-        style={{ marginTop: 24 }}
-      />
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardScrollView>
   );
 };
 
