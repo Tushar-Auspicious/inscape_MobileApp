@@ -65,8 +65,6 @@ const MiniPlayer = () => {
     await loadTrack([], 0); // Reset the player with empty tracks
   };
 
-  console.log("activeTrack  ------>", activeTrack.description);
-
   return (
     <TouchableOpacity
       style={styles.container}

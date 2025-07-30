@@ -2,6 +2,7 @@ import React, { FC, forwardRef, useState } from "react";
 import {
   Alert,
   Image,
+  PixelRatio,
   StyleSheet,
   TextInput,
   TextInputProps,
@@ -63,6 +64,14 @@ const CustomInput = forwardRef<TextInput, CustomInputProps>(
     const [isPickerVisible, setPickerVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+    const systemScale = PixelRatio.getFontScale();
+    const maxScale = 1.2;
+    const cappedScale = Math.min(systemScale, maxScale);
+
+    // Adjusted font size based on cap
+    const baseFontSize = responsiveFontSize(14);
+    const adjustedFontSize = (baseFontSize / systemScale) * cappedScale;
+
     // Handle date selection
     const handleConfirm = (date: Date) => {
       setPickerVisible(false);
@@ -123,6 +132,7 @@ const CustomInput = forwardRef<TextInput, CustomInputProps>(
                 style={[
                   styles.input,
                   multiline && styles.multilineInput, // Apply multiline specific styles
+                  { fontSize: adjustedFontSize },
                 ]}
                 placeholder={placeholder}
                 placeholderTextColor={COLORS.white}
@@ -191,7 +201,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: responsiveFontSize(14),
     color: COLORS.white,
     // Ensure that text is vertically centered for single line inputs by default
     // When multiline, textAlignVertical should be 'top'

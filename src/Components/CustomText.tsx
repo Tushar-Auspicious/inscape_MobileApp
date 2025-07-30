@@ -1,4 +1,10 @@
-import { StyleSheet, Text, type TextProps } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  type TextProps,
+  PixelRatio,
+  TextStyle,
+} from "react-native";
 import COLORS from "../Utilities/Colors";
 import { responsiveFontSize } from "../Utilities/Metrics";
 import { FontFamilyType, getPlatformFont } from "../Assets/fonts";
@@ -23,60 +29,45 @@ export function CustomText({
   type = "default",
   ...rest
 }: CustomTextProps) {
-  // Function to calculate dynamic lineHeight based on fontSize
+  const systemScale = PixelRatio.getFontScale(); // e.g. 2.0
+  const maxScale = 1.2;
+  const cappedScale = Math.min(systemScale, maxScale);
+
+  // Function to calculate lineHeight based on final fontSize
   const calculateLineHeight = (fontSize: number) => Math.ceil(fontSize * 1.1);
 
-  return (
-    <Text
-      style={[
-        { color, fontFamily: getPlatformFont(fontFamily) },
-        type === "heading"
-          ? {
-              ...styles.heading,
-              lineHeight: calculateLineHeight(styles.heading.fontSize),
-            }
-          : undefined,
-        type === "subHeading"
-          ? {
-              ...styles.subHeading,
-              lineHeight: calculateLineHeight(styles.subHeading.fontSize),
-            }
-          : undefined,
-        type === "title"
-          ? {
-              ...styles.title,
-              lineHeight: calculateLineHeight(styles.title.fontSize),
-            }
-          : undefined,
-        type === "subTitle"
-          ? {
-              ...styles.subTitle,
-              lineHeight: calculateLineHeight(styles.subTitle.fontSize),
-            }
-          : undefined,
-        type === "default"
-          ? {
-              ...styles.default,
-              lineHeight: calculateLineHeight(styles.default.fontSize),
-            }
-          : undefined,
-        type === "small"
-          ? {
-              ...styles.small,
-              lineHeight: calculateLineHeight(styles.small.fontSize),
-            }
-          : undefined,
-        type === "extraSmall"
-          ? {
-              ...styles.extraSmall,
-              lineHeight: calculateLineHeight(styles.extraSmall.fontSize),
-            }
-          : undefined,
-        style,
-      ]}
-      {...rest}
-    />
-  );
+  // Function to get base fontSize from type
+  const getBaseFontSize = (): number => {
+    switch (type) {
+      case "heading":
+        return styles.heading.fontSize;
+      case "subHeading":
+        return styles.subHeading.fontSize;
+      case "title":
+        return styles.title.fontSize;
+      case "subTitle":
+        return styles.subTitle.fontSize;
+      case "small":
+        return styles.small.fontSize;
+      case "extraSmall":
+        return styles.extraSmall.fontSize;
+      case "default":
+      default:
+        return styles.default.fontSize;
+    }
+  };
+
+  const finalFontSize = (getBaseFontSize() / systemScale) * cappedScale;
+  const lineHeight = calculateLineHeight(finalFontSize);
+
+  const textStyle: TextStyle = {
+    color,
+    fontFamily: getPlatformFont(fontFamily),
+    fontSize: finalFontSize,
+    lineHeight,
+  };
+
+  return <Text style={[textStyle, style]} {...rest} />;
 }
 
 const styles = StyleSheet.create({
