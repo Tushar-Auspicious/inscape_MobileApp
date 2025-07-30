@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
 
   slideTextCont: {
     gap: verticalScale(10),
+    alignItems: "center",
   },
 
   subtitle: {

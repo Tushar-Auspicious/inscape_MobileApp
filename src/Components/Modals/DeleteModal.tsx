@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: horizontalScale(20),
     paddingVertical: verticalScale(10),
-    height: hp(26),
+    // height: hp(26),
     backgroundColor: COLORS.white,
   },
   btn: {

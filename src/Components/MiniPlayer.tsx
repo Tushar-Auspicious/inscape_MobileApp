@@ -52,6 +52,8 @@ const MiniPlayer = () => {
     await loadTrack([], 0); // Reset the player with empty tracks
   };
 
+  console.log("activeTrack  ------>", activeTrack.description);
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -78,9 +80,11 @@ const MiniPlayer = () => {
             <CustomText numberOfLines={1} style={styles.title}>
               {activeTrack.title}
             </CustomText>
-            <CustomText numberOfLines={1} style={styles.artist}>
-              {activeTrack?.description || "Unknown Artist"}
-            </CustomText>
+            {activeTrack.description && (
+              <CustomText numberOfLines={1} style={styles.artist}>
+                {activeTrack?.description}
+              </CustomText>
+            )}
           </View>
         </View>
 

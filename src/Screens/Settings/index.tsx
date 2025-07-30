@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useRef } from "react";
-import { TouchableOpacity, View } from "react-native";
+import React, { FC, useEffect, useRef, useState } from "react";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ICONS from "../../Assets/icons";
 import CustomIcon from "../../Components/CustomIcon";
@@ -32,6 +32,8 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
     sheetRef.current.close();
   };
 
+  const [isModal, setIsModal] = useState(false);
+
   // Network status
   const { isConnected, retryConnection } = useNetworkStatus();
   const previousConnectionRef = useRef<boolean | null>(null);
@@ -43,6 +45,7 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
     await deleteLocalStorageData(STORAGE_KEYS.token);
     await deleteLocalStorageData(STORAGE_KEYS.isRegistered);
     await deleteLocalStorageData(STORAGE_KEYS.downloadedAudios);
+    await deleteLocalStorageData(STORAGE_KEYS.isOnBoarded);
 
     await loadTrack([], 0);
 
@@ -50,7 +53,7 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
     dispatch(setIsRegistered(null));
 
     navigation.replace("authStack", { screen: "signIn" });
-    sheetRef.current.close();
+    setIsModal(false);
   };
 
   const renderBars = (title: string, onPress: () => void) => {
@@ -140,56 +143,58 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.main}>
-      <View style={styles.container}>
-        <CustomText fontFamily="bold" type="title">
-          Settings
-        </CustomText>
-
-        <View style={{ marginVertical: verticalScale(20) }}>
-          {renderBars("My Account", () => navigation.navigate("myAccount"))}
-          <View
-            style={{
-              backgroundColor: COLORS.mixGreyBlue,
-              height: 1,
-              marginVertical: verticalScale(30),
-            }}
-          />
+      <ScrollView>
+        <View style={styles.container}>
           <CustomText fontFamily="bold" type="title">
-            Support
+            Settings
           </CustomText>
-          <View
-            style={{ gap: verticalScale(10), marginTop: verticalScale(15) }}
-          >
-            {renderBars("FAQ", () => navigation.navigate("Faq"))}
-            {renderBars("Privacy Policy", () =>
-              navigation.navigate("settingsPrivacyPolicy")
-            )}
-            {renderBars("Terms & Conditions", () =>
-              navigation.navigate("settingsTermsAndConditions")
-            )}
-            {renderBars("Contact Us", () => navigation.navigate("contactUs"))}
-            <TouchableOpacity
+
+          <View style={{ marginVertical: verticalScale(20) }}>
+            {renderBars("My Account", () => navigation.navigate("myAccount"))}
+            <View
               style={{
-                paddingVertical: verticalScale(10),
+                backgroundColor: COLORS.mixGreyBlue,
+                height: 1,
+                marginVertical: verticalScale(30),
               }}
-              onPress={() => sheetRef.current.open()}
-              activeOpacity={0.8}
+            />
+            <CustomText fontFamily="bold" type="title">
+              Support
+            </CustomText>
+            <View
+              style={{ gap: verticalScale(10), marginTop: verticalScale(15) }}
             >
-              <CustomText
-                style={{ textDecorationLine: "underline" }}
-                fontFamily="bold"
+              {renderBars("FAQ", () => navigation.navigate("Faq"))}
+              {renderBars("Privacy Policy", () =>
+                navigation.navigate("settingsPrivacyPolicy")
+              )}
+              {renderBars("Terms & Conditions", () =>
+                navigation.navigate("settingsTermsAndConditions")
+              )}
+              {renderBars("Contact Us", () => navigation.navigate("contactUs"))}
+              <TouchableOpacity
+                style={{
+                  paddingVertical: verticalScale(10),
+                }}
+                onPress={() => setIsModal(true)}
+                activeOpacity={0.8}
               >
-                Log out
-              </CustomText>
-            </TouchableOpacity>
+                <CustomText
+                  style={{ textDecorationLine: "underline" }}
+                  fontFamily="bold"
+                >
+                  Log out
+                </CustomText>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-      <LogOutModal
-        sheetRef={sheetRef}
-        onLogout={handleLogout}
-        onCancel={handleCancel}
-      />
+        <LogOutModal
+          isModalVisible={isModal}
+          onCancel={() => setIsModal(false)}
+          onLogout={handleLogout}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 };

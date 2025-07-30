@@ -8,6 +8,7 @@ import React, {
 import {
   FlatList,
   Modal,
+  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -18,7 +19,12 @@ import ENDPOINTS from "../../APIService/endPoints";
 import ICONS from "../../Assets/icons";
 import { BestFor, GetFilterResponse, Level } from "../../Typings/apiTypes";
 import COLORS from "../../Utilities/Colors";
-import { horizontalScale, hp, verticalScale } from "../../Utilities/Metrics";
+import {
+  horizontalScale,
+  hp,
+  verticalScale,
+  wp,
+} from "../../Utilities/Metrics";
 import CustomButton from "../Buttons/CustomButton";
 import CustomIcon from "../CustomIcon";
 import { CustomText } from "../CustomText";
@@ -101,114 +107,123 @@ const FilterModalSheet: FC<FilterModalProps> = ({
             <CustomIcon Icon={ICONS.crossIcon} width={24} height={24} />
           </TouchableOpacity>
 
-          <View style={styles.TitlebtnsContainer}>
-            {levelsList.map((level) => (
-              <TouchableOpacity
-                key={level._id}
-                onPress={() => handleLevelSelect(level.name)}
-                style={[
-                  styles.filterButton,
-                  selectedLevel === level.name
-                    ? {
-                        backgroundColor: COLORS.navyBlue,
-                        borderColor: COLORS.grey,
-                        borderWidth: 1,
-                        marginVertical: verticalScale(5),
-                      }
-                    : {
-                        backgroundColor: COLORS.white,
-                        borderColor: COLORS.grey,
-                        borderWidth: 1,
-                        marginVertical: verticalScale(5),
-                      },
-                ]}
-              >
-                <CustomText
-                  color={
-                    selectedLevel === level.name ? COLORS.white : COLORS.grey
-                  }
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.TitlebtnsContainer}>
+              {levelsList.map((level) => (
+                <TouchableOpacity
+                  key={level._id}
+                  onPress={() => handleLevelSelect(level.name)}
+                  style={[
+                    styles.filterButton,
+                    selectedLevel === level.name
+                      ? {
+                          backgroundColor: COLORS.navyBlue,
+                          borderColor: COLORS.grey,
+                          borderWidth: 1,
+                          marginVertical: verticalScale(5),
+                        }
+                      : {
+                          backgroundColor: COLORS.white,
+                          borderColor: COLORS.grey,
+                          borderWidth: 1,
+                          marginVertical: verticalScale(5),
+                        },
+                  ]}
                 >
-                  {level.name}
+                  <CustomText
+                    color={
+                      selectedLevel === level.name ? COLORS.white : COLORS.grey
+                    }
+                  >
+                    {level.name}
+                  </CustomText>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={{ gap: verticalScale(10) }}>
+              <CustomText fontFamily="semiBold" color={COLORS.navyBlue}>
+                Best for
+              </CustomText>
+
+              <FlatList
+                data={bestForTags}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => {
+                  const isSelected = selectedFilters.includes(item.name);
+                  return (
+                    <TouchableOpacity
+                      onPress={() => toggleFilter(item.name)}
+                      style={[
+                        styles.filterButton,
+                        isSelected
+                          ? { backgroundColor: COLORS.navyBlue }
+                          : {
+                              backgroundColor: COLORS.white,
+                              borderColor: COLORS.grey,
+                              borderWidth: 1,
+                            },
+                      ]}
+                    >
+                      <CustomText
+                        color={isSelected ? COLORS.white : COLORS.grey}
+                      >
+                        {item.name}
+                      </CustomText>
+                    </TouchableOpacity>
+                  );
+                }}
+                contentContainerStyle={{
+                  rowGap: 10,
+                }}
+                columnWrapperStyle={{
+                  justifyContent: "space-evenly",
+                  flexWrap: "wrap",
+                  gap: horizontalScale(5),
+                }}
+                numColumns={3}
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
+              />
+            </View>
+
+            <View style={styles.divider} />
+
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "flex-end",
+                gap: verticalScale(10),
+                paddingBottom: verticalScale(10),
+              }}
+            >
+              <CustomButton
+                backgroundColor={COLORS.navyBlue}
+                textColor={COLORS.white}
+                title="Apply Filter"
+                onPress={onPressApply}
+                style={styles.Applyfilter}
+              />
+              <TouchableOpacity activeOpacity={0.8} onPress={clearFilter}>
+                <CustomText
+                  style={{
+                    textDecorationLine: "underline",
+                    textAlign: "center",
+                  }}
+                  fontFamily="semiBold"
+                  type="subTitle"
+                  color={COLORS.navyBlue}
+                >
+                  Clear filter
                 </CustomText>
               </TouchableOpacity>
-            ))}
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={{ gap: verticalScale(10) }}>
-            <CustomText fontFamily="semiBold" color={COLORS.navyBlue}>
-              Best for
-            </CustomText>
-
-            <FlatList
-              data={bestForTags}
-              keyExtractor={(item) => item._id}
-              renderItem={({ item }) => {
-                const isSelected = selectedFilters.includes(item.name);
-                return (
-                  <TouchableOpacity
-                    onPress={() => toggleFilter(item.name)}
-                    style={[
-                      styles.filterButton,
-                      isSelected
-                        ? { backgroundColor: COLORS.navyBlue }
-                        : {
-                            backgroundColor: COLORS.white,
-                            borderColor: COLORS.grey,
-                            borderWidth: 1,
-                          },
-                    ]}
-                  >
-                    <CustomText color={isSelected ? COLORS.white : COLORS.grey}>
-                      {item.name}
-                    </CustomText>
-                  </TouchableOpacity>
-                );
-              }}
-              contentContainerStyle={{
-                rowGap: 10,
-              }}
-              columnWrapperStyle={{
-                justifyContent: "space-evenly",
-              }}
-              numColumns={3}
-              keyboardShouldPersistTaps="handled"
-              nestedScrollEnabled
-            />
-          </View>
-
-          <View style={styles.divider} />
-
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "flex-end",
-              gap: verticalScale(10),
-              paddingBottom: verticalScale(10),
-            }}
-          >
-            <CustomButton
-              backgroundColor={COLORS.navyBlue}
-              textColor={COLORS.white}
-              title="Apply Filter"
-              onPress={onPressApply}
-              style={styles.Applyfilter}
-            />
-            <TouchableOpacity activeOpacity={0.8} onPress={clearFilter}>
-              <CustomText
-                style={{
-                  textDecorationLine: "underline",
-                  textAlign: "center",
-                }}
-                fontFamily="semiBold"
-                type="subTitle"
-                color={COLORS.navyBlue}
-              >
-                Clear filter
-              </CustomText>
-            </TouchableOpacity>
-          </View>
+            </View>
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -223,7 +238,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: horizontalScale(20),
     paddingVertical: verticalScale(10),
-    height: hp(65),
+    height: hp(75),
     backgroundColor: COLORS.white,
   },
   TitlebtnsContainer: {
@@ -233,7 +248,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     flexWrap: "wrap",
     borderRadius: 12,
-    padding: 5,
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: horizontalScale(5),
   },
   divider: {
     borderBottomWidth: 1,
@@ -250,7 +266,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    minWidth: "30%",
+    minWidth: wp(20),
   },
   Applyfilter: {},
   titlebtn: {

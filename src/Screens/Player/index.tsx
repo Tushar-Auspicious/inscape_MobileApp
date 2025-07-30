@@ -74,6 +74,8 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
   const [playbackError, setPlaybackError] = useState<string | null>(null); // Track playback errors
   const trackList: any = route.params?.trackList || [];
 
+  // console.log("Track List:", trackList);
+
   // Load a track without playing it
   const loadTrack = useCallback(
     async (index: number) => {

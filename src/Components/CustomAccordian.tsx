@@ -89,7 +89,9 @@ const CustomAccordion = ({
           activeOpacity={0.8}
           style={styles.headerContent}
         >
-          <CustomText fontFamily="medium">{title}</CustomText>
+          <CustomText fontFamily="medium" style={{ width: "80%" }}>
+            {title}
+          </CustomText>
           <Animated.View style={iconAnimatedStyle}>
             <CustomIcon Icon={ICONS.downArrowIcon} width={15} height={15} />
           </Animated.View>

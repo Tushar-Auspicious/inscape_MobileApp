@@ -66,7 +66,7 @@ const ExploreCard: FC<ExploreCardProps> = ({
             />
             <View style={styles.content}>
               <CustomText style={{ flex: 1 }} fontFamily="bold">
-                {title.slice(0, 15)}
+                {title}
               </CustomText>
               <CustomText type="extraSmall" fontFamily="bold">
                 {subTitle}
@@ -82,9 +82,7 @@ const ExploreCard: FC<ExploreCardProps> = ({
             overlayColor="transparent"
           >
             <TouchableOpacity style={styles.content} onPress={onPress}>
-              <CustomText style={{ flex: 1 }} fontFamily="bold">
-                {title.slice(0, 15)}
-              </CustomText>
+              <CustomText fontFamily="bold">{title}</CustomText>
               <CustomText type="extraSmall" fontFamily="bold">
                 {subTitle}
               </CustomText>
@@ -119,10 +117,8 @@ const styles = StyleSheet.create({
   content: {
     width: "100%",
     paddingVertical: verticalScale(10),
-    paddingHorizontal: horizontalScale(20),
-    flexDirection: "row",
+    paddingHorizontal: horizontalScale(10),
     justifyContent: "space-between",
-    alignItems: "center",
     ...(Platform.OS === "ios" && {
       position: "absolute",
       bottom: 0,

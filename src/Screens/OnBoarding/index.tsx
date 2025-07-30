@@ -4,6 +4,7 @@ import {
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
@@ -89,26 +90,30 @@ const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        data={OnBoardingSlides}
-        onMomentumScrollEnd={updateCurrentSlideIndex}
-        showsHorizontalScrollIndicator={false}
-        horizontal
-        pagingEnabled
-        renderItem={renderSlides}
-      />
-      {renderIndicators()}
-      <View style={styles.buttonCont}>
-        <CustomButton
-          title="Next"
-          onPress={goToNextSlide}
-          style={{ width: wp(90) }}
+      <ScrollView
+        contentContainerStyle={{ justifyContent: "space-between", flexGrow: 1 }}
+      >
+        <FlatList
+          ref={flatListRef}
+          data={OnBoardingSlides}
+          onMomentumScrollEnd={updateCurrentSlideIndex}
+          showsHorizontalScrollIndicator={false}
+          horizontal
+          pagingEnabled
+          renderItem={renderSlides}
         />
-        <TouchableOpacity onPress={handleSkip}>
-          <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
-      </View>
+        {renderIndicators()}
+        <View style={styles.buttonCont}>
+          <CustomButton
+            title="Next"
+            onPress={goToNextSlide}
+            style={{ width: wp(90) }}
+          />
+          <TouchableOpacity onPress={handleSkip}>
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
