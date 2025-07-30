@@ -62,7 +62,6 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
   const { position, duration } = useProgress();
 
   const [downloading, setDownloading] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false);
 
   const [downloadProgress, setDownloadProgress] = useState(0);
 
@@ -83,7 +82,7 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
     if (trackId) {
       try {
         await postData(ENDPOINTS.audioHistory, {
-          type: "PLAY",
+          type: "LISTEN",
           audio_id: trackId,
         });
         console.log("Play history tracked for track ID:", trackId);
@@ -197,8 +196,8 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
             title: "Download Complete",
             body:
               Platform.OS === "ios"
-                ? `${track?.title} downloaded. Find it in your Inscape folder.`
-                : `${track?.title} downloaded. Find it in your Downloads.`,
+                ? `${track?.title} downloaded. Click the Library icon to play it.`
+                : `${track?.title} downloaded. Click the Library icon to play it.`,
             android: {
               channelId,
               pressAction: {

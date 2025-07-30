@@ -1,20 +1,21 @@
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   Image,
   ImageBackground,
   SafeAreaView,
-  View,
-  Switch,
   TouchableOpacity,
+  View,
 } from "react-native"; // Import Switch
 import Toast from "react-native-toast-message";
 import { postData } from "../../APIService/api";
 import ENDPOINTS from "../../APIService/endPoints";
+import ICONS from "../../Assets/icons";
 import IMAGES from "../../Assets/images";
 import CustomButton from "../../Components/Buttons/CustomButton";
+import CustomIcon from "../../Components/CustomIcon";
 import CustomInput from "../../Components/CustomInput";
 import { CustomText } from "../../Components/CustomText";
-import { KeyboardAvoidingContainer } from "../../Components/KeyboardAvoidingComponent";
+import { KeyboardScrollView } from "../../Components/KeyboardScrollView";
 import { useAppSelector } from "../../Redux/store";
 import { LoginResponse } from "../../Typings/apiTypes";
 import { SignInProps } from "../../Typings/route";
@@ -22,14 +23,10 @@ import COLORS from "../../Utilities/Colors";
 import STORAGE_KEYS from "../../Utilities/Constants";
 import { isValidEmail } from "../../Utilities/Helpers";
 import {
-  storeLocalStorageData,
   getLocalStorageData,
+  storeLocalStorageData,
 } from "../../Utilities/Storage"; // Import getLocalStorageData
 import styles from "./style";
-import { KeyboardScrollView } from "../../Components/KeyboardScrollView";
-import CustomIcon from "../../Components/CustomIcon";
-import ICONS from "../../Assets/icons";
-import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
 
 const SignIn: FC<SignInProps> = ({ navigation }) => {
   const [inputData, setInputData] = useState({
@@ -122,6 +119,13 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
       );
 
       if (response.data.success) {
+        if (response.data.data.user.role !== "user") {
+          Toast.show({
+            type: "error",
+            text1: "You are not authorized to access this app.",
+          });
+          return;
+        }
         await storeLocalStorageData(
           STORAGE_KEYS.token,
           response.data.data.token
@@ -144,7 +148,12 @@ const SignIn: FC<SignInProps> = ({ navigation }) => {
 
         navigation.replace("mainStack", {
           screen: "tabs",
-          params: { screen: "homeTab" },
+          params: {
+            screen: "homeTab",
+            params: {
+              screen: "home",
+            },
+          },
         });
       } else {
         Toast.show({

@@ -37,23 +37,23 @@ export async function PlaybackService() {
   });
 
   TrackPlayer.addEventListener(Event.RemoteDuck, async (event) => {
-    console.log("Event.RemoteDuck", event);
+    // console.log("Event.RemoteDuck", event);
   });
 
   TrackPlayer.addEventListener(Event.PlaybackQueueEnded, (event) => {
-    console.log("Event.PlaybackQueueEnded", event);
+    // console.log("Event.PlaybackQueueEnded", event);
   });
 
   TrackPlayer.addEventListener(Event.PlaybackActiveTrackChanged, (event) => {
-    console.log("Event.PlaybackActiveTrackChanged", event);
+    // console.log("Event.PlaybackActiveTrackChanged", event);
   });
 
   TrackPlayer.addEventListener(Event.PlaybackPlayWhenReadyChanged, (event) => {
-    console.log("Event.PlaybackPlayWhenReadyChanged", event);
+    // console.log("Event.PlaybackPlayWhenReadyChanged", event);
   });
 
   TrackPlayer.addEventListener(Event.PlaybackState, (event) => {
-    console.log("Event.PlaybackState", event);
+    // console.log("Event.PlaybackState", event);
   });
 
   TrackPlayer.addEventListener(Event.MetadataChapterReceived, (event) => {
@@ -69,7 +69,7 @@ export async function PlaybackService() {
   });
 
   TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, (event) => {
-    console.log("Event.PlaybackProgressUpdated", event);
+    // console.log("Event.PlaybackProgressUpdated", event);
   });
 
   TrackPlayer.addEventListener(

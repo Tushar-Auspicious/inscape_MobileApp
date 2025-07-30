@@ -22,13 +22,6 @@ export type AuthStackParams = {
 
 export type MainStackParams = {
   tabs: NavigatorScreenParams<BottomTabParams>;
-  searchHome: undefined;
-  categories: { id: string };
-  myAccount: undefined;
-  Faq: undefined;
-  contactUs: undefined;
-  settingsTermsAndConditions: undefined;
-  settingsPrivacyPolicy: undefined;
   playerList: {
     id?: string;
     isFromMeditation?: boolean;
@@ -43,28 +36,59 @@ export type MainStackParams = {
   };
 };
 
-export type BottomTabParams = {
-  homeTab: undefined;
-  discoverTab: undefined;
-  libraryTab: undefined;
-  settingsTab: undefined;
+export type HomeStackParam = {
+  home: undefined;
+  searchHome: undefined;
+  categories: { id: string };
+  playerList: {
+    id?: string;
+    isFromMeditation?: boolean;
+    meditationTypeData?: {
+      title: string;
+    };
+  };
 };
 
+export type DiscoverStackParam = {
+  discover: undefined;
+  categories: { id: string };
+};
+
+export type SettingsStackParams = {
+  settings: undefined;
+  settingsTermsAndConditions: undefined;
+  settingsPrivacyPolicy: undefined;
+  Faq: undefined;
+  myAccount: undefined;
+  contactUs: undefined;
+};
+
+export type BottomTabParams = {
+  homeTab: NavigatorScreenParams<HomeStackParam>;
+  discoverTab: NavigatorScreenParams<DiscoverStackParam>;
+  libraryTab: undefined;
+  settingsTab: NavigatorScreenParams<SettingsStackParams>;
+};
+
+// SPLASH
 export type SplashProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
   "splash"
 >;
 
+// ONBOARDING
 export type OnBoardingProps = NativeStackScreenProps<
   AuthStackParams,
   "onBoarding"
 >;
 
+// TERMS AND CONDITIONS
 export type TermsAndConditionProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
   "termsAndConditions"
 >;
 
+// AUTH SCREENS
 export type SignUpProps = NativeStackScreenProps<
   RootStackParams & AuthStackParams & MainStackParams,
   "signUp"
@@ -100,49 +124,56 @@ export type PasswordSuccessProps = NativeStackScreenProps<
   "passwordSuccess"
 >;
 
+// HOME TAB SCREENS
 export type HomeScreenProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
-  "homeTab"
->;
-
-export type SettingScreenProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
-  "settingsTab"
->;
-
-export type SettingsTermsAndConditionProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
-  "settingsTermsAndConditions"
->;
-
-export type SettingsPrivacyPolicyProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
-  "settingsPrivacyPolicy"
->;
-
-export type myAccountProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
-  "myAccount"
->;
-
-export type FAQProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
-  "Faq"
+  RootStackParams & MainStackParams & BottomTabParams & HomeStackParam,
+  "home"
 >;
 
 export type SearchHomeProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
+  RootStackParams & MainStackParams & HomeStackParam,
   "searchHome"
 >;
 
 export type CategoryProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
+  RootStackParams & MainStackParams & HomeStackParam & DiscoverStackParam,
   "categories"
 >;
 
+// SETTINGS SCREENS
+export type SettingScreenProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams & SettingsStackParams,
+  "settings"
+>;
+
+export type SettingsTermsAndConditionProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams & SettingsStackParams,
+  "settingsTermsAndConditions"
+>;
+
+export type SettingsPrivacyPolicyProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams & SettingsStackParams,
+  "settingsPrivacyPolicy"
+>;
+
+export type myAccountProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams & SettingsStackParams,
+  "myAccount"
+>;
+
+export type FAQProps = NativeStackScreenProps<
+  RootStackParams & MainStackParams & BottomTabParams & SettingsStackParams,
+  "Faq"
+>;
+
+export type ContactUsProps = NativeStackScreenProps<
+  MainStackParams & RootStackParams & BottomTabParams & SettingsStackParams,
+  "contactUs"
+>;
+
 export type DiscoverProps = NativeStackScreenProps<
-  RootStackParams & MainStackParams & BottomTabParams,
-  "discoverTab"
+  RootStackParams & MainStackParams & BottomTabParams & DiscoverStackParam,
+  "discover"
 >;
 
 export type LibraryProps = NativeStackScreenProps<
@@ -158,9 +189,4 @@ export type PlayerListProps = NativeStackScreenProps<
 export type PlayerProps = NativeStackScreenProps<
   RootStackParams & MainStackParams & BottomTabParams,
   "player"
->;
-
-export type ContactUsProps = NativeStackScreenProps<
-  MainStackParams & RootStackParams,
-  "contactUs"
 >;

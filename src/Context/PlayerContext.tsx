@@ -1,21 +1,28 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+// PlayerContext.tsx
+
+import React, { createContext, ReactNode, useContext, useState } from "react";
 import TrackPlayer, {
-  Track,
-  usePlaybackState,
-  State,
   Event,
-  useTrackPlayerEvents,
-  useProgress,
   RepeatMode,
+  Track as RNTPTrack,
+  State,
+  usePlaybackState,
+  useTrackPlayerEvents,
 } from "react-native-track-player";
 import { postData } from "../APIService/api";
 import ENDPOINTS from "../APIService/endPoints";
+
+interface Track {
+  id?: string;
+  _id?: string;
+  url: string;
+  title: string;
+  artwork?: string;
+  duration: number; // Duration in seconds (number)
+  description?: string;
+  collectionName?: string;
+  level?: string;
+}
 
 interface PlayerContextType {
   currentTrackList: Track[];
@@ -24,6 +31,7 @@ interface PlayerContextType {
   isShuffleEnabled: boolean;
   repeatMode: RepeatMode;
   playbackError: string | null;
+  playbackState: State;
   loadTrack: (tracks: Track[], index: number) => Promise<void>;
   playPause: () => Promise<void>;
   skipToNext: () => Promise<void>;
@@ -53,7 +61,6 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   const [isShuffleEnabled, setIsShuffleEnabled] = useState<boolean>(false);
   const [repeatMode, setRepeatMode] = useState<RepeatMode>(RepeatMode.Off);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
-  const [playHistoryTracked, setPlayHistoryTracked] = useState<boolean>(false);
   const [lastPlayedTrackId, setLastPlayedTrackId] = useState<string | null>(
     null
   );
@@ -64,69 +71,174 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
   // Track playback errors
   useTrackPlayerEvents([Event.PlaybackError], (event) => {
     if (event.type === Event.PlaybackError) {
-      console.error("Playback error:", event.message);
-      setPlaybackError("Failed to play this track. Please try again.");
+      setPlaybackError(
+        `Failed to play this track: ${
+          event.message || "Unknown error"
+        }. Please try again.`
+      );
     }
   });
 
-  // Track play history
-  useTrackPlayerEvents([Event.PlaybackState], async (event) => {
-    if (event.state === State.Playing) {
-      const currentTrack = await TrackPlayer.getActiveTrack();
-      if (
-        currentTrack &&
-        currentTrack.id &&
-        currentTrack.id !== lastPlayedTrackId
-      ) {
-        try {
-          await postData(ENDPOINTS.audioHistory, {
-            type: "PLAY",
-            audio_id: currentTrack.id,
-          });
-          console.log("Play history tracked for track ID:", currentTrack.id);
-          setLastPlayedTrackId(currentTrack.id as string);
-        } catch (error) {
-          console.log("Error tracking play history:", error);
+  // Track play history AND update currentTrackIndex when active track changes
+  useTrackPlayerEvents(
+    [
+      Event.PlaybackState,
+      Event.PlaybackActiveTrackChanged,
+      Event.PlaybackQueueEnded,
+    ],
+    async (event) => {
+      // History tracking (only if playing and track ID is new)
+      if (event.type === Event.PlaybackState && event.state === State.Playing) {
+        const activeTrack = await TrackPlayer.getActiveTrack();
+        if (
+          activeTrack &&
+          activeTrack.id &&
+          activeTrack.id !== lastPlayedTrackId
+        ) {
+          try {
+            await postData(ENDPOINTS.audioHistory, {
+              type: "LISTEN",
+              audio_id: activeTrack.id,
+            });
+            console.log("Play history tracked for track ID:", activeTrack.id);
+            setLastPlayedTrackId(activeTrack.id as string);
+          } catch (error) {
+            console.log("Error tracking play history:", error);
+          }
         }
       }
+
+      // Update currentTrackIndex based on active track change
+      if (event.type === Event.PlaybackActiveTrackChanged) {
+        if (event.track !== null) {
+          const newActiveIndex = await TrackPlayer.getActiveTrackIndex();
+          if (
+            newActiveIndex !== undefined &&
+            newActiveIndex !== currentTrackIndex
+          ) {
+            console.log(
+              `PlayerProvider: Active track changed to index ${newActiveIndex}`
+            );
+            setCurrentTrackIndex(newActiveIndex);
+            setPlaybackError(null); // Clear error on successful track change
+          }
+        } else {
+          console.log(
+            "PlayerProvider: PlaybackActiveTrackChanged - track is null (end of queue or stop)"
+          );
+        }
+      }
+
+      // Handle queue ended scenario
+      if (event.type === Event.PlaybackQueueEnded) {
+        console.log("PlayerProvider: Playback queue ended.");
+        await TrackPlayer.pause();
+        // Optionally reset index to 0 or leave at the end
+        // setCurrentTrackIndex(0);
+      }
     }
-  });
+  );
 
   // Load track function
   const loadTrack = async (tracks: Track[], index: number) => {
     try {
-      setPlaybackError(null);
+      setPlaybackError(null); // Clear error at the start of load attempt
 
-      // Check if we're trying to load the same track that's already playing
-      const currentTrack = await TrackPlayer.getActiveTrack();
-      const targetTrack = tracks[index];
-
-      if (currentTrack && targetTrack && currentTrack.id === targetTrack.id) {
-        console.log("Same track already loaded, not reloading");
-        // Just update the context state
-        setCurrentTrackList(tracks);
-        setCurrentTrackIndex(index);
-
+      if (!tracks || tracks.length === 0) {
+        console.warn("PlayerProvider: No tracks provided to loadTrack.");
+        await TrackPlayer.reset();
+        setCurrentTrackList([]);
+        setCurrentTrackIndex(0);
         return;
       }
 
-      // Reset the queue and add the new tracks
+      const sanitizedTracks: RNTPTrack[] = tracks.map((trackItem) => ({
+        id: trackItem.id || trackItem._id, // Prefer trackItem.id if available
+        url: trackItem.url,
+        title: trackItem.title || "Unknown Title",
+        artwork: trackItem.artwork,
+        duration: trackItem.duration,
+        collectionName: trackItem.collectionName,
+        description: trackItem.description,
+        level: trackItem.level,
+      })) as RNTPTrack[];
+
+      const currentQueue = await TrackPlayer.getQueue();
+      const currentActiveIndex = await TrackPlayer.getActiveTrackIndex();
+      const currentActiveTrackId = (await TrackPlayer.getActiveTrack())?.id;
+
+      const targetTrack = sanitizedTracks[index];
+      const targetTrackId = targetTrack?.id;
+
+      // Check if the exact queue is already loaded and we just need to skip/play
+      const areQueuesIdentical =
+        currentQueue.length === sanitizedTracks.length &&
+        currentQueue.every(
+          (qTrack, i) =>
+            qTrack.id === sanitizedTracks[i].id &&
+            qTrack.url === sanitizedTracks[i].url
+        );
+
+      if (areQueuesIdentical) {
+        console.log("PlayerProvider: Queue is identical.");
+        if (
+          currentActiveIndex === index &&
+          currentActiveTrackId === targetTrackId
+        ) {
+          console.log("PlayerProvider: Same track is already active.");
+          // If it's the same track and it's already playing/paused, just ensure play
+          if (
+            playbackState.state !== State.Playing &&
+            playbackState.state !== State.Buffering
+          ) {
+            await TrackPlayer.play();
+          }
+          // Update context state only if necessary (e.g., if array reference changed)
+          setCurrentTrackList(tracks);
+          setCurrentTrackIndex(index);
+          return; // Nothing more to do
+        } else {
+          console.log(
+            `PlayerProvider: Queue identical, skipping from ${currentActiveIndex} to ${index}`
+          );
+          // Queue is the same, but different track needs to be active
+          await TrackPlayer.skip(index);
+          if (
+            playbackState.state !== State.Playing &&
+            playbackState.state !== State.Buffering
+          ) {
+            await TrackPlayer.play();
+          }
+          setCurrentTrackList(tracks); // Update context list for reference consistency
+          // setCurrentTrackIndex will be updated by PlaybackActiveTrackChanged event listener
+          return; // Done
+        }
+      }
+
+      // If queues are different, or currentQueue is empty/invalid, then reset and add
+      console.log(
+        "PlayerProvider: Queue is different or empty, resetting and adding new queue."
+      );
       await TrackPlayer.reset();
-      await TrackPlayer.add(tracks);
+      await TrackPlayer.add(sanitizedTracks);
       await TrackPlayer.skip(index);
       await TrackPlayer.play();
 
-      // Update state
+      // Update context state AFTER TrackPlayer operations are initiated
       setCurrentTrackList(tracks);
-      setCurrentTrackIndex(index);
-      setPlayHistoryTracked(false);
-    } catch (error) {
-      console.error("Error loading track:", error);
-      setPlaybackError("Failed to load track. Please try again.");
+      setCurrentTrackIndex(index); // This will be confirmed by TrackPlayer's event listener shortly
+      setLastPlayedTrackId(null); // Reset history tracking for new queue
+    } catch (error: any) {
+      console.error("Error loading track in PlayerProvider:", error);
+      setPlaybackError(
+        `Failed to load track: ${error.message || "Unknown error"}.`
+      );
+      setCurrentTrackList([]);
+      setCurrentTrackIndex(0);
+      setLastPlayedTrackId(null);
     }
   };
 
-  // Play/Pause toggle
   const playPause = async () => {
     try {
       if (isPlaying) {
@@ -136,60 +248,56 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
       }
     } catch (error) {
       console.error("Error toggling play/pause:", error);
+      setPlaybackError("Failed to toggle playback. Please try again.");
     }
   };
 
-  // Skip to next track
   const skipToNext = async () => {
     try {
-      if (currentTrackIndex < currentTrackList.length - 1) {
-        await TrackPlayer.skipToNext();
-        setCurrentTrackIndex((prev) => prev + 1);
-        setPlayHistoryTracked(false);
-      }
+      await TrackPlayer.skipToNext();
+      setLastPlayedTrackId(null); // Reset history tracking for next track
     } catch (error) {
       console.error("Error skipping to next track:", error);
+      setPlaybackError("Failed to skip to next track. Please try again.");
     }
   };
 
-  // Skip to previous track
   const skipToPrevious = async () => {
     try {
-      if (currentTrackIndex > 0) {
-        await TrackPlayer.skipToPrevious();
-        setCurrentTrackIndex((prev) => prev - 1);
-        setPlayHistoryTracked(false);
-      }
+      await TrackPlayer.skipToPrevious();
+      setLastPlayedTrackId(null); // Reset history tracking for previous track
     } catch (error) {
       console.error("Error skipping to previous track:", error);
+      setPlaybackError("Failed to skip to previous track. Please try again.");
     }
   };
 
-  // Toggle shuffle mode
   const toggleShuffle = async () => {
     setIsShuffleEnabled((prev) => !prev);
-    // Implement shuffle logic here
+    console.warn(
+      "Shuffle mode toggled, but actual shuffle logic is not yet implemented."
+    );
   };
 
-  // Toggle repeat mode
   const toggleRepeatMode = async () => {
-    const newMode =
-      repeatMode === RepeatMode.Off
-        ? RepeatMode.Track
-        : repeatMode === RepeatMode.Track
-        ? RepeatMode.Queue
-        : RepeatMode.Off;
-
+    let newMode: RepeatMode;
+    if (repeatMode === RepeatMode.Off) {
+      newMode = RepeatMode.Track;
+    } else if (repeatMode === RepeatMode.Track) {
+      newMode = RepeatMode.Queue;
+    } else {
+      newMode = RepeatMode.Off;
+    }
     setRepeatMode(newMode);
     await TrackPlayer.setRepeatMode(newMode);
   };
 
-  // Seek to position
   const seekTo = async (position: number) => {
     try {
       await TrackPlayer.seekTo(position);
     } catch (error) {
       console.error("Error seeking to position:", error);
+      setPlaybackError("Failed to seek track. Please try again.");
     }
   };
 
@@ -200,6 +308,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     isShuffleEnabled,
     repeatMode,
     playbackError,
+    playbackState: playbackState.state!,
     loadTrack,
     playPause,
     skipToNext,
