@@ -10,7 +10,7 @@ import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import { useAppSelector } from "../../Redux/store";
 import { SettingsTermsAndConditionProps } from "../../Typings/route";
-import { wp } from "../../Utilities/Metrics";
+import { getAdjustedFontSize, wp } from "../../Utilities/Metrics";
 import styles from "./style";
 
 type TagStyleMap = {
@@ -116,8 +116,13 @@ const SettingTermsCondition: FC<SettingsTermsAndConditionProps> = ({
             ...dynamicTagStyles,
             h1: {
               ...dynamicTagStyles.h1,
-              fontSize: 24, 
-              marginBottom:10
+              fontSize: getAdjustedFontSize(24),
+              marginBottom: 10,
+            },
+            span: {
+              ...dynamicTagStyles.span,
+              textDecorationLine: "none",
+              fontSize: getAdjustedFontSize(16),
             },
           }}
         />

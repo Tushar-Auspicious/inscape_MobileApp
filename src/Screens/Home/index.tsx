@@ -271,6 +271,8 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
 
   const keyExtractor = useCallback((item: any) => item._id, []);
 
+
+  
   // Initial data loading
   useEffect(() => {
     getHomeData();

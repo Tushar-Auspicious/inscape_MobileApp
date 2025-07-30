@@ -7,7 +7,11 @@ import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import { useAppSelector } from "../../Redux/store";
 import { SettingsPrivacyPolicyProps } from "../../Typings/route";
-import { verticalScale, wp } from "../../Utilities/Metrics";
+import {
+  getAdjustedFontSize,
+  verticalScale,
+  wp,
+} from "../../Utilities/Metrics";
 import styles from "./style";
 import { generateTagStylesFromHTML } from "../SettingTermsCondition";
 
@@ -50,19 +54,19 @@ const SettingsPrivacyPolicy: FC<SettingsPrivacyPolicyProps> = ({
             ...dynamicTagStyles,
             h1: {
               ...dynamicTagStyles.h1,
-              fontSize: 24,
+              fontSize: getAdjustedFontSize(24),
               marginBottom: 10,
               fontWeight: "bold",
             },
             span: {
               ...dynamicTagStyles.span,
               textDecorationLine: "none",
-              fontSize: 16,
+              fontSize: getAdjustedFontSize(16),
             },
-            strong:{
+            strong: {
               fontWeight: "bold",
               marginBottom: 10,
-            }
+            },
           }}
         />
       </ScrollView>

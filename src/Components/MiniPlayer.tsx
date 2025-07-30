@@ -85,10 +85,10 @@ const MiniPlayer = () => {
             <Image source={{ uri: trackArtwork }} style={styles.artwork} />
           )}
           <View style={styles.textContainer}>
-            <CustomText numberOfLines={1} style={styles.title}>
+            <CustomText style={styles.title}>
               {trackTitle}
             </CustomText>
-            <CustomText numberOfLines={1} style={styles.artist}>
+            <CustomText style={styles.artist}>
               {trackDescription}
             </CustomText>
           </View>
@@ -193,11 +193,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: COLORS.white,
-    fontSize: 14,
   },
   artist: {
     color: "rgba(255, 255, 255, 0.7)",
-    fontSize: 12,
     flex: 1,
   },
   playButton: {

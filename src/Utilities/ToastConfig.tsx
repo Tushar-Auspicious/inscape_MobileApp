@@ -4,13 +4,14 @@ import {
   BaseToast,
   BaseToastProps,
   ErrorToast,
+  SuccessToast,
 } from "react-native-toast-message";
 import { getAdjustedFontSize } from "./Metrics";
 // Assuming you use these for scaling
 
 export const toastConfig = {
   success: (props: BaseToastProps) => (
-    <BaseToast
+    <SuccessToast
       {...props}
       text1Style={{
         fontSize: getAdjustedFontSize(14), // Your desired font size for text1

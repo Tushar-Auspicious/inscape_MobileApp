@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import COLORS from "../../Utilities/Colors";
 import {
+  getAdjustedFontSize,
   horizontalScale,
   responsiveFontSize,
   verticalScale,
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(15),
     backgroundColor: COLORS.lightNavyBlue,
     height: 72,
-    fontSize: responsiveFontSize(16),
+    fontSize: getAdjustedFontSize(responsiveFontSize(16)),
     color: COLORS.white,
     textAlign: "center",
   },

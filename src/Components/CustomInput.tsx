@@ -202,13 +202,9 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: COLORS.white,
-    // Ensure that text is vertically centered for single line inputs by default
-    // When multiline, textAlignVertical should be 'top'
   },
   multilineInput: {
     minHeight: verticalScale(80), // Minimum height for multiline input
-    // You can remove or adjust the default 'height' prop if you want it to always expand
-    // with content from the 'numberOfLines' initial setting.
     paddingTop: verticalScale(10), // Adjust padding for multiline
     paddingBottom: verticalScale(10), // Adjust padding for multiline
   },
