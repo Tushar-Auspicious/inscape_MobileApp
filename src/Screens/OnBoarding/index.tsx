@@ -18,6 +18,7 @@ import { deviceWidth, horizontalScale, wp } from "../../Utilities/Metrics";
 import styles from "./style";
 import { storeLocalStorageData } from "../../Utilities/Storage";
 import STORAGE_KEYS from "../../Utilities/Constants";
+import { CustomText } from "../../Components/CustomText";
 
 const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
   const flatListRef = React.useRef<FlatList>(null);
@@ -62,8 +63,10 @@ const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
       <View key={item.id + index} style={styles.slideContainer}>
         <Image source={item?.image} style={styles.slideImage} />
         <View style={styles.slideTextCont}>
-          <Text style={styles.title}>{item?.title}</Text>
-          <Text style={styles.subtitle}>{item?.subtitle}</Text>
+          <CustomText fontFamily="bold" type="subHeading" style={styles.title}>
+            {item?.title}
+          </CustomText>
+          <CustomText style={styles.subtitle}>{item?.subtitle}</CustomText>
         </View>
       </View>
     );
@@ -110,7 +113,9 @@ const OnBoarding: FC<OnBoardingProps> = ({ navigation }) => {
             style={{ width: wp(90) }}
           />
           <TouchableOpacity onPress={handleSkip}>
-            <Text style={styles.skipText}>Skip</Text>
+            <CustomText fontFamily="bold" style={styles.skipText}>
+              Skip
+            </CustomText>
           </TouchableOpacity>
         </View>
       </ScrollView>

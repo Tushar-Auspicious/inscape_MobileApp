@@ -31,6 +31,7 @@ import {
 } from "../Utilities/Helpers";
 import { verticalScale } from "../Utilities/Metrics";
 import CustomIcon from "./CustomIcon";
+import { CustomText } from "./CustomText";
 
 interface UniversalTrackPlayerProps {
   trackData: audioItem;
@@ -310,8 +311,8 @@ const UniversalTrackPlayer: FC<UniversalTrackPlayerProps> = ({
       />
 
       <View style={styles.timeContainer}>
-        <Text style={styles.timeText}>{formatPlayerSeconds(position)}</Text>
-        <Text style={styles.timeText}>{formatPlayerSeconds(duration)}</Text>
+        <CustomText type="small">{formatPlayerSeconds(position)}</CustomText>
+        <CustomText type="small">{formatPlayerSeconds(duration)}</CustomText>
       </View>
 
       <View style={styles.controlsContainer}>
@@ -402,10 +403,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: verticalScale(10),
-  },
-  timeText: {
-    color: COLORS.white,
-    fontSize: 12,
   },
   controlsContainer: {
     flexDirection: "row",

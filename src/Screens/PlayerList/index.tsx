@@ -29,7 +29,6 @@ import IMAGES from "../../Assets/images";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 // import Loader from "../../Components/Loader";
-import { useStopPlaybackOnBackground } from "../../Components/TrackPlayer";
 import { TrackList } from "../../Seeds/PlayerTracks";
 import {
   GetCollectionResponse,
@@ -45,6 +44,7 @@ import styles from "./style";
 import Loader from "../../Components/Loader";
 import NoInternetCard from "../../Components/NoInternetCard";
 import useNetworkStatus from "../../Hooks/useNetworkStatus";
+import { useStopPlaybackOnBackground } from "../../PlayerServices/SetupService";
 
 const PlayerList: FC<PlayerListProps> = ({ navigation, route }) => {
   const { id, isFromMeditation, meditationTypeData } = route.params;

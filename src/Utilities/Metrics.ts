@@ -39,6 +39,13 @@ const hp = (heightPercent: string | number) => {
   return PixelRatio.roundToNearestPixel((deviceHeight * elemHeight) / 100);
 };
 
+const systemScale = PixelRatio.getFontScale();
+const maxScale = 1.2;
+const cappedScale = Math.min(systemScale, maxScale);
+
+const getAdjustedFontSize = (baseSize: number) =>
+  (baseSize / systemScale) * cappedScale;
+
 export {
   deviceHeight,
   deviceSpecificSize,
@@ -48,4 +55,5 @@ export {
   responsiveFontSize,
   verticalScale,
   wp,
+  getAdjustedFontSize,
 };

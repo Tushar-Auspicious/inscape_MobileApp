@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { AppState } from "react-native";
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   Capability,
@@ -24,6 +26,21 @@ const setupPlayer = async (
     // and we'll try again:
     await new Promise<void>((resolve) => setTimeout(resolve, 1));
   }
+};
+
+export const useStopPlaybackOnBackground = () => {
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState !== "active") TrackPlayer.stop();
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => subscription.remove();
+  }, []);
 };
 
 export const SetupService = async () => {

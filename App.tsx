@@ -2,7 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import React, { useEffect } from "react";
 import { Appearance, LogBox, StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
+import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import MiniPlayer from "./src/Components/MiniPlayer";
 import { PlayerProvider } from "./src/Context/PlayerContext";
 import {
@@ -16,12 +16,14 @@ import Routing from "./src/Routes";
 import COLORS from "./src/Utilities/Colors";
 import STORAGE_KEYS from "./src/Utilities/Constants";
 import { getLocalStorageData } from "./src/Utilities/Storage";
+import { toastConfig } from "./src/Utilities/ToastConfig";
+import { CustomText } from "./src/Components/CustomText";
+import { getAdjustedFontSize } from "./src/Utilities/Metrics";
 
 LogBox.ignoreAllLogs();
 Appearance.setColorScheme("light");
 
 const App = () => {
-
   const dispatch = useAppDispatch();
   useEffect(() => {
     const fetchLocalData = async () => {
@@ -58,12 +60,12 @@ const App = () => {
     <>
       <PlayerProvider>
         <SafeAreaProvider>
-          <StatusBar backgroundColor={COLORS.darkBlue}  />
+          <StatusBar backgroundColor={COLORS.darkBlue} />
           <NavigationContainer>
             <Routing />
           </NavigationContainer>
         </SafeAreaProvider>
-        <Toast />
+        <Toast config={toastConfig} />
       </PlayerProvider>
     </>
   );

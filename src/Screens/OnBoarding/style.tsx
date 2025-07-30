@@ -36,15 +36,12 @@ const styles = StyleSheet.create({
 
   subtitle: {
     color: COLORS.white,
-    fontSize: responsiveFontSize(14),
     textAlign: "center",
     maxWidth: wp(60),
   },
 
   title: {
     color: COLORS.white,
-    fontSize: 22,
-    fontWeight: "bold",
     marginTop: 20,
     textAlign: "center",
   },
@@ -58,8 +55,6 @@ const styles = StyleSheet.create({
 
   skipText: {
     textDecorationLine: "underline",
-    color: COLORS.white,
-    fontWeight: "800",
   },
 
   image: {
