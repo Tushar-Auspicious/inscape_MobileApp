@@ -16,15 +16,12 @@ import ENDPOINTS from "../../APIService/endPoints";
 import ICONS from "../../Assets/icons";
 import ContentCard from "../../Components/Cards/ContentCard";
 import ExploreCard from "../../Components/Cards/ExploreCard";
-import SessionCard from "../../Components/Cards/SessionCard";
 import CustomIcon from "../../Components/CustomIcon";
 import { CustomText } from "../../Components/CustomText";
 import Loader from "../../Components/Loader";
 import NoInternetCard from "../../Components/NoInternetCard";
 import useNetworkStatus from "../../Hooks/useNetworkStatus";
 import {
-  Audio,
-  Breathing,
   GetHomeDataResponse,
   MeditationType,
   TrendingAudio,
@@ -33,7 +30,7 @@ import { HomeScreenProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import STORAGE_KEYS from "../../Utilities/Constants";
 import { timeStringToSeconds } from "../../Utilities/Helpers";
-import { horizontalScale, verticalScale } from "../../Utilities/Metrics";
+import { horizontalScale, verticalScale, wp } from "../../Utilities/Metrics";
 import {
   getLocalStorageData,
   storeLocalStorageData,
@@ -147,27 +144,6 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
     navigation.navigate("searchHome");
   }, [navigation]);
 
-  const handleBreathingSessionPress = useCallback(
-    (index: number) => {
-      if (!homeData?.breathing) return;
-
-      navigation.navigate("player", {
-        trackList: homeData.breathing.map((item) => ({
-          id: item._id,
-          artwork: IMAGE_BASE_URL + item.imageUrl,
-          collectionName: item.collectionType?.name ?? "",
-          title: item.songName,
-          duration: timeStringToSeconds(item.duration),
-          description: item.description,
-          url: IMAGE_BASE_URL + item.audioUrl,
-          level: item.levels[0]?.name,
-        })),
-        currentTrackIndex: index,
-      });
-    },
-    [homeData?.breathing, navigation]
-  );
-
   const renderTrendingItem = useCallback(
     ({ item, index }: { item: TrendingAudio; index: number }) => (
       <View style={{ marginRight: horizontalScale(10) }}>
@@ -200,41 +176,6 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
     [homeData]
   );
 
-  const renderCollectionItem = useCallback(
-    ({ item, index }: { item: Audio; index: number }) => {
-      const handlePress = () => {
-        if (!homeData?.collection.audios) return;
-        navigation.navigate("player", {
-          trackList: homeData.collection.audios.map((item) => ({
-            id: item._id,
-            artwork: IMAGE_BASE_URL + item.imageUrl,
-            collectionName: homeData.collection.name ?? "",
-            title: item.songName,
-            duration: timeStringToSeconds(item.duration),
-            description: item.description,
-            url: IMAGE_BASE_URL + item.audioUrl,
-            level: item.levels[0]?.name,
-          })),
-          currentTrackIndex: index,
-        });
-      };
-
-      return (
-        <View style={{ marginRight: horizontalScale(10) }}>
-          <ContentCard
-            duration={item.duration}
-            imageUrl={IMAGE_BASE_URL + item.imageUrl}
-            title={item.songName}
-            type="potrait"
-            isSmall
-            onPress={handlePress}
-          />
-        </View>
-      );
-    },
-    [navigation, homeData]
-  );
-
   const renderMeditationTypeItem = useCallback(
     ({ item, index }: { item: MeditationType; index: number }) => (
       <View style={{ marginRight: horizontalScale(10) }}>
@@ -250,29 +191,15 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
               },
             })
           }
+          width={(wp(100) - horizontalScale(60)) / 2}
         />
       </View>
     ),
     [navigation, homeData]
   );
 
-  const renderBreathingSessionItem = useCallback(
-    ({ item, index }: { item: Breathing; index: number }) => (
-      <SessionCard
-        imageUrl={IMAGE_BASE_URL + item.imageUrl}
-        title={item.songName}
-        duration={item.duration}
-        level={item.levels[0]?.name ?? ""}
-        onPress={() => handleBreathingSessionPress(index)}
-      />
-    ),
-    [handleBreathingSessionPress, homeData]
-  );
-
   const keyExtractor = useCallback((item: any) => item._id, []);
 
-
-  
   // Initial data loading
   useEffect(() => {
     getHomeData();
@@ -392,37 +319,6 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
             </>
           )}
 
-          {homeData.collection && (
-            <>
-              <View style={styles.sectionHeader}>
-                <CustomText type="title" fontFamily="bold">
-                  {homeData.collection.name}
-                </CustomText>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("categories", {
-                      id: homeData.collection._id,
-                    })
-                  }
-                >
-                  <CustomText fontFamily="semiBold">{`${
-                    homeData.collection.audioCount
-                  } session${
-                    homeData.collection.audioCount > 1 ? "s" : ""
-                  }`}</CustomText>
-                </TouchableOpacity>
-              </View>
-              <FlashList
-                data={homeData.collection.audios}
-                contentContainerStyle={styles.horizontalList}
-                keyExtractor={keyExtractor}
-                horizontal
-                renderItem={renderCollectionItem}
-                showsHorizontalScrollIndicator={false}
-              />
-            </>
-          )}
-
           {homeData.meditationType.length > 0 && (
             <>
               <View style={styles.sectionHeader}>
@@ -432,30 +328,12 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
               </View>
               <FlashList
                 data={homeData.meditationType}
+                numColumns={2}
                 contentContainerStyle={styles.horizontalList}
                 keyExtractor={keyExtractor}
-                horizontal
                 renderItem={renderMeditationTypeItem}
                 estimatedItemSize={180}
                 showsHorizontalScrollIndicator={false}
-              />
-            </>
-          )}
-
-          {homeData.breathing.length > 0 && (
-            <>
-              <View style={styles.sectionHeader}>
-                <CustomText type="title" fontFamily="bold">
-                  Breathing Sessions
-                </CustomText>
-              </View>
-              <FlashList
-                data={homeData.breathing}
-                contentContainerStyle={styles.verticalList}
-                keyExtractor={keyExtractor}
-                renderItem={renderBreathingSessionItem}
-                estimatedItemSize={100}
-                showsVerticalScrollIndicator={false}
               />
             </>
           )}

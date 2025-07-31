@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: horizontalScale(20),
   },
   horizontalList: {
-    gap: horizontalScale(20),
     paddingHorizontal: horizontalScale(20),
   },
   verticalList: {
