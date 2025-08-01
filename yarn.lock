@@ -15,6 +15,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@animatereactnative/marquee@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "@animatereactnative/marquee@npm:0.5.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-gesture-handler: ">=2.0.0"
+    react-native-reanimated: ">=2.2.0"
+  checksum: 9ebd304f8b17ff8aec41bd53b5c868d64364a1a8a23f5fa032a34de8a5a5a8133dec8e8e219bfed16738c540db24a869e6b4edc91e86f2825295c1f3503c6be0
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.24.7, @babel/code-frame@npm:^7.27.1":
   version: 7.27.1
   resolution: "@babel/code-frame@npm:7.27.1"
@@ -3240,6 +3252,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "Inscape_App@workspace:."
   dependencies:
+    "@animatereactnative/marquee": ^0.5.2
     "@babel/core": ^7.25.2
     "@babel/preset-env": ^7.25.3
     "@babel/runtime": ^7.25.0

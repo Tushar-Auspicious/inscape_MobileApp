@@ -93,14 +93,6 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
           STORAGE_KEYS.downloadedAudios
         );
 
-        // if (cachedData && cachedData.length > 0) {
-        //   setAudios(cachedData);
-        //   // If cached data is found, ensure initial load is considered complete for displaying existing data
-        //   if (!isInitialLoadComplete) {
-        //     setIsInitialLoadComplete(true);
-        //   }
-        // }
-
         // Fetch from server if online, or if forceRefresh is true AND online
         if (isConnected) {
           const result = await fetchData<getDownloadedAudios[]>(
@@ -157,11 +149,11 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
       navigation.navigate("player", {
         trackList: audios?.map((item) => ({
           id: item._id,
-          artwork: IMAGE_BASE_URL + item.audio_id.imageUrl,
+          artwork: IMAGE_BASE_URL + item.audio_id?.imageUrl,
           collectionName: item.audio_id?.collectionType?.name,
           title: item.audio_id?.songName,
           description: item.audio_id?.description,
-          duration: timeStringToSeconds(item.audio_id.duration),
+          duration: timeStringToSeconds(item.audio_id?.duration),
           url: IMAGE_BASE_URL + item.audio_id?.audioUrl,
           level: audios[index].audio_id?.levels?.[0]?.name || "Basic",
         })),
@@ -280,7 +272,9 @@ const Library: FC<LibraryProps> = ({ navigation }) => {
                   </CustomText>
                 </TouchableOpacity> */}
               </View>
-            ) : <Loader/>
+            ) : (
+              <Loader />
+            )
           }
         />
       </View>

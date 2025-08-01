@@ -8,6 +8,7 @@ import CustomIcon from "./CustomIcon";
 import ICONS from "../Assets/icons";
 import { CustomText } from "./CustomText";
 import { usePlayerContext } from "../Context/PlayerContext";
+import { Marquee } from "@animatereactnative/marquee";
 
 // MiniPlayer component for controlling music from anywhere in the app
 const MiniPlayer = () => {
@@ -54,8 +55,8 @@ const MiniPlayer = () => {
   const navigateToPlayer = () => {
     if (currentTrackList.length > 0) {
       navigation.navigate("player", {
-        trackList: currentTrackList,
-        currentTrackIndex: currentTrackIndex,
+        // trackList: currentTrackList,
+        // currentTrackIndex: currentTrackIndex,
       });
     }
   };
@@ -69,7 +70,7 @@ const MiniPlayer = () => {
     <TouchableOpacity
       style={styles.container}
       activeOpacity={1}
-      // onPress={navigateToPlayer}
+      onPress={navigateToPlayer}
     >
       {/* Progress bar */}
       <View style={styles.progressBarContainer}>
@@ -86,11 +87,24 @@ const MiniPlayer = () => {
           )}
           <View style={styles.textContainer}>
             <CustomText style={styles.title}>
-              {trackTitle}
+              {trackTitle.length > 15
+                ? `${trackTitle.slice(0, 15)}...`
+                : trackTitle}
             </CustomText>
-            <CustomText style={styles.artist}>
-              {trackDescription}
-            </CustomText>
+            {trackDescription.length > 20 ? (
+              <Marquee
+                style={{ alignItems: "center" }}
+                speed={0.4}
+                spacing={30}
+              >
+                <CustomText style={styles.artist}>
+                  {/* {trackDescription} */}
+                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Hic officiis vel, tempora qui cupiditate earum. Consequuntur consectetur corrupti iusto recusandae.
+                </CustomText>
+              </Marquee>
+            ) : (
+              <CustomText style={styles.artist}>{trackDescription}</CustomText>
+            )}
           </View>
         </View>
 
@@ -188,15 +202,15 @@ const styles = StyleSheet.create({
     marginRight: horizontalScale(10),
   },
   textContainer: {
-    flex: 1,
-    marginRight: horizontalScale(4),
+    width: "100%",
+    overflow: "hidden",
+    justifyContent: "center",
   },
   title: {
     color: COLORS.white,
   },
   artist: {
     color: "rgba(255, 255, 255, 0.7)",
-    flex: 1,
   },
   playButton: {
     width: 36,
