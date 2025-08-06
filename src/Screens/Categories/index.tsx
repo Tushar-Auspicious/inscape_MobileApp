@@ -6,7 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import {
   SafeAreaView,
@@ -28,11 +28,7 @@ import { GetCollectionResponse } from "../../Typings/apiTypes";
 import { CategoryProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import { timeStringToSeconds } from "../../Utilities/Helpers";
-import {
-  horizontalScale,
-  hp,
-  verticalScale
-} from "../../Utilities/Metrics";
+import { horizontalScale, hp, verticalScale } from "../../Utilities/Metrics";
 import styles from "./style";
 
 const Categories: FC<CategoryProps> = ({ navigation, route }) => {
@@ -54,11 +50,11 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
   const { isConnected, retryConnection } = useNetworkStatus();
   const previousConnectionRef = useRef<boolean | null>(null);
 
-  const handleCardPress = (audio: any, index: number) => {
+  const handleCardPress = (index: number) => {
     if (
       collectionData &&
       collectionData.audioFiles &&
-      collectionData.audioFiles.length > 0 
+      collectionData.audioFiles.length > 0
     ) {
       navigation.navigate("player", {
         currentTrackIndex: index,
@@ -301,7 +297,7 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
               title={item.songName}
               type={"potrait"}
               isSmall
-              onPress={() => handleCardPress(item, index)} // Pass the item to the handler
+              onPress={() => handleCardPress(index)} // Pass the item to the handler
             />
           )}
           ListEmptyComponent={() => {
@@ -316,7 +312,6 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
           scrollEnabled={false} // <--- Crucial: Disable FlatList's own scrolling
         />
       </ScrollView>
-
     </SafeAreaView>
   );
 };

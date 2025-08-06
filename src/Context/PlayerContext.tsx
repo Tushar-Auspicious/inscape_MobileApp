@@ -1,6 +1,12 @@
 // PlayerContext.tsx
 
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import TrackPlayer, {
   Event,
   RepeatMode,
@@ -11,6 +17,8 @@ import TrackPlayer, {
 } from "react-native-track-player";
 import { postData } from "../APIService/api";
 import ENDPOINTS from "../APIService/endPoints";
+import { AppState, PermissionsAndroid, Platform } from "react-native";
+import { SetupService } from "../PlayerServices/SetupService";
 
 interface Track {
   id?: string;
@@ -39,6 +47,7 @@ interface PlayerContextType {
   toggleShuffle: () => Promise<void>;
   toggleRepeatMode: () => Promise<void>;
   seekTo: (position: number) => Promise<void>;
+  playerReady: boolean;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -49,6 +58,91 @@ export const usePlayerContext = () => {
     throw new Error("usePlayerContext must be used within a PlayerProvider");
   }
   return context;
+};
+
+const requestNotificationPermission = async () => {
+  if (Platform.OS === "android" && Platform.Version >= 33) {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        {
+          title: "Notification Permission",
+          message: "Allow this app to show notifications?",
+          buttonPositive: "OK",
+        }
+      );
+      console.log("Notification permission:", granted);
+    } catch (error) {
+      console.error("Notification permission error:", error);
+    }
+  }
+};
+
+const useSetupPlayer = () => {
+  const [playerReady, setPlayerReady] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
+
+  useEffect(() => {
+    let isMounted = true;
+    console.log("useSetupPlayer: Starting player setup");
+
+    const attemptSetup = async () => {
+      if (retryCount >= maxRetries) {
+        console.log("useSetupPlayer: Max retries reached, aborting");
+        if (isMounted) {
+          setPlayerReady(false);
+        }
+        return;
+      }
+
+      try {
+        console.log("useSetupPlayer: Requesting notification permission");
+        await requestNotificationPermission();
+        console.log("useSetupPlayer: Checking app state");
+        if (AppState.currentState !== "active") {
+          console.log("useSetupPlayer: App in background, delaying setup");
+          return;
+        }
+        console.log("useSetupPlayer: Calling SetupService");
+        await SetupService();
+        if (isMounted) {
+          console.log("useSetupPlayer: SetupService completed successfully");
+          setPlayerReady(true);
+        }
+      } catch (error) {
+        console.error("useSetupPlayer: Setup failed:", error);
+        if (isMounted) {
+          setRetryCount((prev) => prev + 1);
+          console.log(
+            "useSetupPlayer: Retrying setup, attempt",
+            retryCount + 1
+          );
+        }
+      }
+    };
+
+    attemptSetup();
+
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (
+        nextAppState === "active" &&
+        !playerReady &&
+        retryCount < maxRetries
+      ) {
+        console.log("useSetupPlayer: App resumed, retrying setup");
+        attemptSetup();
+      }
+    });
+
+    return () => {
+      console.log("useSetupPlayer: Cleaning up");
+      isMounted = false;
+      subscription.remove();
+    };
+  }, [retryCount, playerReady]);
+
+  return playerReady;
 };
 
 interface PlayerProviderProps {
@@ -67,6 +161,8 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
 
   const playbackState = usePlaybackState();
   const isPlaying = playbackState.state === State.Playing;
+
+  const playerReady = useSetupPlayer();
 
   // Track playback errors
   useTrackPlayerEvents([Event.PlaybackError], (event) => {
@@ -316,6 +412,7 @@ export const PlayerProvider: React.FC<PlayerProviderProps> = ({ children }) => {
     toggleShuffle,
     toggleRepeatMode,
     seekTo,
+    playerReady,
   };
 
   return (

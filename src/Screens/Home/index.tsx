@@ -180,15 +180,19 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
     ({ item, index }: { item: MeditationType; index: number }) => (
       <View style={{ marginRight: horizontalScale(10) }}>
         <ExploreCard
-          imageUrl={IMAGE_BASE_URL + item.audio.imageUrl}
+          imageUrl={IMAGE_BASE_URL + item.imageUrl}
           title={item.name}
-          subTitle={`${item.audioCount} items`}
+          subTitle={`${item.audioCount} meditations`}
           onPress={() =>
-            navigation.navigate("playerList", {
-              isFromMeditation: true,
-              meditationTypeData: {
-                title: item.name,
-              },
+            // navigation.navigate("playerList", {
+            //   isFromMeditation: true,
+            //   meditationTypeData: {
+            //     title: item.name,
+            //   },
+            // })
+
+            navigation.navigate("categories", {
+              id: item._id,
             })
           }
           width={(wp(100) - horizontalScale(60)) / 2}
@@ -332,7 +336,6 @@ const Home: FC<HomeScreenProps> = ({ navigation }) => {
                 contentContainerStyle={styles.horizontalList}
                 keyExtractor={keyExtractor}
                 renderItem={renderMeditationTypeItem}
-                estimatedItemSize={180}
                 showsHorizontalScrollIndicator={false}
               />
             </>

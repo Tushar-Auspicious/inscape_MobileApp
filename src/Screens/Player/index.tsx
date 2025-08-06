@@ -25,43 +25,16 @@ import { CustomText } from "../../Components/CustomText";
 import Loader from "../../Components/Loader";
 import UniversalTrackPlayer from "../../Components/UniversalTrackPlayer";
 import { usePlayerContext } from "../../Context/PlayerContext";
-import { SetupService } from "../../PlayerServices/SetupService";
 import { PlayerProps } from "../../Typings/route";
 import COLORS from "../../Utilities/Colors";
 import { horizontalScale, hp, verticalScale } from "../../Utilities/Metrics";
 import styles from "./style";
 
-export function useSetupPlayer() {
-  const [playerReady, setPlayerReady] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    (async () => {
-      try {
-        await SetupService();
-        if (isMounted) {
-          setPlayerReady(true);
-          console.log("PlayerSetup: Player ready.");
-        }
-      } catch (error) {
-        console.error("PlayerSetup: Player setup failed:", error);
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  return playerReady;
-}
-
 const MIN_LOADING_DURATION = 2000; // milliseconds
 
 const Player: FC<PlayerProps> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
-  const isPlayerReady = useSetupPlayer();
+  const { playerReady } = usePlayerContext();
 
   const {
     loadTrack: contextLoadTrack,
@@ -120,7 +93,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    if (!isPlayerReady || routeTrackList.length === 0) {
+    if (!playerReady || routeTrackList.length === 0) {
       return;
     }
 
@@ -164,7 +137,7 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
       deactivateForcedLoader(); // Ensure forced loader is off if not a new list
     }
   }, [
-    isPlayerReady,
+    playerReady,
     routeTrackList,
     routeInitialIndex,
     contextLoadTrack,
@@ -222,10 +195,41 @@ const Player: FC<PlayerProps> = ({ navigation, route }) => {
     };
   }, []);
 
+  if (!playerReady) {
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: COLORS.darkBlue,
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: hp(100),
+        }}
+      >
+        <CustomText type="heading" color={COLORS.white}>
+          Failed to initialize audio player
+        </CustomText>
+        <TouchableOpacity
+          style={{
+            paddingVertical: verticalScale(12),
+            paddingHorizontal: horizontalScale(30),
+            borderRadius: 25,
+            borderWidth: 1,
+            borderColor: COLORS.white,
+            marginTop: verticalScale(10),
+          }}
+          onPress={() => navigation.goBack()}
+        >
+          <CustomText style={styles.backButtonText}>Go Back</CustomText>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   // Show global loader if player isn't ready OR
   // if a track is actively loading/buffering AND no active track is yet available OR
   // if showForcedLoader is true (for new list loading)
-  if (!isPlayerReady || (isTrackLoading && !track) || showForcedLoader) {
+  if ((isTrackLoading && !track) || showForcedLoader) {
     return (
       <SafeAreaView
         style={{

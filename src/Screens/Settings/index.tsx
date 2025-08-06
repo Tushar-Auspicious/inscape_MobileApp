@@ -45,7 +45,6 @@ const Settings: FC<SettingScreenProps> = ({ navigation }) => {
     await deleteLocalStorageData(STORAGE_KEYS.token);
     await deleteLocalStorageData(STORAGE_KEYS.isRegistered);
     await deleteLocalStorageData(STORAGE_KEYS.downloadedAudios);
-    await deleteLocalStorageData(STORAGE_KEYS.isOnBoarded);
 
     await loadTrack([], 0);
 
