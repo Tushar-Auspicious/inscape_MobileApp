@@ -263,7 +263,7 @@ const Categories: FC<CategoryProps> = ({ navigation, route }) => {
               {collectionData?.collection.name}
             </CustomText>
 
-            <CustomText>{`${collectionData?.audioFiles.length} practices`}</CustomText>
+            <CustomText>{`${collectionData?.audioFiles.length} Meditations`}</CustomText>
             <CustomText>{collectionData?.collection.description}</CustomText>
           </View>
         </View>
